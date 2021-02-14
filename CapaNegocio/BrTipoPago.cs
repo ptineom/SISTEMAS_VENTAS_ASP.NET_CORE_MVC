@@ -1,0 +1,44 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Entidades;
+using CapaDao;
+using Helper;
+using System.Data.SqlClient;
+namespace CapaNegocio
+{
+    public class BrTipoPago
+    {
+        DaoTipoPago dao = null;
+        ResultadoOperacion oResultado = null;
+        public BrTipoPago()
+        {
+            dao = new DaoTipoPago();
+            oResultado = new ResultadoOperacion();
+        }
+        public ResultadoOperacion listaTipoPago()
+        {
+            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            {
+                try
+                {
+                    con.Open();
+                    var lista = dao.listaTipoPago(con);
+                    if (lista != null)
+                    {
+                        oResultado.data = lista;// lista.ToList<Object>();
+                    }
+                    oResultado.SetResultado(true, "");
+                }
+                catch (Exception ex)
+                {
+                    Elog.save(this, ex);
+                    oResultado.SetResultado(false, ex.Message);
+                }
+            }
+            return oResultado;
+        }
+    }
+}

@@ -1,0 +1,55 @@
+﻿@using AplicacionWeb.SistemaVentas.Models.Seguridad
+@model ReqLoginViewModel
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+}
+<style>
+</style>
+<div class="container-fluid">
+    <div class="row d-flex flex-row justify-content-center align-content-center min-vh-100">
+        <div class="col col-sm-8 col-md-6 col-lg-5 ">
+            <div id="vistaLogin" class="position-relative">
+                <div class="card shadow rounded position-relative" style="max-width:390px; width:390px" id="cardLogin">
+                    <img src="~/Upload/images.png" class="card-img-top" />
+                    <div class="card-body pt-0">
+                        <p class="card-text text-muted fst-italic mb-1">  Por favor ingrese su usuario y contraseña.</p>
+                        @using (Html.BeginForm("", "", FormMethod.Post, new { id = "form-login" }))
+                        {
+                            <div class="mb-1">
+                                <label asp-for="idUsuario" class="control-label"></label>
+                                <div class="input-group flex-nowrap">
+                                    <input asp-for="idUsuario" class="form-control" placeholder="Ingrese el usuario" id="txtUsuario" />
+                                    <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                                </div>
+                                <span asp-validation-for="idUsuario" class="text-danger"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="password" class="form-label mb-0"></label>
+                                <div class="input-group flex-nowrap">
+                                    <input type="password" asp-for="password" class="form-control" placeholder="Ingrese la contraseña" id="txtPassword"/>
+                                    <span class="input-group-text" id="iconPassword" style="cursor:pointer"><i class="bi bi-eye-fill"></i></span>
+                                </div>
+                                <span asp-validation-for="password" class="text-danger"></span>
+                            </div>
+                        }
+                        <div class="mb-2 d-grid gap-2">
+                            <button type="button" class="btn btn-primary" id="btnIniciar"><i class="bi bi-key"></i> Iniciar seseión</button>
+                        </div>
+                        <hr />
+                        <a href="#" class="text-decoration-none">¿Has olvidado tu contraseña?</a>
+                    </div>
+                </div>
+            </div>
+
+            <div id="vistaSeleccionSucursal">
+                <partial name="~/Views/Partial/_ViewSeleccionSucursal.cshtml" model="null" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@section myScript{
+    <script src="~/js/seguridad/login.js"></script>
+}
+

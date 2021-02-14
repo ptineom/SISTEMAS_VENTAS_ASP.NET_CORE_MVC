@@ -1,0 +1,29 @@
+﻿@model List<SucursalViewModel>
+
+<div class="card shadow rounded position-relative" style="max-width:390px; width:390px" id="cardSeleccionSucursal">
+    <div class="card-header bg-transparent py-3 fs-5">
+        Seleccione la sede
+    </div>
+    <div class="card-body ">
+        <form asp-controller="Login" asp-action="createIdentitySignInAsync" method="post" id="form-seleccionSucursal">
+            <div class="mb-3">
+                <select class="form-select" id="cboSucursales" name="cboSucursales">
+                    @if(Model != null)
+                    {
+                        foreach (var item in Model)
+                        {
+                            <option value="@item.idSucursal">@item.nomSucursal</option>
+                        }
+                    }
+                </select>
+            </div>
+        </form>
+        <p class="card-text text-muted fst-italic mb-1"> Para continuar debe de seleccionar la sede.</p>
+        <hr />
+        <div class="clearfix">
+            <button type="button" class="btn btn-outline-primary float-start" id="btnAtras"><i class="bi bi-arrow-left"></i> Atrás</button>
+            <button type="button" class="btn btn-outline-success float-end" id="btnSeguir"><i class="bi bi-check2-all"></i> Seguir</button>
+        </div>
+  
+    </div>
+</div>

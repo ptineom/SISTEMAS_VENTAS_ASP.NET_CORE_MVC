@@ -1,0 +1,4 @@
+﻿1.- Para usar las clases de asp.net core enlas libraries add en el proyecto:
+  <ItemGroup>
+     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
