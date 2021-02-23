@@ -146,7 +146,7 @@ namespace AplicacionWeb.SistemaVentas.Controllers
         }
 
         [HttpPost("cambiarSucursal")]
-        public async Task<IActionResult> cambiarSucursalAsync([FromBody] string idSucursal, string nomSucursal)
+        public async Task<IActionResult> cambiarSucursalAsync([FromBody] ReqCambiarSucursalViewModel sucursal)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new { Mesagge = ModelState, Status = "Error" });
@@ -155,8 +155,8 @@ namespace AplicacionWeb.SistemaVentas.Controllers
             //Datos del usuario
             USUARIO modelo = new USUARIO()
             {
-                ID_SUCURSAL = idSucursal,
-                NOM_SUCURSAL = nomSucursal,
+                ID_SUCURSAL = sucursal.idSucursal,
+                NOM_SUCURSAL = sucursal.nomSucursal,
                 ID_USUARIO = userCurrent.idUsuario,
                 NOM_USUARIO = userCurrent.nomUsuario,
                 NOM_ROL = userCurrent.nomRol,
@@ -167,7 +167,7 @@ namespace AplicacionWeb.SistemaVentas.Controllers
             await identitySignIn(modelo);
 
             _resultado = new ResultadoOperacion();
-            _resultado.SetResultado(true, "");
+            _resultado.SetResultado(true,"", "/Home/Index");
 
             return Ok(_resultado);
         }
@@ -207,4 +207,9 @@ namespace AplicacionWeb.SistemaVentas.Controllers
 
         #endregion
     }
+
+    #region "Records"
+    public record ReqCambiarSucursalViewModel(string idSucursal, string nomSucursal);
+    #endregion
+
 }

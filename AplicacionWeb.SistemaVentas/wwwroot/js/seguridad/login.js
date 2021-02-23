@@ -38,7 +38,7 @@ var oLogin = {
 
         oLogin.cambiarCard('vistaLogin');
 
-        //validaciones
+        //validaciones creados en el cliente
         $("#form-seleccionSucursal").validate({
             rules: {
                 cboSucursales: {
