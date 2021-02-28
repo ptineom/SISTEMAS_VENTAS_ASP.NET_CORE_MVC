@@ -28,7 +28,6 @@ namespace CapaNegocio
                 try
                 {
                     con.Open();
-                    oResultado.SetResultado(false, "Usuario y/o contraseña incorrectas");
                     modelo = dao.acceder(con, idUsuario, clave, noValidar);
                     oResultado.SetResultado(true, "", modelo);
                 }

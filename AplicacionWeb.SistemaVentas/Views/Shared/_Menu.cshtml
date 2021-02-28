@@ -1,0 +1,49 @@
+﻿@using AplicacionWeb.SistemaVentas.Models.Seguridad
+
+@model MenuItem
+
+@{
+    MenuItem menuItem = (MenuItem)Model;
+}
+
+@if (menuItem.children == null)
+{
+    <li >
+        <a href="#"
+           data-breadcrumb="@menuItem.breadcrumbs"
+           data-flgFormulario="@menuItem.flgFormulario"
+           data-id="@menuItem.id"
+           data-route="@menuItem.route"
+           class="ps-3">
+
+            @if (menuItem.flgRaiz)
+            {
+                <i class="@(string.IsNullOrEmpty(menuItem.icon)?"": string.Format("{0} {1}",menuItem.icon,"me-1 align-text-bottom"))"></i>
+            }
+            <span class="menu-label">@menuItem.label</span>
+        </a>
+    </li>
+}
+else
+{
+    var id = string.Format("menu-{0}", menuItem.id);
+    <li class="treeview">
+        <a data-bs-toggle="collapse" href="#@id" aria-expanded="false" aria-controls="@id"
+           class="dropdown-toggle ps-3"
+           data-breadcrumb="@menuItem.breadcrumbs"
+           data-flgFormulario="@menuItem.flgFormulario"
+           data-id="@menuItem.id">
+            @if (menuItem.flgRaiz)
+            {
+                <i class="me-1 align-text-bottom @(string.IsNullOrEmpty(menuItem.icon)?"": menuItem.icon)"></i>
+            }
+            <span class="menu-label">@menuItem.label</span>
+        </a>
+        <ul class="collapse list-unstyled treeview-menu" id="@id">
+            @foreach (var hijo in menuItem.children)
+            {
+                <partial name="~/Views/Shared/_Menu.cshtml" model="hijo" />
+            }
+        </ul>
+    </li>
+}

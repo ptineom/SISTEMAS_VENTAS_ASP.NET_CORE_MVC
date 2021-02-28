@@ -7,6 +7,7 @@ using Helper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -23,12 +24,14 @@ namespace AplicacionWeb.SistemaVentas.Controllers
         private IResultadoOperacion _resultado { get; set; }
         private BrUsuario brUsuario = null;
         private IHttpContextAccessor _httpContextAccessor = null;
+        private IWebHostEnvironment _environment= null;
 
-        public LoginController(IResultadoOperacion resultado, IHttpContextAccessor httpContextAccessor)
+        public LoginController(IResultadoOperacion resultado, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment environment)
         {
             _resultado = resultado;
             brUsuario = new BrUsuario();
             _httpContextAccessor = httpContextAccessor;
+            _environment = environment;
         }
         [Route("[action]")]
         public IActionResult Index()
@@ -151,7 +154,8 @@ namespace AplicacionWeb.SistemaVentas.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(new { Mesagge = ModelState, Status = "Error" });
 
-            UsuarioLogueadoViewModel userCurrent = new Session(_httpContextAccessor).obtenerUsuarioLogueado();
+            UsuarioLogueadoViewModel userCurrent = new Session(_httpContextAccessor, _environment).obtenerUsuarioLogueado();
+
             //Datos del usuario
             USUARIO modelo = new USUARIO()
             {
@@ -160,7 +164,8 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                 ID_USUARIO = userCurrent.idUsuario,
                 NOM_USUARIO = userCurrent.nomUsuario,
                 NOM_ROL = userCurrent.nomRol,
-                FLG_CTRL_TOTAL = userCurrent.flgCtrlTotal
+                FLG_CTRL_TOTAL = userCurrent.flgCtrlTotal,
+                FOTO = userCurrent.avatarUri
             };
 
             //Generamos la identidad y cookie.
@@ -190,7 +195,8 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                 new Claim("fullName", usuario.NOM_USUARIO),
                 new Claim("idSucursal", usuario.ID_SUCURSAL),
                 new Claim("nomSucursal", usuario.NOM_SUCURSAL),
-                new Claim("flgCtrlTotal", usuario.FLG_CTRL_TOTAL.ToString())
+                new Claim("flgCtrlTotal", usuario.FLG_CTRL_TOTAL.ToString()),
+                new Claim("avatarUri", usuario.FOTO)
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

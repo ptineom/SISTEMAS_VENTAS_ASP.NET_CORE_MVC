@@ -31,17 +31,18 @@ namespace CapaNegocio
                     if (lista != null)
                     {
                         //Agregado el menú home
+                        int idMax = (lista.Select(x => x.ID_APLICACION).Max() + 1);
                         lista.Insert(1, new APLICACION()
                         {
                             ID_APLICACION_PADRE = 1,
-                            ID_APLICACION = lista.Select(x => x.ID_APLICACION).Max(),
+                            ID_APLICACION = idMax,
                             NOM_APLICACION = "Home",
                             FLG_FORMULARIO = true,
-                            ICON_SPA = "mdi-home",
-                            ROUTE_SPA = "Home",
+                            NOM_FORMULARIO = "Index",
+                            ICON = "bi bi-house-fill",
+                            NOM_CONTROLADOR = "Home",
                             FLG_RAIZ = false,
-                            BREADCRUMS = "Home",
-                            FLG_HOME = true
+                            BREADCRUMS = $"{idMax}|Home"
                         });
                     }
                     oResultado.SetResultado(true, "", lista);

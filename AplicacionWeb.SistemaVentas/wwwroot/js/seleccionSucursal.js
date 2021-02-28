@@ -35,7 +35,7 @@ var oSeleccionSucursal = {
                 }
             }).catch((error) => {
                 alert(error.response.data.message);
-            }).finally(() => oMetodos.hideLoading());
+            }).finally(() => oMetodos.hideLoading('#cardSeleccionSucursal'));
         }
     },
 }

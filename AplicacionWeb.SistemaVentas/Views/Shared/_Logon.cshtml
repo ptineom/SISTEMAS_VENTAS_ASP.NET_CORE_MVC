@@ -1,0 +1,62 @@
+﻿@model AplicacionWeb.SistemaVentas.Models.Seguridad.UsuarioLogueadoViewModel;
+<li class="nav-item ms-2 dropdown pt-0 pb-1 px-2">
+    <a href="#user-info-panel" class="nav-link dropdown-toggle pt-0 pb-0 align-baseline"
+       role="button" aria-expanded="false" title="Hector Toro Valencia"
+       data-bs-toggle="collapse" aria-controls="user-info-panel"
+       style="display: inline-block;" id="user-info">
+
+        @if (!string.IsNullOrEmpty(Model.avatarB64))
+        {
+            <img class="nav-user-photo rounded-circle d-inline-block" style="vertical-align:super"
+                 src="data:image/jpg;base64,@Model.avatarB64" />
+        }
+        else
+        {
+            <img class="nav-user-photo rounded-circle d-inline-block" style="vertical-align:super"
+                 src="~/Imagenes/avatar_notFound.png" />
+        }
+
+        <span class="lh-1 text-white d-none d-sm-inline-block">
+            <small class="fw-bold d-block">Bienvenido: </small>
+            <span class="text-truncate d-inline-block" style="width: 130px;">
+                @Helper.ViewHelper.CapitalizeAll(Model.nomUsuario)
+            </span>
+        </span>
+    </a>
+
+    <div class="collapse position-absolute rounded-0" id="user-info-panel">
+        <div class="card" style="background-color: #3C8DBC;">
+            <div class="card-body py-2">
+                <div class="user-data text-center text-white">
+                    @if (!string.IsNullOrEmpty(Model.avatarB64))
+                    {
+                        <img class="rounded-circle" src="data:image/jpg;base64,@Model.avatarB64" style="width: 80px;" />
+                    }
+                    else
+                    {
+                        <img class="rounded-circle" src="~/Imagenes/avatar_notFound.png" style="width: 80px;" />
+                    }
+                    <p class="card-text mb-1 mt-2">Sede: @Helper.ViewHelper.CapitalizeAll(Model.nomSucursal)</p>
+                    <h4 class="card-title mb-0">@Helper.ViewHelper.CapitalizeAll(Model.nomRol)</h4>
+                    <p class="card-text">@Helper.ViewHelper.CapitalizeAll(Model.nomUsuario)</p>
+                </div>
+
+            </div>
+            <div class="card-footer bg-white px-2">
+                <a class="btn btn-outline-primary d-flex align-items-center float-start lh-1">
+                    <span class="me-1">Cambiar<br>contraseña </span>
+                    <i class="bi bi-key-fill" style="font-size: 28px; color:orange"></i>
+                </a>
+                <a href="~/SucursalUsuario/IndexSeleccionSucursal" class="btn btn-outline-primary d-flex align-items-center float-end lh-1">
+                    <span class="me-1">Cambiar<br>Sede</span>
+                    <i class="bi bi-arrow-repeat" style="font-size: 28px; color: green;"></i>
+                </a>
+            </div>
+            <div class="card-footer bg-light text-end pt-0">
+                <a href="~/Login/identitySignOn" class="fs-5">
+                    Cerrar sesión <i class="bi bi-power success" style="font-size: 32px;color:red; cursor: pointer"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</li>

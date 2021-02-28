@@ -3,6 +3,7 @@ using AplicacionWeb.SistemaVentas.Servicios.Seguridad;
 using CapaNegocio;
 using Entidades;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -19,14 +20,16 @@ namespace AplicacionWeb.SistemaVentas.Controllers
         IResultadoOperacion _resultado = null;
         BrSucursalUsuario brSucursalUsuario = null;
         IHttpContextAccessor _httpContextAccessor = null;
+        IWebHostEnvironment _environment = null;
         string _idUsuario = string.Empty;
 
-        public SucursalUsuarioController(IResultadoOperacion resultado, IHttpContextAccessor httpContextAccessor)
+        public SucursalUsuarioController(IResultadoOperacion resultado, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment environment)
         {
             _resultado = resultado;
             brSucursalUsuario = new BrSucursalUsuario();
             _httpContextAccessor = httpContextAccessor;
-            _idUsuario = new Session(_httpContextAccessor).obtenerUsuarioLogueado().idUsuario;
+            _environment = environment;
+            _idUsuario = new Session(_httpContextAccessor, _environment).obtenerUsuarioLogueado().idUsuario;
         }
 
         [Route("[action]")]
