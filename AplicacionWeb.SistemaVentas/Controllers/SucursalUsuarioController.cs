@@ -18,38 +18,36 @@ namespace AplicacionWeb.SistemaVentas.Controllers
     public class SucursalUsuarioController : Controller
     {
         IResultadoOperacion _resultado = null;
-        BrSucursalUsuario brSucursalUsuario = null;
-        IHttpContextAccessor _httpContextAccessor = null;
-        IWebHostEnvironment _environment = null;
+        BrSucursalUsuario _brSucursalUsuario = null;
+        IHttpContextAccessor _accessor = null;
         string _idUsuario = string.Empty;
 
-        public SucursalUsuarioController(IResultadoOperacion resultado, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment environment)
+        public SucursalUsuarioController(IResultadoOperacion resultado, IHttpContextAccessor accessor)
         {
             _resultado = resultado;
-            brSucursalUsuario = new BrSucursalUsuario();
-            _httpContextAccessor = httpContextAccessor;
-            _environment = environment;
-            _idUsuario = new Session(_httpContextAccessor, _environment).obtenerUsuarioLogueado().idUsuario;
+            _brSucursalUsuario = new BrSucursalUsuario();
+            _accessor = accessor;
+            _idUsuario = new Session(_accessor).GetUserLogged().IdUsuario;
         }
 
         [Route("[action]")]
         public IActionResult IndexSeleccionSucursal()
         {
              //Lista de sucursales por usuario.
-            _resultado = brSucursalUsuario.listaSucursalPorUsuario(_idUsuario);
+            _resultado = _brSucursalUsuario.GetAllByUserId(_idUsuario);
 
-            if (!_resultado.bResultado)
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.sMensaje, Status = "Error" });
+            if (!_resultado.Resultado)
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
 
-            List<SucursalViewModel> sucursales = ((List<SUCURSAL>)_resultado.data).Select(x => new SucursalViewModel() { 
-                idSucursal = x.ID_SUCURSAL,
-                nomSucursal = x.NOM_SUCURSAL
+            List<SucursalViewModel> sucursales = ((List<SUCURSAL>)_resultado.Data).Select(x => new SucursalViewModel() { 
+                IdSucursal = x.ID_SUCURSAL,
+                NomSucursal = x.NOM_SUCURSAL
             }).ToList<SucursalViewModel>();
 
             sucursales.Insert(0, new SucursalViewModel()
             {
-                idSucursal="",
-                nomSucursal = "---SELECCIONE---"
+                IdSucursal="-1",
+                NomSucursal = "---SELECCIONE---"
             });
 
             return View(sucursales);

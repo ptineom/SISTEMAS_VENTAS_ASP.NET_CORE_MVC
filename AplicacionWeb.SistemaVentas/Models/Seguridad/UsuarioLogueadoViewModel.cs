@@ -7,13 +7,13 @@ namespace AplicacionWeb.SistemaVentas.Models.Seguridad
 {
     public class UsuarioLogueadoViewModel
     {
-        public string idUsuario { get; set; }
-        public string nomUsuario { get; set; }
-        public string nomRol { get; set; }
-        public string idSucursal { get; set; }
-        public string nomSucursal { get; set; }
-        public bool flgCtrlTotal { get; set; }
-        public string avatarB64 { get; set; }
-        public string avatarUri { get; set; }
+        public string IdUsuario { get; set; }
+        public string NomUsuario { get; set; }
+        public string NomRol { get; set; }
+        public string IdSucursal { get; set; }
+        public string NomSucursal { get; set; }
+        public bool FlgCtrlTotal { get; set; }
+        public string AvatarB64 { get; set; }
+        public string AvatarUri { get; set; }
     }
 }

@@ -6,29 +6,29 @@
 @{
     object modelo = (object)Model;
 
-    UsuarioLogueadoViewModel usuarioActual = (UsuarioLogueadoViewModel)modelo.getValueProperty("usuarioActual");
-    MenuItem menu = (MenuItem)modelo.getValueProperty("menu");
+    UsuarioLogueadoViewModel usuarioActual = (UsuarioLogueadoViewModel)modelo.getValueProperty("UsuarioActual");
+    MenuItem menu = (MenuItem)modelo.getValueProperty("Menu");
 }
 
 <ul class="px-0" id="sidebar-menu">
-    <li class="ps-2" style=" border-bottom: 2px solid rgba(255, 255, 255, 0.12);">
-        @if (!string.IsNullOrEmpty(usuarioActual.avatarB64))
+    <li class="ps-2 py-1" style="border-bottom: 2px solid rgba(255, 255, 255, 0.12);">
+        @if (!string.IsNullOrEmpty(usuarioActual.AvatarB64))
         {
-            <img class="nav-user-photo align-top rounded-circle mb-3" src="data:image/jpg;base64,@usuarioActual.avatarB64" />
+            <img class="nav-user-photo rounded-circle" src="data:image/jpg;base64,@usuarioActual.AvatarB64" />
         }
         else
         {
-            <img class="nav-user-photo align-top rounded-circle mb-3" src="~/Imagenes/avatar_notFound.png" />
+            <img class="nav-user-photo rounded-circle" src="~/Imagenes/avatar_notFound.png" />
         }
 
-        <span class="ps-2 py-3 my-0 lh-1 d-inline-block">
+        <span class="ps-2 my-0 lh-1 d-inline-block align-text-top">
             <small class="fw-bold text-truncate d-block" style="width: 140px;">
-                @Helper.ViewHelper.CapitalizeAll(usuarioActual.nomUsuario)
+                @Helper.ViewHelper.CapitalizeAll(usuarioActual.NomUsuario)
             </small>
-            <span style="color: rgba(255, 255, 255, 0.7);"> @Helper.ViewHelper.CapitalizeAll(usuarioActual.nomRol)</span>
+            <span style="color: rgba(255, 255, 255, 0.7);"> @Helper.ViewHelper.CapitalizeAll(usuarioActual.NomRol)</span>
         </span>
 
-        <button type="button" class="btn rounded-circle btn-sm mb-2 align-top sidebar-expandir">
+        <button type="button" class="btn rounded-circle btn-sm align-top sidebar-expandir">
             <i class="bi bi-arrow-left-circle text-white " style="font-size: 22px;"></i>
         </button>
       

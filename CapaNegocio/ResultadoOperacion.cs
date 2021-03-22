@@ -6,14 +6,14 @@ namespace CapaNegocio
 {
     public class ResultadoOperacion : IResultadoOperacion
     {
-        public bool bResultado { get; set; }
-        public string sMensaje { get; set; }
-        public object data { get; set; }
+        public bool Resultado { get; set; }
+        public string Mensaje { get; set; }
+        public object Data { get; set; }
 
         public ResultadoOperacion()
         {
-            bResultado = false;
-            sMensaje = "Ocurrio un error inesperado";
+            Resultado = false;
+            Mensaje = "Ocurrio un error inesperado";
         }
         public void SetResultado(bool resultado, string mensaje)
         {
@@ -23,9 +23,9 @@ namespace CapaNegocio
             }
             else
             {
-                sMensaje = mensaje;
+                Mensaje = mensaje;
             }
-            bResultado = resultado;
+            Resultado = resultado;
         }
 
         public void SetResultado(bool resultado, string mensaje, object modelo)
@@ -36,24 +36,24 @@ namespace CapaNegocio
             }
             else
             {
-                sMensaje = mensaje;
+                Mensaje = mensaje;
             }
-            bResultado = resultado;
-            data = modelo;
+            Resultado = resultado;
+            Data = modelo;
         }
 
         public void SetResultado(bool resultado, object modelo)
         {
             if (!resultado)
             {
-                sMensaje = "Ocurrio un error inesperado";
+                Mensaje = "Ocurrio un error inesperado";
             }
             else
             {
-                sMensaje = "";
+                Mensaje = "";
             }
-            bResultado = resultado;
-            data = modelo;
+            Resultado = resultado;
+            Data = modelo;
         }
     }
 }

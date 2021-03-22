@@ -26,11 +26,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     COBRANZA modelo = dao.combosCobranza(con, idSucursal, idUsuario);
-                    if (modelo != null)
-                    {
-                        oResultado.data = modelo;// (Object)modelo;
-                    }
-                    oResultado.SetResultado(true, "");
+                  
+                    oResultado.SetResultado(true, modelo);
                 }
                 catch (Exception ex)
                 {
@@ -49,11 +46,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var lista = dao.listaCtaCteCobranza(con, idSucursal, estadoPago, idCliente, idTipoComprobante, nroSerie, nroDocumento, fechaInicio, fechaFinal);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                 
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
@@ -72,11 +66,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var lista = dao.listaCobranza(con, idSucursal, idTipoComprobante, nroSerie, nroDocumento);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                 
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
@@ -142,11 +133,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     COBRANZA modelo = dao.combosReporteCobranza(con, idSucursal);
-                    if (modelo != null)
-                    {
-                        oResultado.data = modelo;// (Object)modelo;
-                    }
-                    oResultado.SetResultado(true, "");
+                   
+                    oResultado.SetResultado(true, modelo);
                 }
                 catch (Exception ex)
                 {
@@ -166,11 +154,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var lista = dao.reporteCtaCteCobranza(con, idSucursal, idTipoComprobante, fechaInicio, fechaFinal);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                 
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {

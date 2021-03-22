@@ -7,8 +7,8 @@ namespace AplicacionWeb.SistemaVentas.Models
 {
     public class ResultadoLoginViewModel
     {
-        public bool masDeUnaSucursal { get; set; }
-        public string returnUrl { get; set; }
-        public List<SucursalViewModel> sucursales { get; set; }
+        public bool MasDeUnaSucursal { get; set; }
+        public string ReturnUrl { get; set; }
+        public List<SucursalViewModel> Sucursales { get; set; }
     }
 }

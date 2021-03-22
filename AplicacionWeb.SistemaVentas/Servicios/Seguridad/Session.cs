@@ -17,32 +17,37 @@ namespace AplicacionWeb.SistemaVentas.Servicios.Seguridad
 {
     public class Session
     {
-        private IHttpContextAccessor _httpContext { get; }
-        private IWebHostEnvironment _enviroment { get; }
-        public Session(IHttpContextAccessor httpContext, IWebHostEnvironment environment)
+        private IHttpContextAccessor _accessor;
+        private IWebHostEnvironment _enviroment;
+
+        public Session(IHttpContextAccessor accessor, IWebHostEnvironment environment)
         {
-            _httpContext = httpContext;
+            _accessor = accessor;
             _enviroment = environment;
         }
+        public Session(IHttpContextAccessor accessor)
+        {
+            _accessor = accessor;
+        }
 
-        public bool existUserInSession()
+        public bool ExistUserInSession()
         {
             bool bExiste = false;
 
-            if (_httpContext.HttpContext.User != null)
+            if (_accessor.HttpContext.User != null)
             {
-                bExiste = _httpContext.HttpContext.User.Identity.IsAuthenticated;
+                bExiste = _accessor.HttpContext.User.Identity.IsAuthenticated;
             }
 
             return bExiste;
         }
-
-        public UsuarioLogueadoViewModel obtenerUsuarioLogueado()
+        
+        public UsuarioLogueadoViewModel GetUserLoggedFull()
         {
             UsuarioLogueadoViewModel modelo = null;
-            if (existUserInSession())
+            if (_accessor.HttpContext.User != null && _accessor.HttpContext.User.Identity.IsAuthenticated)
             {
-                ClaimsIdentity identity = (ClaimsIdentity)_httpContext.HttpContext.User.Identity;
+                ClaimsIdentity identity = (ClaimsIdentity)_accessor.HttpContext.User.Identity;
                 if (identity != null)
                 {
                     var claims = identity.Claims;
@@ -59,55 +64,43 @@ namespace AplicacionWeb.SistemaVentas.Servicios.Seguridad
 
                     modelo = new UsuarioLogueadoViewModel
                     {
-                        idUsuario = claims.FirstOrDefault(x => x.Type == ClaimTypes.Name).Value,
-                        nomUsuario = claims.FirstOrDefault(x => x.Type == "fullName").Value,
-                        nomRol = claims.FirstOrDefault(x => x.Type == ClaimTypes.Role).Value,
-                        idSucursal = claims.FirstOrDefault(x => x.Type == "idSucursal").Value,
-                        nomSucursal = claims.FirstOrDefault(x=> x.Type == "nomSucursal").Value,
-                        flgCtrlTotal = Convert.ToBoolean(claims.FirstOrDefault(x => x.Type == "flgCtrlTotal").Value),
-                        avatarB64 = avatarB64,
-                        avatarUri = avatarUri
+                        IdUsuario = claims.FirstOrDefault(x => x.Type == ClaimTypes.Name).Value,
+                        NomUsuario = claims.FirstOrDefault(x => x.Type == "fullName").Value,
+                        NomRol = claims.FirstOrDefault(x => x.Type == ClaimTypes.Role).Value,
+                        IdSucursal = claims.FirstOrDefault(x => x.Type == "idSucursal").Value,
+                        NomSucursal = claims.FirstOrDefault(x=> x.Type == "nomSucursal").Value,
+                        FlgCtrlTotal = Convert.ToBoolean(claims.FirstOrDefault(x => x.Type == "flgCtrlTotal").Value),
+                        AvatarB64 = avatarB64,
+                        AvatarUri = avatarUri
                     };
                 }
             }
             return modelo;
         }
 
-        public static bool existUserInSessionStatic()
-        {
-            bool bExiste = false;
-            IHttpContextAccessor httpContextAccessor = new HttpContextAccessor();
-
-            if (httpContextAccessor.HttpContext.User != null)
-                  bExiste = httpContextAccessor.HttpContext.User.Identity.IsAuthenticated;
-
-            return bExiste;
-        }
-
-        public static UsuarioLogueadoViewModel obtenerUsuarioLogueadoStatic()
+        public UsuarioLogueadoViewModel GetUserLogged()
         {
             UsuarioLogueadoViewModel modelo = null;
-            if (existUserInSessionStatic())
+            if (_accessor.HttpContext.User != null && _accessor.HttpContext.User.Identity.IsAuthenticated)
             {
-                IHttpContextAccessor httpContextAccessor = new HttpContextAccessor();
-                ClaimsIdentity identity = (ClaimsIdentity)httpContextAccessor.HttpContext.User.Identity;
-
+                ClaimsIdentity identity = (ClaimsIdentity)_accessor.HttpContext.User.Identity;
                 if (identity != null)
                 {
                     var claims = identity.Claims;
+
                     modelo = new UsuarioLogueadoViewModel
                     {
-                        idUsuario = claims.FirstOrDefault(x => x.Type == ClaimTypes.Name).Value,
-                        nomUsuario = claims.FirstOrDefault(x => x.Type == "fullName").Value,
-                        nomRol = claims.FirstOrDefault(x => x.Type == ClaimTypes.Role).Value,
-                        idSucursal = claims.FirstOrDefault(x => x.Type == "idSucursal").Value,
-                        flgCtrlTotal = Convert.ToBoolean(claims.FirstOrDefault(x => x.Type == "flgCtrlTotal").Value)
+                        IdUsuario = claims.FirstOrDefault(x => x.Type == ClaimTypes.Name).Value,
+                        NomUsuario = claims.FirstOrDefault(x => x.Type == "fullName").Value,
+                        NomRol = claims.FirstOrDefault(x => x.Type == ClaimTypes.Role).Value,
+                        IdSucursal = claims.FirstOrDefault(x => x.Type == "idSucursal").Value,
+                        NomSucursal = claims.FirstOrDefault(x => x.Type == "nomSucursal").Value,
+                        FlgCtrlTotal = Convert.ToBoolean(claims.FirstOrDefault(x => x.Type == "flgCtrlTotal").Value),
+                        AvatarUri = claims.FirstOrDefault(x => x.Type == "avatarUri").Value
                     };
                 }
             }
             return modelo;
         }
-
-       
     }
 }

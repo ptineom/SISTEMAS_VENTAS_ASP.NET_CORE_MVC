@@ -33,7 +33,7 @@ namespace CapaDao
                             modelo.FLG_COMPRA = reader.GetBoolean(reader.GetOrdinal("FLG_COMPRA"));
                             modelo.FLG_RENDIR_SUNAT = reader.GetBoolean(reader.GetOrdinal("FLG_RENDIR_SUNAT"));
                             modelo.FLG_NO_EDITABLE = reader.GetBoolean(reader.GetOrdinal("FLG_NO_EDITABLE"));
-                            modelo.XML_TIPO_NC = reader.GetString(reader.GetOrdinal("XML_TIPO_NC"));
+                            modelo.JSON_TIPO_NC = reader.GetString(reader.GetOrdinal("JSON_TIPO_NC"));
                             modelo.LETRA_INICIAL_SERIE_ELECTRONICA = reader.GetString(reader.GetOrdinal("LETRA_INICIAL_SERIE_ELECTRONICA"));
                             lista.Add(modelo);
                         }
@@ -58,7 +58,7 @@ namespace CapaDao
                 cmd.Parameters.Add("@FLG_COMPRA", SqlDbType.Bit).Value = oModelo.FLG_COMPRA;
                 cmd.Parameters.Add("@FLG_RENDIR_SUNAT", SqlDbType.Bit).Value = oModelo.FLG_RENDIR_SUNAT;
                 cmd.Parameters.Add("@ID_USUARIO_REGISTRO", SqlDbType.VarChar, 20).Value = oModelo.ID_USUARIO_REGISTRO;
-                cmd.Parameters.Add("@XML_TIPO_NC", SqlDbType.Xml).Value = string.IsNullOrEmpty(oModelo.XML_TIPO_NC) ? (object)DBNull.Value : oModelo.XML_TIPO_NC;
+                cmd.Parameters.Add("@JSON_TIPO_NC", SqlDbType.VarChar,-1).Value = string.IsNullOrEmpty(oModelo.JSON_TIPO_NC) ? (object)DBNull.Value : oModelo.JSON_TIPO_NC;
                 cmd.Parameters.Add("@LETRA_INICIAL_SERIE_ELECTRONICA", SqlDbType.VarChar, 2).Value = string.IsNullOrEmpty(oModelo.LETRA_INICIAL_SERIE_ELECTRONICA) ? (object)DBNull.Value : oModelo.LETRA_INICIAL_SERIE_ELECTRONICA;
                 cmd.ExecuteNonQuery();
                 bExito = true;

@@ -35,8 +35,7 @@ namespace CapaDao
                             {
                                 ID_TIPO_DOCUMENTO = reader.GetInt32(reader.GetOrdinal("ID_TIPO_DOCUMENTO")),
                                 NOM_TIPO_DOCUMENTO = reader.GetString(reader.GetOrdinal("NOM_TIPO_DOCUMENTO")),
-                                ABREVIATURA = reader.GetString(reader.GetOrdinal("ABREVIATURA")),
-                                FLG_NO_NATURAL = reader.GetBoolean(reader.GetOrdinal("FLG_NO_NATURAL")),
+                                ABREVIATURA = reader.GetString(reader.GetOrdinal("ABREVIATURA"))
                             });
                         }
                     }

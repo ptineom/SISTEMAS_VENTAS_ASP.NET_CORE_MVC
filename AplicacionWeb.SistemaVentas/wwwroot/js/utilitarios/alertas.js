@@ -1,75 +1,79 @@
 "use strict"
 var oAlerta = {
-    bodyMensaje: function (sTipoAlerta, sMensaje, idElementoContenedor) {
-        var sTitulo = "";
-        var sIcono = "";
-        var sColorIcono = "";
-        switch (sTipoAlerta) {
+    alerta: function (config) {
+        let title = !!config.title ? config.title : '';
+        let subtitle = !!config.subtitle ? config.subtitle : '';
+        let type = !!config.type ? config.type : 'default';
+        let header = '', color = '', icon = '';
+        let closeAutomatic = config.closeAutomatic != undefined ? config.closeAutomatic : false;
+
+        switch (type) {
             case "success":
-                sTitulo = "¡Bien!";
-                sIcono = "ion-checkmark";
-                sColorIcono = "green";
-                break;
-            case "danger":
-                sTitulo = "¡Error!";
-                sIcono = "ion-close-circled";
-                sColorIcono = "red";
-                break;
-            case "warning":
-                sTitulo = "¡Alerta!";
-                sIcono = "ion-alert-circled";
-                sColorIcono = "#FFC300";
+                header = "¡Éxito!";
+                color = "#008d4c";
+                icon = "bi-check-circle";
                 break;
             case "info":
-                sTitulo = "¡Información!";
-                sIcono = "ion-information-circled";
-                sColorIcono = "#1b95e0";
+                header = "¡Información!"
+                color = "#00a7d0";
+                icon = "bi-info-circle";
+                break;
+            case "warning":
+                header = "¡Advertencia!";
+                color = "#db8b0b";
+                icon = "bi-exclamation-triangle";
+                break;
+            case "error":
+                header = "¡Error!";
+                color = "#d33724";
+                icon = "bi-exclamation-octagon";
                 break;
             default:
+                header = "¡Alerta!";
+                color = "#b5bbc8";
+                icon = "";
                 break;
         }
-        var sContenido = '';
-        sContenido += '<div class="alert alert-' + sTipoAlerta + ' alert-dismissible fade show" role="alert" id="alerta">';
-        sContenido += '<div class="ContenedorBoton">';
-        sContenido += '<button type="button" class="close" data-dismiss="alert" aria-label="Close" >';
-        sContenido += '<span aria-hidden="true">&times;</span></button></div>';
-        sContenido += '<div class="ContenedorCuerpo">';
-        sContenido += '<div class="mensaje">';
-        sContenido += '<div class="cabecera-mensaje">';
-        sContenido += '<h4 class="alert-heading" style="color:' + sColorIcono + '">' + sTitulo + '</h4></div>';
-        sContenido += '<div class="cuerpo-mensaje">' + sMensaje + '</div></div>';
-        sContenido += '<div class="icono-personal" >';
-        sContenido += '<span class="icono-alertas ' + sIcono + '" style="color:' + sColorIcono + '"></span>';
-        sContenido += '</div></div></div>'
 
-        if (idElementoContenedor == null || idElementoContenedor == "" || idElementoContenedor == undefined) {
-            $("body").prepend(sContenido);
-        } else {
-            var modalContent = $("#" + idElementoContenedor).find(".modal-content");
-            $("#" + idElementoContenedor).find(".modal-body").prepend(sContenido);
+        if (document.getElementById('alerta') != null) 
+            return;
+
+        let content = document.getElementById('content');
+        let style = `style='position: fixed;top: 60px;z-index: 9999;right: 10px;background-color:${color}; color:#fff; opacity:1'`
+        let alerta = `<div  class="alert alert-dismissible fade show" role="alert" ${style} id="alerta">
+                            <h4 class="mb-0">${header}</h4>
+                            <i class="bi ${icon} fs-2 me-2"></i>
+                            <strong>${title}</strong> <span>${subtitle}</span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" style='color:white' aria-label="Close"></button>
+                        </div>`;
+
+        content.insertAdjacentHTML('afterbegin', alerta);
+
+        document.getElementById('alerta').addEventListener('closed.bs.alert', function () {
+            clearInterval(oCompra.intervalId);
+        })
+
+        if (closeAutomatic) {
+            let timeout = 3000;
+            let milisegundos = 200;
+
+            //Despué de cumplir el intervalo indicado en el timeout, desaparecerá lentamente.
+            setTimeout(() => {
+                let myAlert = document.getElementById('alerta');
+                //Disminuirá la opacidad del componente hasta desaparecer.
+                oCompra.intervalId = setInterval(function () {
+                    if (myAlert.style.opacity > 0) {
+                        myAlert.style.opacity -= 0.1;
+                    } else {
+                        clearInterval(oCompra.intervalId);
+                        myAlert.parentElement.removeChild(myAlert);
+                    }
+                }, milisegundos);
+            }, timeout);
         }
-        //setTimeout(function () {
-        //    $(".alert").fadeOut(6000, function () {
-        //        $(".alert ").remove();
-        //    });
-        //}, 2000)
-
     },
-    mensajeOk: function (sMensaje) {
-        oAlerta.bodyMensaje('success', sMensaje);
-    },
-    mensajeError: function (sMensaje) {
-        oAlerta.bodyMensaje('danger', sMensaje);
-    },
-    mensajeInformacion: function (sMensaje) {
-        oAlerta.bodyMensaje('info', sMensaje);
-    },
-    mensajeAlerta: function (sMensaje, idElementoContenedor) {
-        oAlerta.bodyMensaje('warning', sMensaje, idElementoContenedor);
-    },
-    mensajeBootbox: function (mensaje, tipoAlerta, callBack) {
-        var icono = "";
-        var colorIcono = "";
+    alertaBootbox: function (mensaje, tipoAlerta, callBack) {
+        let icono = "";
         switch (tipoAlerta) {
             case "success":
                 icono = "<i class='fas fa-check-circle' style='color:green'></i>";
@@ -163,50 +167,4 @@ var oAlerta = {
 
         }, 250);
     },
-    listaEtiquetaError: function (listaIdElementos, idContenedor) {
-        var nCount = listaIdElementos.length;
-        if (nCount > 0) {
-            oAlerta.limpiarEtiquetaError(idContenedor);
-            for (var i = 0; i < nCount; i++) {
-                var elemento = $("#" + listaIdElementos[i].elemento);
-                elemento.after("<span class='label label-danger field-validation-error'>" + listaIdElementos[i].mensajeError + "</span>");
-                //elemento.after("<span class='badge badge-danger field-validation-error'>" + listaIdElementos[i].mensajeError + "</span>");
-            }
-        }
-    },
-    etiquetaError: function (idElemento, mensajeError) {
-        const limpiarEtiqueta = () => {
-            return new Promise((resolve, reject) => {
-                oAlerta.limpiarEtiquetaError(idElemento);
-                let bSeguirOk = true;
-                resolve(bSeguirOk);
-            });
-        };
-        const crearEtiqueta = () => {
-            return new Promise(() => {
-                var elemento = $("#" + idElemento);
-                elemento.append("<span class='label label-danger field-validation-error'>" + mensajeError + "</span>");
-                //Pasando los 2 seg. se ejecutará el fadeout que hará que se elimine el error lentamente en 3 seg.(animación)
-                setTimeout(function () {
-                    let validation = elemento.find(".field-validation-error");
-                    validation.fadeOut(3000, function () {
-                        validation.remove();
-                    });
-                }, 2000)
-            });
-        };
-        //Ejecutamos las promesas
-        limpiarEtiqueta().then((bSeguir) => {
-            if (bSeguir) {
-                // codigo opcional
-            }
-            crearEtiqueta();
-        });
-    },
-    limpiarEtiquetaError: function (idElemento) {
-        var elemento = $("#" + idElemento).find(".field-validation-error");
-        if (elemento.length > 0) {
-            elemento.remove();
-        }
-    }
 }

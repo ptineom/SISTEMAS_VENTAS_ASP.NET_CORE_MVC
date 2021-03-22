@@ -1,3 +1,88 @@
-{
-
-}
+[
+  {
+    "outputFileName": "wwwroot/css/site.bundle.min.css",
+    "inputFiles": [
+      "wwwroot/css/style.css",
+      "wwwroot/css/layout.css"
+    ],
+    "minify": {
+      "enabled": false,
+      "renameLocals": true
+    }
+  },
+  {
+    "outputFileName": "wwwroot/icons/bootstrap-icons/font/bootstrap-icons.min.css",
+    "inputFiles": [
+      "wwwroot/icons/bootstrap-icons/font/bootstrap-icons.css"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/main.min.js",
+    "inputFiles": [
+      "wwwroot/js/main.js"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    }
+  },
+  {
+    "outputFileName": "wwwroot/js/seguridad/login.min.js",
+    "inputFiles": [
+      "wwwroot/js/seguridad/login.js"
+    ],
+    "minify": {
+      "enabled": false,
+      "renameLocals": true
+    }
+  },
+  {
+    "outputFileName": "wwwroot/js/seleccionSucursal.min.js",
+    "inputFiles": [
+      "wwwroot/js/seleccionSucursal.js"
+    ],
+    "minify": {
+      "enabled": false,
+      "renameLocals": true
+    }
+  },
+  {
+    "outputFileName": "wwwroot/js/compra.min.js",
+    "inputFiles": [
+      "wwwroot/js/compra.js"
+    ],
+    "minify": {
+      "enabled": false,
+      "renameLocals": true
+    }
+  },
+  {
+    "outputFileName": "wwwroot/js/venta.min.js",
+    "inputFiles": [
+      "wwwroot/js/venta.js"
+    ],
+    "minify": {
+      "enabled": false,
+      "renameLocals": true
+    }
+  },
+  {
+    "outputFileName": "wwwroot/js/utilitarios/utils.bundle.min.js",
+    "inputFiles": [
+      "wwwroot/js/utilitarios/alertas.js",
+      "wwwroot/js/utilitarios/extensiones.js",
+      "wwwroot/js/utilitarios/helpers.js",
+      "wwwroot/js/utilitarios/configControls.js"
+    ],
+    "minify": {
+      "enabled": false,
+      "renameLocals": true
+    }
+  },
+  {
+    "outputFileName": "wwwroot/js/Modal/modalAbono.min.js",
+    "inputFiles": [
+      "wwwroot/js/Modal/modalAbono.js"
+    ]
+  }
+]

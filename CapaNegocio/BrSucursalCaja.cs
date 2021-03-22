@@ -26,11 +26,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var lista = dao.listaSucursalCaja(con, idSucursal);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+               
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
@@ -48,11 +45,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var lista = dao.listaCajas(con, idSucursal, ref listaSucCaj);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                 
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {

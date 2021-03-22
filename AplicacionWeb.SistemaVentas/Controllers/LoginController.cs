@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,45 +22,49 @@ namespace AplicacionWeb.SistemaVentas.Controllers
     [Route("[controller]")]
     public class LoginController : Controller
     {
-        private IResultadoOperacion _resultado { get; set; }
-        private BrUsuario brUsuario = null;
-        private IHttpContextAccessor _httpContextAccessor = null;
+        private IResultadoOperacion _resultado = null;
+        private BrUsuario _brUsuario = null;
+        private IHttpContextAccessor _accessor = null;
         private IWebHostEnvironment _environment= null;
+        private IConfiguration _configuration = null;
 
-        public LoginController(IResultadoOperacion resultado, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment environment)
+        public LoginController(IResultadoOperacion resultado, IHttpContextAccessor accessor, 
+            IWebHostEnvironment environment, IConfiguration configuration)
         {
+            _configuration = configuration;
             _resultado = resultado;
-            brUsuario = new BrUsuario();
-            _httpContextAccessor = httpContextAccessor;
+            _brUsuario = new BrUsuario(_configuration);
+            _accessor = accessor;
             _environment = environment;
         }
+
         [Route("[action]")]
         public IActionResult Index()
         {
             return View(new ReqLoginViewModel());
         }
 
-        [HttpPost("acceder")]
+        [HttpPost("ValidateUser")]
         [AllowAnonymous]
-        public async Task<IActionResult> accederAsync([FromBody] ReqLoginViewModel login)
+        public async Task<IActionResult> ValidateUserAsync([FromBody] ReqLoginViewModel request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new { Mesagge = ModelState, Status = "Error" });
 
-            if (string.IsNullOrWhiteSpace(login.idUsuario) || string.IsNullOrWhiteSpace(login.password))
+            if (string.IsNullOrWhiteSpace(request.idUsuario) || string.IsNullOrWhiteSpace(request.password))
                 return BadRequest(new { Message = "Usuario y/o contraseña incorrectas", Status = "Error" });
 
             //Validamos la existencia del usuario en la BD.
-            string passwordHash256 = HashHelper.GetHash256(login.password);
-            _resultado = await Task.Run(() => brUsuario.acceder(login.idUsuario, passwordHash256));
+            string passwordHash256 = HashHelper.GetHash256(request.password);
+            _resultado = await Task.Run(() => _brUsuario.ValidateUser(request.idUsuario, passwordHash256));
 
-            if (!_resultado.bResultado)
-                return StatusCode(StatusCodes.Status404NotFound, new { Message = _resultado.sMensaje, Status = "Error" });
+            if (!_resultado.Resultado)
+                return StatusCode(StatusCodes.Status404NotFound, new { Message = _resultado.Mensaje, Status = "Error" });
 
             try
             {
                 //Datos del usuario
-                USUARIO modelo = (USUARIO)_resultado.data;
+                USUARIO modelo = (USUARIO)_resultado.Data;
                 int countSedes = modelo.COUNT_SEDES;
 
                 if (countSedes == 0)
@@ -71,12 +76,12 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                 if (countSedes == 1)
                 {
                     //Generamos la identidad y cookie.
-                    await identitySignIn(modelo);
+                    await IdentitySignInAsync(modelo);
 
                     resultadoLogin = new ResultadoLoginViewModel()
                     {
-                        returnUrl = "/Home/Index",
-                        masDeUnaSucursal = false
+                        ReturnUrl = "/Home/Index",
+                        MasDeUnaSucursal = false
                     };
                 }
                 else if (countSedes > 1)
@@ -85,21 +90,22 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                     _resultado = new ResultadoOperacion();
 
                     //Lista de sucursales por usuario.
-                    _resultado = brSucursalUsuario.listaSucursalPorUsuario(login.idUsuario);
+                    _resultado = brSucursalUsuario.GetAllByUserId(request.idUsuario);
 
-                    if (!_resultado.bResultado)
-                        return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.sMensaje, Status = "Error" });
+                    if (!_resultado.Resultado)
+                        return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
 
-                    List<SucursalViewModel> sucursales = ((List<SUCURSAL>)_resultado.data).Select(x => new SucursalViewModel()
+                    List<SucursalViewModel> sucursales = ((List<SUCURSAL>)_resultado.Data).Select(x => new SucursalViewModel()
                     {
-                        idSucursal = x.ID_SUCURSAL,
-                        nomSucursal = x.NOM_SUCURSAL
+                        IdSucursal = x.ID_SUCURSAL,
+                        NomSucursal = x.NOM_SUCURSAL
                     }).ToList<SucursalViewModel>();
+                    sucursales.Insert(0, new SucursalViewModel() { IdSucursal = "-1", NomSucursal = "---SELECCIONE---" });
 
                     resultadoLogin = new ResultadoLoginViewModel()
                     {
-                        masDeUnaSucursal = true,
-                        sucursales = sucursales
+                        MasDeUnaSucursal = true,
+                        Sucursales = sucursales
                     };
                 }
                 _resultado = new ResultadoOperacion();
@@ -121,26 +127,26 @@ namespace AplicacionWeb.SistemaVentas.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("createIdentitySignIn")]
-        public async Task<IActionResult> createIdentitySignInAsync([FromBody] ReqSeleccionSucursalViewModel sucursal)
+        [HttpPost("CreateIdentitySignIn")]
+        public async Task<IActionResult> CreateIdentitySignInAsync([FromBody] ReqSeleccionSucursalViewModel request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new { Mesagge = ModelState, Status = "Error" });
 
             //Validamos la existencia del usuario en la BD.
-            string passwordHash256 = HashHelper.GetHash256(sucursal.password);
-            _resultado = await Task.Run(() => brUsuario.acceder(sucursal.idUsuario, passwordHash256));
+            string passwordHash256 = HashHelper.GetHash256(request.password);
+            _resultado = await Task.Run(() => _brUsuario.ValidateUser(request.idUsuario, passwordHash256));
 
-            if (!_resultado.bResultado)
-                return StatusCode(StatusCodes.Status404NotFound, new { Message = _resultado.sMensaje, Status = "Error" });
+            if (!_resultado.Resultado)
+                return StatusCode(StatusCodes.Status404NotFound, new { Message = _resultado.Mensaje, Status = "Error" });
 
             //Datos del usuario
-            USUARIO modelo = (USUARIO)_resultado.data;
-            modelo.ID_SUCURSAL = sucursal.idSucursal;
-            modelo.NOM_SUCURSAL = sucursal.nomSucursal;
+            USUARIO modelo = (USUARIO)_resultado.Data;
+            modelo.ID_SUCURSAL = request.idSucursal;
+            modelo.NOM_SUCURSAL = request.nomSucursal;
 
             //Generamos la identidad y cookie.
-            await identitySignIn(modelo);
+            await IdentitySignInAsync(modelo);
 
             _resultado = new ResultadoOperacion();
             _resultado.SetResultado(true, "", "/Home/Index");
@@ -148,28 +154,29 @@ namespace AplicacionWeb.SistemaVentas.Controllers
             return Ok(_resultado);
         }
 
-        [HttpPost("cambiarSucursal")]
-        public async Task<IActionResult> cambiarSucursalAsync([FromBody] ReqCambiarSucursalViewModel sucursal)
+        [HttpPost("ChangeSucursal")]
+        public async Task<IActionResult> ChangeSucursalAsync([FromBody] ReqCambiarSucursalViewModel request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new { Mesagge = ModelState, Status = "Error" });
 
-            UsuarioLogueadoViewModel userCurrent = new Session(_httpContextAccessor, _environment).obtenerUsuarioLogueado();
+            //Obtenemos el usuario actual 
+            UsuarioLogueadoViewModel userCurrent = new Session(_accessor, _environment).GetUserLogged();
 
             //Datos del usuario
             USUARIO modelo = new USUARIO()
             {
-                ID_SUCURSAL = sucursal.idSucursal,
-                NOM_SUCURSAL = sucursal.nomSucursal,
-                ID_USUARIO = userCurrent.idUsuario,
-                NOM_USUARIO = userCurrent.nomUsuario,
-                NOM_ROL = userCurrent.nomRol,
-                FLG_CTRL_TOTAL = userCurrent.flgCtrlTotal,
-                FOTO = userCurrent.avatarUri
+                ID_SUCURSAL = request.IdSucursal,
+                NOM_SUCURSAL = request.NomSucursal,
+                ID_USUARIO = userCurrent.IdUsuario,
+                NOM_USUARIO = userCurrent.NomUsuario,
+                NOM_ROL = userCurrent.NomRol,
+                FLG_CTRL_TOTAL = userCurrent.FlgCtrlTotal,
+                FOTO = userCurrent.AvatarUri
             };
 
             //Generamos la identidad y cookie.
-            await identitySignIn(modelo);
+            await IdentitySignInAsync(modelo);
 
             _resultado = new ResultadoOperacion();
             _resultado.SetResultado(true,"", "/Home/Index");
@@ -177,16 +184,16 @@ namespace AplicacionWeb.SistemaVentas.Controllers
             return Ok(_resultado);
         }
 
-        [Route("identitySignOn")]
+        [Route("IdentitySignOn")]
         [AllowAnonymous]
-        public async Task<IActionResult> identitySignOn()
+        public async Task<IActionResult> IdentitySignOnAsync()
         {
             await HttpContext.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
 
         #region Metodos privados
-        public async Task identitySignIn(USUARIO usuario)
+        public async Task IdentitySignInAsync(USUARIO usuario)
         {
             IEnumerable<Claim> claims = new List<Claim>()
             {
@@ -215,7 +222,7 @@ namespace AplicacionWeb.SistemaVentas.Controllers
     }
 
     #region "Records"
-    public record ReqCambiarSucursalViewModel(string idSucursal, string nomSucursal);
+    public record ReqCambiarSucursalViewModel(string IdSucursal, string NomSucursal);
     #endregion
 
 }

@@ -143,11 +143,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     DOC_VENTA modelo = dao.combosReportesVentas(con, idSucursal);
-                    if (modelo != null)
-                    {
-                        oResultado.data = modelo;
-                    }
-                    oResultado.SetResultado(true, "");
+                
+                    oResultado.SetResultado(true, modelo);
                 }
                 catch (Exception ex)
                 {
@@ -167,11 +164,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var lista = dao.consultaVentas(con, idSucursal, idCliente, idTipoComprobante, fechaInicio, fechaFinal, idTipoCondicionPago, idUsuarioCaja);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+    
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
@@ -191,11 +185,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var lista = dao.consultaVentasDetalle(con, idSucursal, idTipoComprobante, nroSerie, nroDocumento);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+              
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
@@ -214,11 +205,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var lista = dao.consultaVentasPorUsuario(con, idSucursal, fechaInicio, fechaFinal, tipo);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                 
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
@@ -237,11 +225,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var lista = dao.consultaVentasPorMes(con, idSucursal, anio);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {

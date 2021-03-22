@@ -11,12 +11,12 @@ namespace CapaNegocio
 {
     public class BrPagos
     {
-        DaoPagos dao = null;
-        ResultadoOperacion oResultado = null;
+        DaoPagos _dao = null;
+        ResultadoOperacion _resultado = null;
         public BrPagos()
         {
-            dao = new DaoPagos();
-            oResultado = new ResultadoOperacion();
+            _dao = new DaoPagos();
+            _resultado = new ResultadoOperacion();
         }
         public ResultadoOperacion combosPagos(string idSucursal, string idUsuario)
         {
@@ -25,20 +25,17 @@ namespace CapaNegocio
                 try
                 {
                     con.Open();
-                    PAGOS modelo = dao.combosPagos(con, idSucursal, idUsuario);
-                    if (modelo != null)
-                    {
-                        oResultado.data = modelo;
-                    }
-                    oResultado.SetResultado(true, "");
+                    PAGOS modelo = _dao.combosPagos(con, idSucursal, idUsuario);
+                   
+                    _resultado.SetResultado(true, modelo);
                 }
                 catch (Exception ex)
                 {
                     Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
+                    _resultado.SetResultado(false, ex.Message);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
         public ResultadoOperacion listaCtaCtePagos(string idSucursal, string estadoPago, string idProveedor, string idTipoComprobante,
             string nroSerie, int nroDocumento, string fechaInicio, string fechaFinal)
@@ -48,20 +45,17 @@ namespace CapaNegocio
                 try
                 {
                     con.Open();
-                    var lista = dao.listaCtaCtePagos(con, idSucursal, estadoPago, idProveedor, idTipoComprobante, nroSerie, nroDocumento, fechaInicio, fechaFinal);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                    var lista = _dao.listaCtaCtePagos(con, idSucursal, estadoPago, idProveedor, idTipoComprobante, nroSerie, nroDocumento, fechaInicio, fechaFinal);
+                 
+                    _resultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
                     Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
+                    _resultado.SetResultado(false, ex.Message);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
         
         public ResultadoOperacion listaPagos(string idSucursal, string idTipoComprobante, string nroSerie, int nroDocumento, string idProveedor)
@@ -71,20 +65,17 @@ namespace CapaNegocio
                 try
                 {
                     con.Open();
-                    var lista = dao.listaPagos(con, idSucursal, idTipoComprobante, nroSerie, nroDocumento, idProveedor);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                    var lista = _dao.listaPagos(con, idSucursal, idTipoComprobante, nroSerie, nroDocumento, idProveedor);
+                  
+                    _resultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
                     Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
+                    _resultado.SetResultado(false, ex.Message);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
         
         public ResultadoOperacion grabarPago(PAGOS oModelo)
@@ -96,18 +87,18 @@ namespace CapaNegocio
                 {
                     con.Open();
                     trx = con.BeginTransaction();
-                    dao.grabarPago(con, trx, oModelo);
-                    oResultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
+                    _dao.grabarPago(con, trx, oModelo);
+                    _resultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
                     trx.Commit();
                 }
                 catch (Exception ex)
                 {
-                    oResultado.SetResultado(false, ex.Message.ToString());
+                    _resultado.SetResultado(false, ex.Message.ToString());
                     trx.Rollback();
                     Elog.save(this, ex);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
 
         public ResultadoOperacion anularPago(string idSucursal, string idTipoComprobante,
@@ -120,18 +111,18 @@ namespace CapaNegocio
                 {
                     con.Open();
                     trx = con.BeginTransaction();
-                    dao.anularPago(con, trx, idSucursal, idTipoComprobante, nroSerie, nroDocumento, idProveedor, correlativo, idUsuario);
-                    oResultado.SetResultado(true, Helper.Constantes.sMensajeEliminadoOk);
+                    _dao.anularPago(con, trx, idSucursal, idTipoComprobante, nroSerie, nroDocumento, idProveedor, correlativo, idUsuario);
+                    _resultado.SetResultado(true, Helper.Constantes.sMensajeEliminadoOk);
                     trx.Commit();
                 }
                 catch (Exception ex)
                 {
-                    oResultado.SetResultado(false, ex.Message.ToString());
+                    _resultado.SetResultado(false, ex.Message.ToString());
                     trx.Rollback();
                     Elog.save(this, ex);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
 
         public ResultadoOperacion combosReportePagos(string idSucursal)
@@ -141,20 +132,17 @@ namespace CapaNegocio
                 try
                 {
                     con.Open();
-                    PAGOS modelo = dao.combosReportePagos(con, idSucursal);
-                    if (modelo != null)
-                    {
-                        oResultado.data = modelo;
-                    }
-                    oResultado.SetResultado(true, "");
+                    PAGOS modelo = _dao.combosReportePagos(con, idSucursal);
+
+                    _resultado.SetResultado(true, modelo);
                 }
                 catch (Exception ex)
                 {
                     Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
+                    _resultado.SetResultado(false, ex.Message);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
 
         public ResultadoOperacion reporteCtaCtePagos(string idSucursal, string idTipoComprobante,
@@ -165,20 +153,17 @@ namespace CapaNegocio
                 try
                 {
                     con.Open();
-                    var lista = dao.reporteCtaCtePagos(con, idSucursal, idTipoComprobante, fechaInicio, fechaFinal);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                    var lista = _dao.reporteCtaCtePagos(con, idSucursal, idTipoComprobante, fechaInicio, fechaFinal);
+                  
+                    _resultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
                     Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
+                    _resultado.SetResultado(false, ex.Message);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
 
     }

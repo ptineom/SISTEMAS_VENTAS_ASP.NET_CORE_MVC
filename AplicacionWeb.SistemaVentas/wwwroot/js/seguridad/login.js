@@ -3,7 +3,7 @@ var oLogin = {
     init: function () {
         $.validator.unobtrusive.parse("#form-login");
         document.getElementById('btnIniciar').addEventListener('click', oLogin.ingresarUsuario);
-        document.getElementById('txtUsuario').addEventListener('keyup', (e) => oMetodos.teclaEnter(e, 'txtPassword'));
+        document.getElementById('txtUsuario').addEventListener('keyup', (e) => oHelper.teclaEnter(e, 'txtPassword'));
         document.getElementById('txtPassword').addEventListener('keyup', function (e) {
             if (e.key == "Enter")
                 oLogin.ingresarUsuario();
@@ -65,7 +65,7 @@ var oLogin = {
     },
     seleccionarSucursal: function () {
         if ($("#form-seleccionSucursal").valid()) {
-            oMetodos.showLoading('#cardSeleccionSucursal');
+            oHelper.showLoading('#cardSeleccionSucursal');
             let cboSucursales = document.getElementById('cboSucursales');
             let nomSucursal = cboSucursales.options[cboSucursales.selectedIndex].text;
 
@@ -75,14 +75,14 @@ var oLogin = {
                 idSucursal: cboSucursales.value,
                 nomSucursal
             };
-            axios.post("/Login/createIdentitySignIn", parameters).then((response) => {
-                if (response.data.bResultado) {
-                    let returnUrl = response.data.data;
+            axios.post("/Login/CreateIdentitySignIn", parameters).then((response) => {
+                if (response.data.Resultado) {
+                    let returnUrl = response.data.Data;
                     window.location.href = returnUrl;
                 }
             }).catch((error) => {
                 alert(error.response.data.message);
-            }).finally(() => oMetodos.hideLoading());
+            }).finally(() => oHelper.hideLoading());
         }
     },
     cambiarCard: function (vista) {
@@ -96,31 +96,30 @@ var oLogin = {
     },
     ingresarUsuario: function () {
         if ($("#form-login").valid()) {
-            oMetodos.showLoading('#cardLogin');
+            oHelper.showLoading('#cardLogin');
 
             let parameters = {
                 idUsuario: document.getElementById('txtUsuario').value,
                 password: document.getElementById('txtPassword').value
             };
 
-            axios.post("/Login/acceder", parameters).then((response) => {
-                if (response.data.bResultado) {
-                    let data = response.data.data;
-                    let masDeUnaSucursal = data.masDeUnaSucursal
+            axios.post("/Login/ValidateUser", parameters).then((response) => {
+                if (response.data.Resultado) {
+                    let data = response.data.Data;
+                    let masDeUnaSucursal = data.MasDeUnaSucursal
 
                     //Si tiene mas de de una sucursal mostramos el formulario para que pueda seleccionar.
                     if (masDeUnaSucursal) {
-                        let sucursales = data.sucursales;
+                        let sucursales = data.Sucursales;
                         let frag = document.createDocumentFragment();
                         let cboSucursales = document.getElementById('cboSucursales');
                         cboSucursales.innerHTML = "";
 
                         //Cargamos el combo de sucursales
-                        sucursales.unshift({ idSucursal: "", nomSucursal: "---SELECCIONE---" });
                         sucursales.forEach(x => {
                             let option = document.createElement('option');
-                            option.value = x.idSucursal;
-                            option.text = x.nomSucursal;
+                            option.value = x.IdSucursal;
+                            option.text = x.NomSucursal;
                             frag.appendChild(option);
                         });
                         cboSucursales.appendChild(frag);
@@ -134,7 +133,7 @@ var oLogin = {
                 }
             }).catch((error) => {
                 alert(error.response.data.message);
-            }).finally(() => oMetodos.hideLoading());
+            }).finally(() => oHelper.hideLoading());
         }
     }
 

@@ -10,7 +10,7 @@ namespace Entidades
 		public string ACCION { get; set; }
 		public string ID_TIPO_CONDICION_PAGO { get; set; }
 		public string NOM_TIPO_CONDICION_PAGO { get; set; }
-		public bool FLG_NO_EVALUA_CREDITO { get; set; }
+		public bool FLG_EVALUA_CREDITO { get; set; }
 		public string ID_USUARIO_REGISTRO { get; set; }
 	}
 }

@@ -1,4 +1,14 @@
-﻿1.- Para usar las clases de asp.net core enlas libraries add en el proyecto:
+﻿1.- Para poder usar las clases de asp.net mvc core en las libraries de clases add en el proyecto:
   <ItemGroup>
      <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
+
+2.-  Para la autenticacion con cookie no se requiere instalar nungún nuget.
+
+3.- Para la union y minimazion(bundle) hay 2 opciones(yo uso la opcion 2):
+    1.- agregar nugget:  BuildBundlerMinifier = MInificará y agrupará los archivos listados en el bundleconfig.json al compilar el proyecto.
+    2.- agregar la extension: bundler & minifier = minificará archivos dandole click derecho al archivo deseado. Los cambios que se haga 
+    en el archivo normal actualizara el minimizado.(esta extension muy buena, actuliza el minimificado asi este en despliegue el proyecto.)
+
+4.- Para administrar secretos: click derecho en en el proyecto, luego "Administrar secretos de usuarios"
+5.- Para las operaciones combinadas en javascript : https://github.com/MikeMcl/decimal.js-light/

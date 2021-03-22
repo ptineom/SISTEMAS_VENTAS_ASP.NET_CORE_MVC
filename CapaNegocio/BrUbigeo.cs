@@ -26,11 +26,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     List<UBIGEO> lista = dao.combosDepartamentos(con);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
@@ -48,11 +45,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     List<UBIGEO> lista = dao.combosProvincias(con, idDepartamento);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                 
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
@@ -70,11 +64,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     List<UBIGEO> lista = dao.combosDistritos(con, idProvincia);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {

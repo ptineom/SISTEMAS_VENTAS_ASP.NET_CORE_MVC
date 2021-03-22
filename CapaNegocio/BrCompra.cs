@@ -7,134 +7,128 @@ using Entidades;
 using CapaDao;
 using System.Data.SqlClient;
 using Helper;
+using Microsoft.Extensions.Configuration;
+
 namespace CapaNegocio
 {
     public class BrCompra
     {
-        DaoCompra dao = null;
-        ResultadoOperacion oResultado = null;
-        public BrCompra()
+        private DaoCompra _dao = null;
+        private ResultadoOperacion _resultado = null;
+        private IConfiguration _configuration = null;
+        private Conexion _conexion = null;
+        public BrCompra(IConfiguration configuration)
         {
-            dao = new DaoCompra();
-            oResultado = new ResultadoOperacion();
+            _dao = new DaoCompra();
+            _resultado = new ResultadoOperacion();
+            _configuration = configuration;
+            _conexion = new Conexion(_configuration);
         }
 
-        public ResultadoOperacion combosCompras( string idSucursal, string idUsuario)
+        public ResultadoOperacion GetData( string idSucursal, string idUsuario)
         {
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
-                    DOC_COMPRA modelo = dao.combosCompras(con, idSucursal, idUsuario);
-                    if (modelo != null)
-                    {
-                        oResultado.data = modelo;//(Object)modelo;
-                    }
-                    oResultado.SetResultado(true, "");
+                    DOC_COMPRA modelo = _dao.GetData(con, idSucursal, idUsuario);
+                    _resultado.SetResultado(true, modelo);
                 }
                 catch (Exception ex)
                 {
                     Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
+                    _resultado.SetResultado(false, ex.Message);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
 
-        public ResultadoOperacion grabarCompra(DOC_COMPRA oModelo, ref string nroSerie, ref string nroComprobante)
+        public ResultadoOperacion Register(DOC_COMPRA oModelo, ref string nroSerie, ref string nroComprobante)
         {
             SqlTransaction trx = null;
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
                     trx = con.BeginTransaction();
-                    dao.grabarCompra(con, trx, oModelo, ref nroSerie, ref nroComprobante);
-                    oResultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
+                    _dao.Register(con, trx, oModelo, ref nroSerie, ref nroComprobante);
+                    _resultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
                     trx.Commit();
                 }
                 catch (Exception ex)
                 {
-                    oResultado.SetResultado(false, ex.Message.ToString());
+                    _resultado.SetResultado(false, ex.Message.ToString());
                     trx.Rollback();
                     Elog.save(this, ex);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
 
-        public ResultadoOperacion anularCompra(string idSucursal, string idTipoComprobante,
+        public ResultadoOperacion Delete(string idSucursal, string idTipoComprobante,
             string nroSerie, int nroDocumento, string idProveedor, string idUsuario)
         {
             SqlTransaction trx = null;
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
                     trx = con.BeginTransaction();
-                    dao.anularCompra(con, trx, idSucursal, idTipoComprobante, nroSerie, nroDocumento, idProveedor, idUsuario);
-                    oResultado.SetResultado(true, Helper.Constantes.sMensajeEliminadoOk);
+                    _dao.Delete(con, trx, idSucursal, idTipoComprobante, nroSerie, nroDocumento, idProveedor, idUsuario);
+                    _resultado.SetResultado(true, Helper.Constantes.sMensajeEliminadoOk);
                     trx.Commit();
                 }
                 catch (Exception ex)
                 {
-                    oResultado.SetResultado(false, ex.Message.ToString());
+                    _resultado.SetResultado(false, ex.Message.ToString());
                     trx.Rollback();
                     Elog.save(this, ex);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
 
-        public ResultadoOperacion listaCompras(string idSucursal, string idTipoComprobante, string nroSerie, int nroDocumento, string fechaInicio, 
+        public ResultadoOperacion GetAllByFilters(string idSucursal, string idTipoComprobante, string nroSerie, int nroDocumento, string fechaInicio, 
             string fechaFinal, int idEstado)
         {
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
-                    var lista = dao.listaCompras(con, idSucursal, idTipoComprobante, nroSerie, nroDocumento, fechaInicio, fechaFinal, idEstado);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista; // lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                    var lista = _dao.GetAllByFilters(con, idSucursal, idTipoComprobante, nroSerie, nroDocumento, fechaInicio, fechaFinal, idEstado);
+                    _resultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
                     Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
+                    _resultado.SetResultado(false, ex.Message);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
 
-        public ResultadoOperacion compraPorCodigo(string idSucursal, string idTipoComprobante, string nroSerie,
+        public ResultadoOperacion GetById(string idSucursal, string idTipoComprobante, string nroSerie,
             int nroDocumento, string idProveedor)
         {
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
-                    DOC_COMPRA_INFORME modelo = dao.compraPorCodigo(con, idSucursal, idTipoComprobante, nroSerie, nroDocumento, idProveedor);
-                    if (modelo != null)
-                    {
-                        oResultado.data = modelo;//(Object)modelo;
-                    }
-                    oResultado.SetResultado(true, "");
+                    DOC_COMPRA_INFORME modelo = _dao.GetById(con, idSucursal, idTipoComprobante, nroSerie, nroDocumento, idProveedor);
+                    _resultado.SetResultado(true, modelo);
                 }
                 catch (Exception ex)
                 {
                     Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
+                    _resultado.SetResultado(false, ex.Message);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
     }
 }

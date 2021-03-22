@@ -16,12 +16,12 @@ var oMain = {
 
         //Mostrar vista del menú
         Array.from(document.querySelectorAll('#sidebar-menu li a[data-flgFormulario="True"]')).forEach(a => {
-            a.addEventListener('click', (e) => {
-                let elem = e.target;
+             a.addEventListener('click', (e) => {
+                let elem = e.currentTarget;
 
                 //Se usa un sessionStorage con el fin a que se elimine cuando cerramos la ventana si nos olvidamos cerrar sessión.
                 sessionStorage.setItem("breadcrumb", elem.getAttribute("data-breadcrumb"));
-
+     
                 window.location.href = elem.getAttribute("data-route");
             });
         })
@@ -55,6 +55,15 @@ var oMain = {
                     }
                 });
             })
+        });
+
+        document.getElementById('btnCerrarSesion').addEventListener('click', (e) => {
+            e.preventDefault();
+
+            if (sessionStorage.getItem('breadcrumb') != null) 
+                sessionStorage.removeItem("breadcrumb");
+
+            window.location.href = "/Login/IdentitySignOn";
         });
 
         //Agregar breadcrumb referente al menu item elegido en el menu y expandir.

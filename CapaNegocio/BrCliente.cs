@@ -27,11 +27,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var lista = dao.listaClientes(con, tipoFiltro, filtro, flgConInactivos);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                  
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
@@ -119,7 +116,7 @@ namespace CapaNegocio
                 {
                     con.Open();
                     CLIENTE modelo = dao.clientePorDocumento(con, idTipoDocumento, nroDocumento);
-                    oResultado.SetResultado(true, "", oResultado.data = modelo);
+                    oResultado.SetResultado(true, modelo);
                 }
                 catch (Exception ex)
                 {

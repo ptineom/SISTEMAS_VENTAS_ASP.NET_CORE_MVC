@@ -7,7 +7,7 @@ namespace AplicacionWeb.SistemaVentas.Models
 {
     public class SucursalViewModel
     {
-        public string idSucursal { get; set; }
-        public string nomSucursal { get; set; }
+        public string IdSucursal { get; set; }
+        public string NomSucursal { get; set; }
     }
 }

@@ -46,7 +46,7 @@ namespace CapaNegocio
                     {
                         if (!flgSinFotos)
                         {
-                            string dominioWebApi = Configuraciones.DOMINIO_WEB_API;
+                            string dominioWebApi = "";// Configuraciones.DOMINIO_WEB_API;
                             string uploadEmpresa = Configuraciones.UPLOAD_EMPRESA;
                             
                             byte[] binaryFoto = null;

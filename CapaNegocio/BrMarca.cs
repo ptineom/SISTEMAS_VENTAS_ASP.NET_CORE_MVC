@@ -11,12 +11,12 @@ namespace CapaNegocio
 {
     public class BrMarca
     {
-        DaoMarca dao = null;
-        ResultadoOperacion oResultado = null;
+        DaoMarca _dao = null;
+        ResultadoOperacion _resultado = null;
         public BrMarca()
         {
-            dao = new DaoMarca();
-            oResultado = new ResultadoOperacion();
+            _dao = new DaoMarca();
+            _resultado = new ResultadoOperacion();
         }
         public ResultadoOperacion listaMarcas(string nomMarca)
         {
@@ -25,17 +25,17 @@ namespace CapaNegocio
                 try
                 {
                     con.Open();
-                    var lista = dao.listaMarcas(con, nomMarca);
+                    var lista = _dao.listaMarcas(con, nomMarca);
 
-                    oResultado.SetResultado(true, "", oResultado.data);
+                    _resultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
                     Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
+                    _resultado.SetResultado(false, ex.Message);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
         public ResultadoOperacion grabarMarca(MARCA oModelo)
         {
@@ -48,19 +48,19 @@ namespace CapaNegocio
                     trx = con.BeginTransaction();
 
                     int idMarca = 0;
-                    dao.grabarMarca(con, trx, oModelo, ref idMarca);
+                    _dao.grabarMarca(con, trx, oModelo, ref idMarca);
 
-                    oResultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk, idMarca);
+                    _resultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk, idMarca);
                     trx.Commit();
                 }
                 catch (Exception ex)
                 {
-                    oResultado.SetResultado(false, ex.Message.ToString());
+                    _resultado.SetResultado(false, ex.Message.ToString());
                     trx.Rollback();
                     Elog.save(this, ex);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
         public ResultadoOperacion anularMarca(int idMarca, string idUsuario)
         {
@@ -71,18 +71,18 @@ namespace CapaNegocio
                 {
                     con.Open();
                     trx = con.BeginTransaction();
-                    dao.anularMarca(con, trx, idMarca, idUsuario);
-                    oResultado.SetResultado(true, Helper.Constantes.sMensajeEliminadoOk);
+                    _dao.anularMarca(con, trx, idMarca, idUsuario);
+                    _resultado.SetResultado(true, Helper.Constantes.sMensajeEliminadoOk);
                     trx.Commit();
                 }
                 catch (Exception ex)
                 {
-                    oResultado.SetResultado(false, ex.Message.ToString());
+                    _resultado.SetResultado(false, ex.Message.ToString());
                     trx.Rollback();
                     Elog.save(this, ex);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
     }
 }

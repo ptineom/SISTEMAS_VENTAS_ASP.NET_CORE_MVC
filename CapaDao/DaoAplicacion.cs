@@ -11,15 +11,16 @@ namespace CapaDao
 {
     public class DaoAplicacion
     {
-        public List<APLICACION> listarMenuUsuario(SqlConnection con, string sIdUsuario)
+        public List<APLICACION> GetMenuByUserId(SqlConnection con, string sIdUsuario)
         {
             List<APLICACION> listaAplicacion = null;
             APLICACION oAplicacion = null;
             SqlDataReader reader = null;
+
             using (SqlCommand cmd = new SqlCommand("PA_LISTA_MENU_PROYECTO", con))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@ID_USUARIO", sIdUsuario);
+                cmd.Parameters.Add("@ID_USUARIO", SqlDbType.VarChar, 2).Value = sIdUsuario;
                 reader = cmd.ExecuteReader(CommandBehavior.SingleResult);
                 if (reader != null)
                 {

@@ -14,13 +14,15 @@ var oSeleccionSucursal = {
                 }
             },
             messages: {
-                cboSucursales: "Debe de seleccionar la sucursal"
+                cboSucursales: {
+                    required: "Debe de seleccionar la sucursal"
+                }
             }
         })
     },
     seleccionarSucursal: function () {
         if ($("#form-seleccionSucursal").valid()) {
-            oMetodos.showLoading('#cardSeleccionSucursal');
+            oHelper.showLoading('#cardSeleccionSucursal');
             let cboSucursales = document.getElementById('cboSucursales');
             let nomSucursal = cboSucursales.options[cboSucursales.selectedIndex].text;
 
@@ -28,14 +30,14 @@ var oSeleccionSucursal = {
                 idSucursal: cboSucursales.value,
                 nomSucursal
             };
-            axios.post("/Login/cambiarSucursal", parameters).then((response) => {
-                if (response.data.bResultado) {
-                    let returnUrl = response.data.data;
+            axios.post("/Login/ChangeSucursal", parameters).then((response) => {
+                if (response.data.Resultado) {
+                    let returnUrl = response.data.Data;
                     window.location.href = returnUrl;
                 }
             }).catch((error) => {
                 alert(error.response.data.message);
-            }).finally(() => oMetodos.hideLoading('#cardSeleccionSucursal'));
+            }).finally(() => oHelper.hideLoading('#cardSeleccionSucursal'));
         }
     },
 }

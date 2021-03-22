@@ -10,7 +10,7 @@ namespace CapaDao
 {
     public class DaoUsuario
     {
-        public USUARIO acceder(SqlConnection con, string idUsuario, string clave, bool noValidar = false)
+        public USUARIO ValidateUser(SqlConnection con, string idUsuario, string clave, bool noValidar = false)
         {
             USUARIO oModelo = null;
             using (SqlCommand cmd = new SqlCommand("PA_VALIDA_USUARIO", con))
@@ -46,7 +46,7 @@ namespace CapaDao
             return oModelo;
         }
 
-        public List<USUARIO> listaUsuario(SqlConnection con)
+        public List<USUARIO> GetAll(SqlConnection con)
         {
             List<USUARIO> lista = null;
             USUARIO modelo = null;
@@ -78,7 +78,7 @@ namespace CapaDao
             return lista;
         }
 
-        public USUARIO obtenerUsuarioPorCodigo(SqlConnection con, string idUsuario)
+        public USUARIO GetById(SqlConnection con, string idUsuario)
         {
             USUARIO modelo = null;
             using (SqlCommand cmd = new SqlCommand("PA_MANT_USUARIO", con))
@@ -109,7 +109,7 @@ namespace CapaDao
             return modelo;
         }
 
-        public bool grabarUsuario(SqlConnection con, SqlTransaction trx, USUARIO oModelo)
+        public bool Register(SqlConnection con, SqlTransaction trx, USUARIO oModelo)
         {
             bool bExito;
             using (SqlCommand cmd = new SqlCommand("PA_MANT_USUARIO", con, trx))
@@ -130,7 +130,7 @@ namespace CapaDao
             return bExito;
         }
 
-        public bool anularUsuario(SqlConnection con, SqlTransaction trx, string idUsuario, string IdUsuarioRegistro)
+        public bool Delete(SqlConnection con, SqlTransaction trx, string idUsuario, string IdUsuarioRegistro)
         {
             bool bExito;
             using (SqlCommand cmd = new SqlCommand("PA_MANT_USUARIO", con, trx))
@@ -146,7 +146,7 @@ namespace CapaDao
             return bExito;
         }
 
-        public List<USUARIO> usuariosActivos(SqlConnection con)
+        public List<USUARIO> GetUsersActivated(SqlConnection con)
         {
             USUARIO modelo = null;
             List<USUARIO> lista = null;
@@ -176,7 +176,7 @@ namespace CapaDao
             return lista;
         }
 
-        public bool cambiarContrasenia(SqlConnection con, SqlTransaction trx, USUARIO oModelo)
+        public bool ChangePassword(SqlConnection con, SqlTransaction trx, USUARIO oModelo)
         {
             bool bExito;
             using (SqlCommand cmd = new SqlCommand("PA_MANT_USUARIO", con, trx))
@@ -193,7 +193,7 @@ namespace CapaDao
             return bExito;
         }
 
-        public bool guardarTokenRecuperacionPassword(SqlConnection con, SqlTransaction trx, USUARIO oModelo)
+        public bool SaveTokenRecovererPassword(SqlConnection con, SqlTransaction trx, USUARIO oModelo)
         {
             bool bExito;
             using (SqlCommand cmd = new SqlCommand("PA_MANT_USUARIO", con, trx))
@@ -209,7 +209,7 @@ namespace CapaDao
             return bExito;
         }
 
-        public bool recuperarContrasenia(SqlConnection con, SqlTransaction trx, USUARIO oModelo)
+        public bool RecoverPassowrd(SqlConnection con, SqlTransaction trx, USUARIO oModelo)
         {
             bool bExito;
             using (SqlCommand cmd = new SqlCommand("PA_MANT_USUARIO", con, trx))

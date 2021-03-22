@@ -27,11 +27,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var lista = dao.listaEmpleados(con);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;//lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
@@ -49,11 +46,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     EMPLEADO modelo = dao.combosEmpleados(con);
-                    if (modelo != null)
-                    {
-                        oResultado.data = modelo;
-                    }
-                    oResultado.SetResultado(true, "");
+                 
+                    oResultado.SetResultado(true, modelo);
                 }
                 catch (Exception ex)
                 {
@@ -71,11 +65,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     EMPLEADO modelo = dao.empleadoPorCodigo(con, idEmpleado);
-                    if (modelo != null)
-                    {
-                        oResultado.data = modelo;// (Object)modelo;
-                    }
-                    oResultado.SetResultado(true, "");
+                 
+                    oResultado.SetResultado(true, modelo);
                 }
                 catch (Exception ex)
                 {
@@ -119,7 +110,7 @@ namespace CapaNegocio
                     string xmlFotos = string.Empty;
                     dao.anularEmpleado(con, trx, idEmpleado, idUsuario, ref xmlFotos);
                     oResultado.SetResultado(true, Helper.Constantes.sMensajeEliminadoOk);
-                    oResultado.data = xmlFotos;
+                    oResultado.Data = xmlFotos;
                     trx.Commit();
                 }
                 catch (Exception ex)
@@ -139,11 +130,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var lista = dao.listaEmpleadosGeneral(con);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;//lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                  
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {

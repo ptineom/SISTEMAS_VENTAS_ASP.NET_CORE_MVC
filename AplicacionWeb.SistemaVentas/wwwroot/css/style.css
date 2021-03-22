@@ -24,7 +24,43 @@
     z-index: 2000;
     opacity: 0.4;
 }
-
+.warning-intenso {
+    background-color: #FB9514
+}
 label.error {
     color: #dc3545;
+    width:100%;
+}
+
+/*totales ventas y compras*/
+.totales {
+    background-color: #EEEEEE;
+    display: block;
+    border-bottom: 1px solid #6c757d;
+    text-align: right;
+}
+.title-totales {
+    color: rgba(0, 0, 0, 0.6)
+}
+/* ************************ */
+
+/*Datatable*/
+th {
+    font-style: normal;
+    font-weight: normal;
+}
+table.dataTable > thead .sorting:before, 
+table.dataTable > thead .sorting:after, 
+table.dataTable > thead .sorting_asc:before, 
+table.dataTable > thead .sorting_asc:after, 
+table.dataTable > thead .sorting_desc:before, 
+table.dataTable > thead .sorting_desc:after, 
+table.dataTable > thead .sorting_asc_disabled:before, 
+table.dataTable > thead .sorting_asc_disabled:after, 
+table.dataTable > thead .sorting_desc_disabled:before, 
+table.dataTable > thead .sorting_desc_disabled:after {
+    bottom: .1em;
+}
+table.dataTable{
+    margin-top:0px !important;
 }

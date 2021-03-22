@@ -8,7 +8,7 @@ namespace CapaDao
 {
     public class DaoArticulo
     {
-        public List<ARTICULO> listaArticulos(SqlConnection con, string accion, string idSucursal, string tipoFiltro, string filtro)
+        public List<ARTICULO> GetAllByFilters(SqlConnection con, string accion, string idSucursal, string tipoFiltro, string filtro)
         {
             List<ARTICULO> lista = null;
             ARTICULO modelo = null;
@@ -35,7 +35,7 @@ namespace CapaDao
                             modelo.NOM_FAMILIA = reader.IsDBNull(reader.GetOrdinal("NOM_FAMILIA")) ? string.Empty : reader.GetString(reader.GetOrdinal("NOM_FAMILIA"));
                             modelo.CODIGO_BARRA = reader.IsDBNull(reader.GetOrdinal("CODIGO_BARRA")) ? string.Empty : reader.GetString(reader.GetOrdinal("CODIGO_BARRA"));
                             modelo.FLG_INACTIVO = reader.GetBoolean(reader.GetOrdinal("FLG_INACTIVO"));
-                            modelo.PRECIO_VENTA = reader.GetDecimal(reader.GetOrdinal("PRECIO_VENTA"));
+                            modelo.PRECIO_VENTA_FINAL = reader.GetDecimal(reader.GetOrdinal("PRECIO_VENTA_FINAL"));
                             modelo.PRECIO_COMPRA = reader.GetDecimal(reader.GetOrdinal("PRECIO_COMPRA"));
                             modelo.STOCK_ACTUAL = reader.GetDecimal(reader.GetOrdinal("STOCK_ACTUAL"));
                             modelo.STOCK_MINIMO = reader.GetDecimal(reader.GetOrdinal("STOCK_MINIMO"));
@@ -53,8 +53,8 @@ namespace CapaDao
             }
             return lista;
         }
-       
-        public List<ARTICULO> listaArticulosGeneral(SqlConnection con, string accion, string idSucursal, string tipoFiltro, string filtro, ref MONEDA moneda)
+
+        public List<ARTICULO> GetAllByFiltersHelper(SqlConnection con, string accion, string idSucursal, string tipoFiltro, string filtro)
         {
             List<ARTICULO> lista = null;
             ARTICULO modelo = null;
@@ -96,61 +96,14 @@ namespace CapaDao
                             lista.Add(modelo);
                         }
                     }
-                    if (reader.NextResult())
-                    {
-                        if (reader.HasRows)
-                        {
-                            if (reader.Read())
-                            {
-                                oMoneda = new MONEDA()
-                                {
-                                    ID_MONEDA = reader.GetString(reader.GetOrdinal("ID_MONEDA")),
-                                    NOM_MONEDA = reader.GetString(reader.GetOrdinal("NOM_MONEDA")),
-                                    SGN_MONEDA = reader.GetString(reader.GetOrdinal("SGN_MONEDA"))
-                                };
-                            }
-                            moneda = oMoneda;
-                        }
-                    }
                 }
                 reader.Close();
                 reader.Dispose();
             }
             return lista;
         }
-        
-        public List<UNIDAD_MEDIDA> listaUmPorFamilia(SqlConnection con, string idGrupo, string idFamilia)
-        {
-            List<UNIDAD_MEDIDA> lista = null;
-            UNIDAD_MEDIDA modelo = null;
-            using (SqlCommand cmd = new SqlCommand("PA_MANT_FAMILIA_UM", con))
-            {
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.Add("@ACCION", SqlDbType.VarChar, 3).Value = "GET";
-                cmd.Parameters.Add("@ID_GRUPO", SqlDbType.VarChar, 2).Value = idGrupo;
-                cmd.Parameters.Add("@ID_FAMILIA", SqlDbType.VarChar, 3).Value = idFamilia;
-                SqlDataReader reader = cmd.ExecuteReader();
-                if (reader != null)
-                {
-                    if (reader.HasRows)
-                    {
-                        lista = new List<UNIDAD_MEDIDA>();
-                        while (reader.Read())
-                        {
-                            modelo = new UNIDAD_MEDIDA();
-                            modelo.ID_UM = reader.GetString(reader.GetOrdinal("ID_UM"));
-                            modelo.NOM_UM = reader.GetString(reader.GetOrdinal("NOM_UM"));
-                            lista.Add(modelo);
-                        }
-                    }
-                }
-                reader.Close();
-                reader.Dispose();
-            }
-            return lista;
-        }
-        
-        public bool grabarArticulo(SqlConnection con, SqlTransaction trx, ARTICULO oModelo, ref string idArticulo, ref string xmlFotos, 
+
+        public bool Register(SqlConnection con, SqlTransaction trx, ARTICULO oModelo, ref string idArticulo, ref string jsonFotos,
             ref bool flgMismaFoto)
         {
             bool bExito;
@@ -181,9 +134,9 @@ namespace CapaDao
                 cmd.Parameters.Add("@ID_SUCURSAL", SqlDbType.VarChar, 2).Value = oModelo.ID_SUCURSAL;
                 cmd.Parameters.Add("@STOCK_MINIMO", SqlDbType.Decimal).Value = oModelo.STOCK_MINIMO == 0 ? (object)DBNull.Value : oModelo.STOCK_MINIMO;
                 cmd.Parameters.Add("@FLG_MISMA_FOTO", SqlDbType.Bit).Direction = ParameterDirection.Output;
-                cmd.Parameters.Add("@JSON_UM", SqlDbType.VarChar,-1).Value = string.IsNullOrEmpty(oModelo.JSON_UM) ? (object)DBNull.Value : oModelo.JSON_UM;
+                cmd.Parameters.Add("@JSON_UM", SqlDbType.VarChar, -1).Value = string.IsNullOrEmpty(oModelo.JSON_UM) ? (object)DBNull.Value : oModelo.JSON_UM;
                 cmd.Parameters.Add("@JSON_FOTOS", SqlDbType.VarChar, -1).Direction = ParameterDirection.Output;
-                cmd.Parameters.Add("@JSON_SUCURSAL", SqlDbType.VarChar,-1).Value = string.IsNullOrEmpty(oModelo.JSON_SUCURSAL) ? (object)DBNull.Value : oModelo.JSON_SUCURSAL;
+                cmd.Parameters.Add("@JSON_SUCURSAL", SqlDbType.VarChar, -1).Value = string.IsNullOrEmpty(oModelo.JSON_SUCURSAL) ? (object)DBNull.Value : oModelo.JSON_SUCURSAL;
                 cmd.Parameters.Add("@NOM_FOTO", SqlDbType.VarChar, 30).Value = string.IsNullOrEmpty(oModelo.NOM_FOTO) ? (object)DBNull.Value : oModelo.NOM_FOTO;
                 cmd.ExecuteNonQuery();
                 bExito = true;
@@ -194,14 +147,14 @@ namespace CapaDao
                 }
                 else if (oModelo.ACCION == "UPD")
                 {
-                    xmlFotos = cmd.Parameters["@JSON_FOTOS"].Value.ToString();
+                    jsonFotos = cmd.Parameters["@JSON_FOTOS"].Value.ToString();
                     flgMismaFoto = Convert.ToBoolean(cmd.Parameters["@FLG_MISMA_FOTO"].Value);
                 }
             }
             return bExito;
         }
 
-        public bool anularArticulo(SqlConnection con, SqlTransaction trx, string idArticulo, string idUsuario, ref string xmlFotos)
+        public bool Delete(SqlConnection con, SqlTransaction trx, string idArticulo, string idUsuario, ref string xmlFotos)
         {
             bool bExito;
             using (SqlCommand cmd = new SqlCommand("PA_MANT_ARTICULO", con, trx))
@@ -220,8 +173,8 @@ namespace CapaDao
             }
             return bExito;
         }
-        
-        public ARTICULO articuloPorCodigo(SqlConnection con, string idSucursal, string idArticulo)
+
+        public ARTICULO GetById(SqlConnection con, string idSucursal, string idArticulo)
         {
             ARTICULO modelo = null;
             List<ARTICULO_UM> listaArticuloUm = null;
@@ -273,7 +226,9 @@ namespace CapaDao
                                         FLG_PROMOCION = reader.GetBoolean(reader.GetOrdinal("FLG_PROMOCION")),
                                         DESCUENTO1 = reader.IsDBNull(reader.GetOrdinal("DESCUENTO1")) ? default(decimal) : reader.GetDecimal(reader.GetOrdinal("DESCUENTO1")),
                                         FEC_INICIO_PROMOCION = reader.IsDBNull(reader.GetOrdinal("FEC_INICIO_PROMOCION")) ? string.Empty : reader.GetString(reader.GetOrdinal("FEC_INICIO_PROMOCION")),
-                                        FEC_FINAL_PROMOCION = reader.IsDBNull(reader.GetOrdinal("FEC_FINAL_PROMOCION")) ? string.Empty : reader.GetString(reader.GetOrdinal("FEC_FINAL_PROMOCION"))
+                                        FEC_FINAL_PROMOCION = reader.IsDBNull(reader.GetOrdinal("FEC_FINAL_PROMOCION")) ? string.Empty : reader.GetString(reader.GetOrdinal("FEC_FINAL_PROMOCION")),
+                                        PRECIO_VENTA = reader.GetDecimal(reader.GetOrdinal("PRECIO_VENTA")),
+                                        PRECIO_VENTA_FINAL = reader.GetDecimal(reader.GetOrdinal("PRECIO_VENTA_FINAL"))
                                     });
                                 };
                                 modelo.listaArticuloUm = listaArticuloUm;

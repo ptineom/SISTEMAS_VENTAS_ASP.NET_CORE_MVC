@@ -2,7 +2,309 @@
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var listaDocumentos = (List<TipoDocumentosViewModel>)ViewBag.listaDocumentos;
+    var listaComprobantes = (List<TipoComprobanteViewModel>)ViewBag.listaComprobantes;
+    var listaMonedas = (List<MonedaViewModel>)ViewBag.listaMonedas;
+    var listaTipPag = (List<TipoPagoViewModel>)ViewBag.listaTipPag;
+    var listaTipConPag = (List<TipoCondicionPagoViewModel>)ViewBag.listaTipConPag;
+    var listaEstados = (List<EstadoViewModel>)ViewBag.listaEstados;
+    var tasIgv = Convert.ToInt32(ViewBag.TasIgv);
 }
 
-<h1>Compra</h1>
+<input type="hidden" id="hddIgv" value="@tasIgv" />
+<div class="row">
+    <div class="col-12 col-md-6 pe-1">
+        <div class="card rounded-0 ">
+            <div class="card-header bg-transparent py-1 fs-5">
+                <i class="bi bi-file-ruled align-text-bottom"></i> <span class="">Datos del comprobante</span>
+            </div>
+            <div class="card-body py-1 px-2">
+                <div class="row">
+                    <div class="col-12 col-sm-4 col-md-5 ">
+                        <label class="form-label mb-1">Tipo comprobante</label>
+                        <select class="form-select form-select-sm" id="cboTipCom" aria-label=".form-select-lg example">
+                            @if (listaComprobantes != null)
+                            {
+                                foreach (var item in listaComprobantes)
+                                {
+                                    <option value="@item.IdTipoComprobante" data-flgRendirSunat="@item.FlgRendirSunat">@item.NomTipoComprobante</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12 col-sm-4 col-md-3">
+                        <label class="form-label mb-1">Serie</label>
+                        <input class="form-control form-control-sm" id="txtSerie" type="text" autocomplete="off">
+                    </div>
+                    <div class="col-12 col-sm-4 col-md-4">
+                        <label class="form-label mb-1">Número</label>
+                        <input class="form-control form-control-sm" id="txtNumero" type="text" autocomplete="off">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-md-6 ">
+                        <label class="form-label mb-1">Fecha compra</label>
+                        <div class="input-group input-group-sm date">
+                            <span class="input-group-text" ><i class="bi bi-calendar-check"></i></span>
+                            <input type="text" class="form-control date-picker" id="txtFecEmi" data-date-format="dd/mm/yyyy">
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label mb-1">Fecha vencimiento</label>
+                        <div class="input-group input-group-sm date">
+                            <span class="input-group-text" ><i class="bi bi-calendar-check"></i></span>
+                            <input type="text" class="form-control date-picker" id="txtFecVen" data-date-format="dd/mm/yyyy">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 ps-0">
+        <div class="card rounded-0 " id="cardProveedor">
+            <div class="card-header bg-transparent py-1 fs-5">
+                <i class="bi bi-truck align-text-bottom"></i>  <span class="">Datos del proveedor</span>
+            </div>
+            <div class="card-body py-1 px-2">
+                <div class="row">
+                    <div class="col-12 col-sm-5 pe-1">
+                        <label class="form-label mb-1">Tipo documento</label>
+                        <select class="form-select form-select-sm" id="cboTipDoc">
+                            @if (listaDocumentos != null)
+                            {
+                                foreach (var item in listaDocumentos)
+                                {
+                                    <option value="@item.IdTipoDocumento" data-maxDigitos="@item.MaxDigitos" data-flgRuc="@item.FlgRuc">@item.Abreviatura</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12 col-sm-7 ps-1">
+                        <input type="hidden" id="hddIdPro" />
+                        <label class="form-label mb-1">N° documento</label>
+                        <div class="input-group input-group-sm ">
+                            <button class="btn btn-outline-primary" type="button" id="btnNuePro"><i class="bi bi-file-earmark-plus"></i></button>
+                            <input type="text" class="form-control " placeholder="" id="txtNumDoc" disabled autocomplete="off">
+                            <button class="btn btn-outline-success" type="button" id="btnBusPorNum" disabled><i class="bi bi-arrow-return-left"></i></button>
+                            <button class="btn btn-outline-secondary" type="button" id="btnConPro" ><i class="bi bi-binoculars-fill "></i></button>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label mb-1">Razón social</label>
+                        <input type="text" class="form-control form-control-sm " id="txtRazSoc" disabled>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-1">
+    <div class="col-12">
+        <div class="card rounded-0 shadow">
+            <div class="card-body py-1 px-2">
+                <div class="row">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label mb-1">Código de barra</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="bi bi-upc"></i></span>
+                            <input type="text" class="form-control" aria-label="Código de barra" id="txtCodBar" placeholder="Ingrese el código de barra">
+                            <button class="btn btn-outline-secondary" id="btnLimCodBar" style="display:none" type="button"><i class="bi bi-x"></i></button>
+                            <button class="btn btn-outline-secondary" id="btnBusPorCodBar" type="button"><i class="bi bi-arrow-return-left"></i></button>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4 d-flex align-items-end">
+                        <button type="button" class="btn btn-primary" id="btnAgrArt"><i class="bi bi-cart-plus-fill"></i> Agregar artículos [+]</button>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label mb-1">Moneda</label>
+                        <select class="form-select form-select-sm" disabled id="cboMoneda">
+                            @if (listaMonedas != null)
+                            {
+                                foreach (var item in listaMonedas)
+                                {
+                                    <option value="@item.IdMoneda" data-flgLocal="@item.FlgLocal" selected="@item.FlgLocal" data-sgnMoneda="@item.SgnMoneda">@item.NomMoneda</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-1 ">
+                        <label class="form-label mb-1">I.G.V.</label>
+                        <input type="text" class="form-control form-control-sm text-end" autocomplete="off" id="txtIgv" value="@tasIgv">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-1">
+    <div class="col-12">
+        <div class="card rounded-0 ">
+            <div class="card-header bg-transparent py-1 fs-6">
+                <i class="bi bi-cart-plus-fill align-text-bottom"></i> <span class="">Detalle de la venta</span>
+            </div>
+            <div class="card-body py-1 px-2">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-responsive">
+                            <table id="tblDetalle" class="table table-striped table-hover table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center">Cod.</th>
+                                        <th class="text-center" style="min-width:350px">Descripción</th>
+                                        <th class="text-center">U.M.</th>
+                                        <th class="text-center">Factor</th>
+                                        <th class="text-center">Precio(U.M.)</th>
+                                        <th class="text-center">Cantidad</th>
+                                        <th class="text-center">Dscto%</th>
+                                        <th class="text-center">Importe</th>
+                                        <th class="text-center"></th>
+                                        <th class="d-none"></th>
+                                    </tr>
+
+                                </thead>
+                                <tbody>
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-1">
+    <div class="col-12">
+        <div class="card rounded-0 ">
+            <div class="card-body py-1 px-2">
+                <div class="row">
+                    <div class="col-4">
+                        <div class="row">
+                            <div class="col-6">
+                                <label class="form-label mb-1">Tipo de pago</label>
+                                <select class="form-select form-select-sm" id="cboTipPag">
+                                    @if (listaTipPag != null)
+                                    {
+                                        foreach (var item in listaTipPag)
+                                        {
+                                            <option value="@item.IdTipoPago">@item.NomTipoPago</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label mb-1">Forma de pago</label>
+                                <select class="form-select form-select-sm" id="cboForPag">
+                                    @if (listaTipConPag != null)
+                                    {
+                                        foreach (var item in listaTipConPag)
+                                        {
+                                            <option value="@item.IdTipoCondicionPago" data-flgEvaluaCredito="@item.FlgEvaluaCredito">@item.NomTipoCondicionPago</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label mb-1">Observación</label>
+                                <textarea class="form-control" id="txtObservacion" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="row" id="panelAbono">
+                            <div class="col-12">
+                                <label class="form-label mb-1">Abono</label>
+                                <div class="input-group input-group-sm ">
+                                    <input class="form-control form-control-sm" disabled id="txtAbono" type="text">
+                                    <button class="btn btn-outline-secondary" type="button" id="btnEditarAbono"><i class="bi bi-pencil-fill"></i></button>
+                                </div>
+
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label mb-1">Saldo</label>
+                                <input class="form-control form-control-sm" id="txtSaldo" type="text" disabled>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-5">
+                        <div class="row">
+                            <div class="col-3">
+                                <label class="form-label mb-1 fw-bold title-totales">Sub total</label>
+                            </div>
+
+                            <div class="col-6 offset-3">
+                                <label class="totales mb-1" id="lblSubTot"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3">
+                                <label class="form-label mb-1 fw-bold title-totales">Dscto %</label>
+                            </div>
+                            <div class="col-3">
+                                <input type="number" class="form-control form-control-sm text-end" style="background-color: #cff4fc" min="0" max="100" step="5" id="txtTasDes" />
+                            </div>
+                            <div class="col-6">
+                                <label class="totales mb-1" id="lblTotDes"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3">
+                                <label class="form-label mb-1 fw-bold title-totales">I.G.V.(@tasIgv%)</label>
+                            </div>
+
+                            <div class="col-6 offset-3">
+                                <label class="totales mb-1" id="lblTotIgv"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3">
+                                <label class="form-label mb-1 fw-bold title-totales">Total</label>
+                            </div>
+                            <div class="col-3">
+
+                            </div>
+                            <div class="col-6">
+                                <label class="totales mb-1" id="lblTotal"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3">
+                                <label class="form-label mb-1 fw-bold title-totales">Redondeo</label>
+                            </div>
+                            <div class="col-3">
+                                <label class="totales mb-1" id="lblTotRed"></label>
+                            </div>
+                            <div class="col-6">
+                                <label class="totales mb-1" id="lblTotPag"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row mt-1">
+    <div class="col-12 text-end">
+        <button type="button" class="btn btn-primary" id="btnNuevo"><i class="bi bi-file-earmark-plus-fill"></i> Nuevo [F6]</button>
+        <button type="button" class="btn btn-success" id="btnPagar"><i class="bi bi-cash-stack"></i> Pagar [F7]</button>
+        <button type="button" class="btn btn-danger" id="btnAnular"><i class="bi bi-trash-fill"></i> Anular</button>
+        <button type="button" class="btn btn-info" id="btnBuscar"><i class="bi bi-search"></i> Buscar [F9]</button>
+        <button type="button" class="btn btn-secondary" id="btnImprimir"><i class="bi bi-printer"></i> Imprimir</button>
+    </div>
+</div>
+<partial name="~/Views/Partial/_ViewConsultarProveedor.cshtml"/>
+
+@section myScript{
+
+    <script src="~/js/compra.min.js"></script>
+    <script src="~/js/Modal/modalAbono.js"></script>
+    <script src="~/js/Modal/modalConsultarProveedor.js"></script>
+}
 

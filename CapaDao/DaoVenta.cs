@@ -41,7 +41,6 @@ namespace CapaDao
                                 ID_TIPO_DOCUMENTO = reader.GetInt32(reader.GetOrdinal("ID_TIPO_DOCUMENTO")),
                                 NOM_TIPO_DOCUMENTO = reader.GetString(reader.GetOrdinal("NOM_TIPO_DOCUMENTO")),
                                 ABREVIATURA = reader.GetString(reader.GetOrdinal("ABREVIATURA")),
-                                FLG_NO_NATURAL = reader.GetBoolean(reader.GetOrdinal("FLG_NO_NATURAL")),
                                 MAX_DIGITOS = reader.GetInt32(reader.GetOrdinal("MAX_DIGITOS")),
                             });
                         }
@@ -105,7 +104,7 @@ namespace CapaDao
                                 {
                                     ID_TIPO_CONDICION_PAGO = reader.GetString(reader.GetOrdinal("ID_TIPO_CONDICION_PAGO")),
                                     NOM_TIPO_CONDICION_PAGO = reader.GetString(reader.GetOrdinal("NOM_TIPO_CONDICION_PAGO")),
-                                    FLG_NO_EVALUA_CREDITO = reader.GetBoolean(reader.GetOrdinal("FLG_NO_EVALUA_CREDITO")),
+                                    FLG_EVALUA_CREDITO = reader.GetBoolean(reader.GetOrdinal("FLG_EVALUA_CREDITO")),
                                 });
                             }
                         }

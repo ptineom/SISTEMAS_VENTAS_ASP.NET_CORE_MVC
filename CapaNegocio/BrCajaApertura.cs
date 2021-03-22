@@ -28,11 +28,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var modelo = dao.cajaAbiertaXusuario(con, idSucursal,idCaja, idUsuario, correlativo);
-                    if (modelo != null)
-                    {
-                        oResultado.data = (Object)modelo;
-                    }
-                    oResultado.SetResultado(true, "");
+                
+                    oResultado.SetResultado(true, modelo);
                 }
                 catch (Exception ex)
                 {
@@ -51,11 +48,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var modelo = dao.totalCobranzaXcaja(con, idSucursal, idCaja, idUsuario, correlativo);
-                    if (modelo != null)
-                    {
-                        oResultado.data = (Object)modelo;
-                    }
-                    oResultado.SetResultado(true, "");
+               
+                    oResultado.SetResultado(true, modelo);
                 }
                 catch (Exception ex)
                 {
@@ -75,11 +69,8 @@ namespace CapaNegocio
                     con.Open();
                     trx = con.BeginTransaction();
                     var modelo = dao.grabarCajaApertura(con, trx, oModelo);
-                    if (modelo != null)
-                    {
-                        oResultado.data = (Object)modelo;
-                    }
-                    oResultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
+               
+                    oResultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk, modelo);
                     trx.Commit();
                 }
                 catch (Exception ex)
@@ -121,11 +112,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var modelo = dao.cajaXusuario(con, idSucursal, idUsuario);
-                    if (modelo != null)
-                    {
-                        oResultado.data = (object)modelo;
-                    }
-                    oResultado.SetResultado(true, "");
+                 
+                    oResultado.SetResultado(true, modelo);
                 }
                 catch (Exception ex)
                 {
@@ -164,11 +152,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var lista = dao.listaAperturasCajasXusuario(con, idSucursal, idUsuario, fecIni, fecFin);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                  
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
@@ -190,11 +175,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     COMBOS_REPORTE_CAJA_ARQUEO modelo = dao.combosReportesCajaArqueo(con, idSucursal);
-                    if (modelo != null)
-                    {
-                        oResultado.data = (object)modelo;
-                    }
-                    oResultado.SetResultado(true, "");
+                
+                    oResultado.SetResultado(true, modelo);
                 }
                 catch (Exception ex)
                 {
@@ -213,11 +195,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var lista = dao.listaArqueoCaja(con, idSucursal, fecIni, fecFin, idUsuario, idCaja);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista; //lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                  
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {

@@ -10,7 +10,7 @@ namespace CapaDao
 {
     public class DaoCompra
     {
-        public DOC_COMPRA combosCompras(SqlConnection con, string idSucursal, string idUsuario)
+        public DOC_COMPRA GetData(SqlConnection con, string idSucursal, string idUsuario)
         {
             DOC_COMPRA modelo = null;
             List<TIPO_DOCUMENTO> listaDocumentos = null;
@@ -19,9 +19,7 @@ namespace CapaDao
             List<TIPO_PAGO> listaTipPag = null;
             List<TIPO_CONDICION_PAGO> listaTipCon = null;
             List<ESTADO> listaEstados = null;
-
-            string idProveedor = string.Empty;
-            string nomProveedor = string.Empty;
+            decimal tasIgv = 0;
 
             using (SqlCommand cmd = new SqlCommand("PA_MANT_COMPRAS", con))
             {
@@ -42,7 +40,8 @@ namespace CapaDao
                                 ID_TIPO_DOCUMENTO = reader.GetInt32(reader.GetOrdinal("ID_TIPO_DOCUMENTO")),
                                 NOM_TIPO_DOCUMENTO = reader.GetString(reader.GetOrdinal("NOM_TIPO_DOCUMENTO")),
                                 ABREVIATURA = reader.GetString(reader.GetOrdinal("ABREVIATURA")),
-                                FLG_NO_NATURAL = reader.GetBoolean(reader.GetOrdinal("FLG_NO_NATURAL"))
+                                FLG_RUC = reader.GetBoolean(reader.GetOrdinal("FLG_RUC")),
+                                MAX_DIGITOS = reader.GetInt32(reader.GetOrdinal("MAX_DIGITOS")),
                             });
                         }
                     }
@@ -57,7 +56,6 @@ namespace CapaDao
                                 {
                                     ID_TIPO_COMPROBANTE = reader.GetString(reader.GetOrdinal("ID_TIPO_COMPROBANTE")),
                                     NOM_TIPO_COMPROBANTE = reader.GetString(reader.GetOrdinal("NOM_TIPO_COMPROBANTE")),
-                                    FLG_SIN_COMPROBANTE = reader.GetBoolean(reader.GetOrdinal("FLG_SIN_COMPROBANTE")),
                                     LETRA_INICIAL_SERIE_ELECTRONICA = reader.GetString(reader.GetOrdinal("LETRA_INICIAL_SERIE_ELECTRONICA")),
                                 });
                             }
@@ -106,23 +104,12 @@ namespace CapaDao
                                 {
                                     ID_TIPO_CONDICION_PAGO = reader.GetString(reader.GetOrdinal("ID_TIPO_CONDICION_PAGO")),
                                     NOM_TIPO_CONDICION_PAGO = reader.GetString(reader.GetOrdinal("NOM_TIPO_CONDICION_PAGO")),
-                                    FLG_NO_EVALUA_CREDITO = reader.GetBoolean(reader.GetOrdinal("FLG_NO_EVALUA_CREDITO"))
+                                    FLG_EVALUA_CREDITO = reader.GetBoolean(reader.GetOrdinal("FLG_EVALUA_CREDITO"))
                                 });
                             }
                         }
                     }
 
-                    if (reader.NextResult())
-                    {
-                        if (reader.HasRows)
-                        {
-                            if (reader.Read())
-                            {
-                                idProveedor = reader.GetString(reader.GetOrdinal("ID_PROVEEDOR"));
-                                nomProveedor = reader.GetString(reader.GetOrdinal("NOM_PROVEEDOR"));
-                            }
-                        }
-                    }
                     if (reader.NextResult())
                     {
                         if (reader.HasRows)
@@ -138,15 +125,25 @@ namespace CapaDao
                             }
                         }
                     }
+
+                    if (reader.NextResult())
+                    {
+                        if (reader.HasRows)
+                        {
+                            if (reader.Read()){
+                                tasIgv = reader.GetDecimal(reader.GetOrdinal("IGV"));
+                            }
+                        }
+                    }
+
                     modelo = new DOC_COMPRA();
                     modelo.listaDocumentos = listaDocumentos;
                     modelo.listaComprobantes = listaComprobantes;
                     modelo.listaMonedas = listaMonedas;
                     modelo.listaTipPag = listaTipPag;
                     modelo.listaTipCon = listaTipCon;
-                    modelo.ID_PROVEEDOR = idProveedor;
-                    modelo.NOM_PROVEEDOR = nomProveedor;
                     modelo.listaEstados = listaEstados;
+                    modelo.TAS_IGV = tasIgv;
                 }
                 reader.Close();
                 reader.Dispose();
@@ -154,7 +151,7 @@ namespace CapaDao
             return modelo;
         }
 
-        public bool grabarCompra(SqlConnection con, SqlTransaction trx, DOC_COMPRA oModelo, ref string nroSerie, ref string nroComprobante)
+        public bool Register(SqlConnection con, SqlTransaction trx, DOC_COMPRA oModelo, ref string nroSerie, ref string nroComprobante)
         {
             bool bExito;
             using (SqlCommand cmd = new SqlCommand("PA_MANT_COMPRAS", con, trx))
@@ -212,7 +209,7 @@ namespace CapaDao
             return bExito;
         }
 
-        public bool anularCompra(SqlConnection con, SqlTransaction trx, string idSucursal, string idTipoComprobante,
+        public bool Delete(SqlConnection con, SqlTransaction trx, string idSucursal, string idTipoComprobante,
     string nroSerie, int nroDocumento, string idProveedor, string idUsuario)
         {
             bool bExito;
@@ -233,7 +230,7 @@ namespace CapaDao
             return bExito;
         }
 
-        public List<DOC_COMPRA_LISTADO> listaCompras(SqlConnection con, string idSucursal, string idTipoComprobante,
+        public List<DOC_COMPRA_LISTADO> GetAllByFilters(SqlConnection con, string idSucursal, string idTipoComprobante,
             string nroSerie, int nroDocumento, string fechaInicio, string fechaFinal, int idEstado)
         {
             List<DOC_COMPRA_LISTADO> lista = null;
@@ -283,7 +280,7 @@ namespace CapaDao
             return lista;
         }
 
-        public DOC_COMPRA_INFORME compraPorCodigo(SqlConnection con, string idSucursal, string idTipoComprobante, string nroSerie,
+        public DOC_COMPRA_INFORME GetById(SqlConnection con, string idSucursal, string idTipoComprobante, string nroSerie,
             int nroDocumento, string idProveedor)
         {
             DOC_COMPRA_INFORME modelo = null;

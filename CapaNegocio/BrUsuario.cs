@@ -13,211 +13,208 @@ namespace CapaNegocio
 {
     public class BrUsuario
     {
-        DaoUsuario dao = null;
-        ResultadoOperacion oResultado = null;
-        public BrUsuario()
+        private DaoUsuario _dao = null;
+        private ResultadoOperacion _resultado = null;
+        private IConfiguration _configuration;
+        private Conexion _conexion = null;
+
+        public BrUsuario(IConfiguration configuration)
         {
-            dao = new DaoUsuario();
-            oResultado = new ResultadoOperacion();
+            _dao = new DaoUsuario();
+            _resultado = new ResultadoOperacion();
+            _configuration = configuration;
+            //Conexion BD.
+            _conexion = new Conexion(_configuration);
         }
-        public ResultadoOperacion acceder(string idUsuario, string clave, bool noValidar = false)
+        public ResultadoOperacion ValidateUser(string idUsuario, string clave, bool noValidar = false)
         {
             USUARIO modelo = null;
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
-                    modelo = dao.acceder(con, idUsuario, clave, noValidar);
-                    oResultado.SetResultado(true, "", modelo);
+                    modelo = _dao.ValidateUser(con, idUsuario, clave, noValidar);
+                    _resultado.SetResultado(true, "", modelo);
                 }
                 catch (Exception ex)
                 {
-                    oResultado.SetResultado(false, ex.Message);
+                    _resultado.SetResultado(false, ex.Message);
                     Elog.save(this, ex);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
         
-        public ResultadoOperacion listaUsuario()
+        public ResultadoOperacion GetAll()
         {
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
-                    var lista = dao.listaUsuario(con);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                    var lista = _dao.GetAll(con);
+
+                    _resultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
                     Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
+                    _resultado.SetResultado(false, ex.Message);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
-        public ResultadoOperacion grabarUsuario(USUARIO oModelo)
+        public ResultadoOperacion Register(USUARIO oModelo)
         {
             SqlTransaction trx = null;
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
                     trx = con.BeginTransaction();
-                    dao.grabarUsuario(con, trx, oModelo);
-                    oResultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
+                    _dao.Register(con, trx, oModelo);
+                    _resultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
                     trx.Commit();
                 }
                 catch (Exception ex)
                 {
-                    oResultado.SetResultado(false, ex.Message.ToString());
+                    _resultado.SetResultado(false, ex.Message.ToString());
                     trx.Rollback();
                     Elog.save(this, ex);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
-        public ResultadoOperacion anularUsuario(string idUsuario, string idUsuarioRegistro)
+        public ResultadoOperacion Delete(string idUsuario, string idUsuarioRegistro)
         {
             SqlTransaction trx = null;
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
                     trx = con.BeginTransaction();
-                    dao.anularUsuario(con, trx, idUsuario, idUsuarioRegistro);
-                    oResultado.SetResultado(true, Helper.Constantes.sMensajeEliminadoOk);
+                    _dao.Delete(con, trx, idUsuario, idUsuarioRegistro);
+                    _resultado.SetResultado(true, Helper.Constantes.sMensajeEliminadoOk);
                     trx.Commit();
                 }
                 catch (Exception ex)
                 {
-                    oResultado.SetResultado(false, ex.Message.ToString());
+                    _resultado.SetResultado(false, ex.Message.ToString());
                     trx.Rollback();
                     Elog.save(this, ex);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
-        public ResultadoOperacion obtenerUsuarioPorCodigo(string idUsuario)
+        public ResultadoOperacion GetById(string idUsuario)
         {
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
-                    USUARIO modelo = dao.obtenerUsuarioPorCodigo(con, idUsuario);
-                    if (modelo != null)
-                    {
-                        oResultado.data = modelo;
-                    }
-                    oResultado.SetResultado(true, "");
+                    USUARIO modelo = _dao.GetById(con, idUsuario);
+
+                    _resultado.SetResultado(true, modelo);
                 }
                 catch (Exception ex)
                 {
                     Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
+                    _resultado.SetResultado(false, ex.Message);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
-        public ResultadoOperacion usuariosActivos()
+        public ResultadoOperacion GetUsersActivated()
         {
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
-                    List<USUARIO> lista = dao.usuariosActivos(con);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                    List<USUARIO> lista = _dao.GetUsersActivated(con);
+
+                    _resultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
                     Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
+                    _resultado.SetResultado(false, ex.Message);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
 
-        public ResultadoOperacion cambiarContrasenia(USUARIO oModelo)
+        public ResultadoOperacion ChangePassword(USUARIO oModelo)
         {
             SqlTransaction trx = null;
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
                     trx = con.BeginTransaction();
-                    dao.cambiarContrasenia(con, trx, oModelo);
-                    oResultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
+                    _dao.ChangePassword(con, trx, oModelo);
+                    _resultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
                     trx.Commit();
                 }
                 catch (Exception ex)
                 {
-                    oResultado.SetResultado(false, ex.Message.ToString());
+                    _resultado.SetResultado(false, ex.Message.ToString());
                     trx.Rollback();
                     Elog.save(this, ex);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
 
-        public ResultadoOperacion guardarTokenRecuperacionPassword(USUARIO oModelo)
+        public ResultadoOperacion SaveTokenRecovererPassword(USUARIO oModelo)
         {
             SqlTransaction trx = null;
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
                     trx = con.BeginTransaction();
-                    dao.guardarTokenRecuperacionPassword(con, trx, oModelo);
-                    oResultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
+                    _dao.SaveTokenRecovererPassword(con, trx, oModelo);
+                    _resultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
                     trx.Commit();
                 }
                 catch (Exception ex)
                 {
-                    oResultado.SetResultado(false, ex.Message.ToString());
+                    _resultado.SetResultado(false, ex.Message.ToString());
                     trx.Rollback();
                     Elog.save(this, ex);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
 
-        public ResultadoOperacion recuperarContrasenia(USUARIO oModelo)
+        public ResultadoOperacion RecoverPassowrd(USUARIO oModelo)
         {
             SqlTransaction trx = null;
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
                     trx = con.BeginTransaction();
-                    dao.recuperarContrasenia(con, trx, oModelo);
-                    oResultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
+                    _dao.RecoverPassowrd(con, trx, oModelo);
+                    _resultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
                     trx.Commit();
                 }
                 catch (Exception ex)
                 {
-                    oResultado.SetResultado(false, ex.Message.ToString());
+                    _resultado.SetResultado(false, ex.Message.ToString());
                     trx.Rollback();
                     Elog.save(this, ex);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
 
     }

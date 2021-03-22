@@ -6,9 +6,9 @@ namespace CapaNegocio
 {
     public interface IResultadoOperacion
     {
-        bool bResultado { get; set; }
-        string sMensaje { get; set; }
-        object data { get; set; }
+        bool Resultado { get; set; }
+        string Mensaje { get; set; }
+        object Data { get; set; }
 
         void SetResultado(bool resultado, string mensaje);
         void SetResultado(bool resultado, string mensaje, object modelo);

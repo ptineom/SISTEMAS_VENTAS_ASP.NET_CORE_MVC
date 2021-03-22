@@ -30,45 +30,49 @@ a, a:hover, a:focus {
     transition: all 0.3s;
 }
 
-    #sidebar.active {
-        /* margin-left: -250px;*/
-        width: 56px;
-    }
+#sidebar.active {
+    /* margin-left: -250px;*/
+    width: 56px;
+}
 
-    #sidebar.active ul li > a span.menu-label {
-        display: none;
-    }
+#sidebar.active ul li > a span.menu-label {
+    display: none;
+}
 
-        #sidebar.active li:first-of-type span, #sidebar.active li:first-of-type button {
-            display: none !important;
-        }
+#sidebar.active li:first-of-type span, #sidebar.active li:first-of-type button {
+    display: none !important;
+}
 
-        #sidebar .sidebar-header {
-            background: #367fa9;
-            height: 55px;
-        }
+#sidebar.active #sidebar-menu .dropdown-toggle::after{
+    border:0px;
+}
 
-    #sidebar ul li a {
-        padding: 10px;
-        display: block;
-    }
+#sidebar .sidebar-header {
+    background: #367fa9;
+    height: 51px;
+}
 
-        #sidebar ul li a:hover {
-            background: #333D42;
-        }
+#sidebar ul li a {
+    padding: 10px;
+    display: block;
+}
 
-    #sidebar ul li.active > a {
-        color: #3c8dbc
-    }
+#sidebar ul li a:hover {
+    background: #333D42;
+}
+
+#sidebar ul li.active > a {
+    color: #3c8dbc
+}
 
 #sidebar-menu > li {
     border-bottom: 1px solid #1a2226;
 }
 
-    #sidebar-menu > li > .treeview-menu {
-        margin: 0 1px;
-        background: #2c3b41;
-    }
+#sidebar-menu > li > .treeview-menu {
+    margin: 0 1px;
+    background: #2c3b41;
+}
 
 .treeview-menu > li > a {
     padding: 5px 5px 5px 15px !important;
@@ -110,18 +114,18 @@ ul ul a {
     padding-right: 0px !important;
 }
 
-    #content > nav {
-        background-color: #3C8DBC;
-        /* position: fixed;
-    left:250px;
-    right: 0px;
-    z-index: 5000; */
-    }
+#content > nav {
+    background-color: #3C8DBC;
+    /* position: fixed;
+left:250px;
+right: 0px;
+z-index: 5000; */
+}
 
-    #content.active {
-        /*   width: 100%;*/
-        width: calc(100% - 56px);
-    }
+#content.active {
+    /*   width: 100%;*/
+    width: calc(100% - 56px);
+}
 
 /* ---------------------------------------------------
     LOGGOUT
@@ -132,16 +136,16 @@ ul ul a {
 }
 
 .nav-user-photo {
-    border: 2px solid #FFF;
     max-width: 40px;
     position: relative;
-    top: 0.5rem;
+    top: 0.1rem;
 }
 
 #user-info-panel {
     right: 0px;
-    top: 57px;
+    top: 53px;
     width: 280px;
+    z-index:999;
 }
 
 /* ---------------------------------------------------
@@ -161,14 +165,19 @@ ul ul a {
 
 @media (max-width: 768px) {
     #sidebar {
-        margin-left: -250px;
+        width: 250px;
     }
 
-        #sidebar.active {
-            margin-left: 0;
-        }
+    #sidebar.active {
+        width:0;
+    }
 
     #content {
-        width: 100%;
+        width: calc(100%);
+    }
+
+
+    #content.active {
+           width: 100%;
     }
 }

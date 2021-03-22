@@ -26,11 +26,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var lista = dao.listaGrupos(con);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                 
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
@@ -48,11 +45,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var lista = dao.cboGrupos(con);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+                  
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {

@@ -27,11 +27,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var modelo = dao.cboIngresoEgresoCaja(con, movimiento, idSucursal, idUsuario);
-                    if (modelo != null)
-                    {
-                        oResultado.data = (Object)modelo;
-                    }
-                    oResultado.SetResultado(true, "");
+                
+                    oResultado.SetResultado(true, modelo);
                 }
                 catch (Exception ex)
                 {
@@ -50,11 +47,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var lista = dao.listaIngresoEgresoCaja(con, idSucursal, idTipoMovimiento, fecIni, fecFin);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+               
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
@@ -120,11 +114,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var modelo = dao.cboReporteIngresoEgresoCaja(con, movimiento, idSucursal);
-                    if (modelo != null)
-                    {
-                        oResultado.data = modelo;// (Object)modelo;
-                    }
-                    oResultado.SetResultado(true, "");
+                 
+                    oResultado.SetResultado(true, modelo);
                 }
                 catch (Exception ex)
                 {
@@ -144,11 +135,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var lista = dao.reporteIngresoEgresoCaja(con, idSucursal,movimiento, cadenaIdConceptoIE, fecIni, fecFin);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;// lista.ToList<Object>();
-                    }
-                    oResultado.SetResultado(true, "");
+               
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {

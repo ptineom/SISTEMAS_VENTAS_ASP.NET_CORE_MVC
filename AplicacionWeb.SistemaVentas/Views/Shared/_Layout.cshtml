@@ -3,18 +3,20 @@
 @using Microsoft.AspNetCore.Http;
 @using Helper;
 @using AplicacionWeb.SistemaVentas.Models.Seguridad;
+@using Microsoft.Extensions.Configuration;
 
 @inject IWebHostEnvironment enviroment
 @inject IHttpContextAccessor  accessor
+@inject IConfiguration configuration
 
 @{
-    UsuarioLogueadoViewModel usuarioActual = new Session(accessor, enviroment).obtenerUsuarioLogueado();
-    MenuItem menu = new Menu().obtenerMenuPorUsuario(usuarioActual.idUsuario);
+    UsuarioLogueadoViewModel usuarioActual = new Session(accessor, enviroment).GetUserLoggedFull();
+    MenuItem menu = new Menu(configuration).GetMenuByUserId(usuarioActual.IdUsuario);
 
     object modeloSidebarMenu = new
     {
-        usuarioActual = usuarioActual,
-        menu = menu
+        UsuarioActual = usuarioActual,
+        Menu = menu
     };
 }
 
@@ -25,11 +27,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - AplicacionWeb.SistemaVentas</title>
 
-    <!-- Scrollbar Custom CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="~/icons/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
-    <link href="~/css/layout.css" rel="stylesheet" />
+    <link href="~/lib/jquery-mCustomScrollbar/dis/css/jquery.mCustomScrollbar.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/icons/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="~/lib/dataTables-bootstrap5/dist/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+    <link href="~/css/site.bundle.min.css" rel="stylesheet" asp-append-version="true" />
 
 </head>
 <body>
@@ -48,7 +51,7 @@
                     <i class="bi bi-menu-button-wide"></i>
                 </button>
 
-                <span class="navbar-brand mx-3 text-white d-none d-md-block">Sistema de ventas</span>
+                <span class="navbar-brand mx-3 text-white d-none d-lg-block">Sistema de ventas</span>
 
                 <ul class="navbar-nav flex-row flex-wrap ms-md-auto " id="ul-session">
                     <partial name="~/Views/Shared/_Notification.cshtml" />
@@ -57,7 +60,7 @@
                 <!-- <a class="btn btn-success d-lg-inline-block my-2 my-md-0 ms-md-3" href="#">Download</a> -->
             </div>
         </nav>
-        
+
         <partial name="~/Views/Shared/_Breadcrumb.cshtml" />
 
         <main role="main" class="px-2 pt-1 ">
@@ -70,18 +73,25 @@
         </footer>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/dataTables-bootstrap5/dist/js/jquery.dataTables.min.js"></script>
+    <script src="~/lib/dataTables-bootstrap5/dist/js/dataTables.bootstrap5.min.js"></script>
+    <script src="~/lib/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+    <script src="~/lib/bootstrap-datepicker/locales/bootstrap-datepicker.es.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/lib/jquery-mCustomScrollbar/dis/js/jquery.mCustomScrollbar.concat.min.js"></script>
+    <script src="~/lib/axios.min.js"></script>
+    <script src="~/lib/decimal.min.js"></script>
+    <script src="~/lib/moment.min.js"></script>
+    <script src="~/js/utilitarios/utils.bundle.min.js" asp-append-version="true"></script>
+    <script src="~/js/main.min.js" asp-append-version="true"></script>
 
-    <script src="~/lib/jquery/dist/jquery.js"></script>
-    <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
-    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
-    <!-- jQuery Custom Scroller CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
-
-    <script src="~/lib/axios.js"></script>
-    <script src="~/js/main.js"></script>
-    @*<script src="~/js/site.js" asp-append-version="true"></script>*@
-    @await RenderSectionAsync("Scripts", required: false)
+    @*@await RenderSectionAsync("Scripts", required: false)*@
+    @if (IsSectionDefined("myScript"))
+    {
+        @RenderSection("myScript", false);
+    }
 </body>
 </html>

@@ -10,7 +10,7 @@ namespace CapaDao
 {
     public class DaoProveedor
     {
-        public List<PROVEEDOR> listaProveedores(SqlConnection con, string tipoFiltro, string filtro, bool flgConInactivos )
+        public List<PROVEEDOR> GetAllByFilters(SqlConnection con, string tipoFiltro, string filtro, bool flgConInactivos )
         {
             List<PROVEEDOR> lista = null;
             PROVEEDOR modelo = null;
@@ -50,7 +50,7 @@ namespace CapaDao
             return lista;
         }
 
-        public PROVEEDOR proveedorPorCodigo(SqlConnection con, string idProveedor)
+        public PROVEEDOR GetById(SqlConnection con, string idProveedor)
         {
             PROVEEDOR modelo = null;
             using (SqlCommand cmd = new SqlCommand("PA_MANT_PROVEEDOR", con))
@@ -86,7 +86,7 @@ namespace CapaDao
             return modelo;
         }
 
-        public bool grabarProveedor(SqlConnection con, SqlTransaction trx, PROVEEDOR oModelo)
+        public bool Register(SqlConnection con, SqlTransaction trx, PROVEEDOR oModelo)
         {
             bool bExito;
             using (SqlCommand cmd = new SqlCommand("PA_MANT_PROVEEDOR", con, trx))
@@ -112,7 +112,7 @@ namespace CapaDao
             return bExito;
         }
 
-        public bool anularProveedor(SqlConnection con, SqlTransaction trx, string idProveedor, string idUsuario)
+        public bool Delete(SqlConnection con, SqlTransaction trx, string idProveedor, string idUsuario)
         {
             bool bExito;
             using (SqlCommand cmd = new SqlCommand("PA_MANT_PROVEEDOR", con, trx))
@@ -127,7 +127,7 @@ namespace CapaDao
             }
             return bExito;
         }
-        public PROVEEDOR proveedorPorDocumento(SqlConnection con, int idTipoDocumento, string nroDocumento)
+        public PROVEEDOR GetByDocument(SqlConnection con, int idTipoDocumento, string nroDocumento)
         {
             PROVEEDOR modelo = null;
             using (SqlCommand cmd = new SqlCommand("PA_MANT_PROVEEDOR", con))

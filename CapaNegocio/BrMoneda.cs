@@ -27,11 +27,8 @@ namespace CapaNegocio
                 {
                     con.Open();
                     var lista = dao.listaMonedas(con);
-                    if (lista != null)
-                    {
-                        oResultado.data = lista;
-                    }
-                    oResultado.SetResultado(true, "", lista);
+                  
+                    oResultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
