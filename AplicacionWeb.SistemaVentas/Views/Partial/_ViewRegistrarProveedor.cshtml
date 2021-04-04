@@ -1,0 +1,96 @@
+﻿@using AplicacionWeb.SistemaVentas.Extensiones
+@using AplicacionWeb.SistemaVentas.Models.Request
+@using AplicacionWeb.SistemaVentas.Models.ViewModel
+
+@model ProveedorRequest
+@{
+    var listaDepartamento = (List<DepartamentoModel>)ViewData["listaDepartamento"];
+    var listaTipoDocumento = (List<TipoDocumentoModel>)ViewData["listaTipoDocumento"];
+}
+
+<div class="modal fade" id="modalRegistrarProveedor" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title fs-6"><i class="bi bi-truck "></i> Registro de proveedores</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-3 pt-2">
+                <form id="form-proveedor">
+                    <div class="row">
+                        <div class="col-12 col-sm-5">
+                            <label class="form-label mb-1" asp-for="IdTipoDocumento">Tipo documento</label>
+                            <select class="form-select form-select-sm" id="cboTipDocRegProv" asp-for="IdTipoDocumento">
+                                @if (listaTipoDocumento != null)
+                                {
+                                    foreach (var item in listaTipoDocumento)
+                                    {
+                                        <option value="@item.IdTipoDocumento" data-max-digitos="@item.MaxDigitos" data-flgRuc="@item.FlgRuc">@item.Abreviatura</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="IdTipoDocumento" class="text-danger"></span>
+                        </div>
+                        <div class="col-12 col-sm-7">
+                            <label asp-for="NroDocumento" class="form-label mb-1">N° documento</label>
+                            <input asp-for="NroDocumento" type="text" class="form-control form-control-sm" placeholder="" id="txtNumDocRegProv" autocomplete="off">
+                            <span asp-validation-for="NroDocumento" class="text-danger"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="RazonSocial" class="form-label mb-1">Razón social</label>
+                            <input asp-for="RazonSocial" type="text" class="form-control form-control-sm text-uppercase" id="txtRazSocRegProv">
+                            <span asp-validation-for="RazonSocial" class="text-danger"></span>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label mb-1">Contacto</label>
+                            <input type="text" class="form-control form-control-sm text-uppercase" id="txtConRegProv">
+                        </div>
+                        <div class="col-8">
+                            <label class="form-label mb-1">Email</label>
+                            <input type="text" class="form-control form-control-sm " id="txtEmaRegProv">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label mb-1">Teléfono</label>
+                            <input type="text" class="form-control form-control-sm " id="txtTelRegProv">
+                        </div>
+                        <div class="col-12 col-sm-4">
+                            <label class="form-label mb-1">Departamento</label>
+                            <select class="form-select form-select-sm" id="cboDepRegProv">
+                                @if (listaDepartamento != null)
+                                {
+                                    foreach (var item in listaDepartamento)
+                                    {
+                                        <option value="@item.IdDepartamento">@item.NomDepartamento</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-12 col-sm-4">
+                            <label class="form-label mb-1" asp-for="IdProvincia">Provincia</label>
+                            <select class="form-select form-select-sm" id="cboProRegProv" asp-for="IdProvincia">
+                                <option value="">---Seleccione---</option>
+                            </select>
+                            <span asp-validation-for="IdProvincia" class="text-danger"></span>
+                        </div>
+                        <div class="col-12 col-sm-4">
+                            <label class="form-label mb-1" asp-for="IdDistrito">Distrito</label>
+                            <select class="form-select form-select-sm" id="cboDisRegProv" asp-for="IdDistrito">
+                                <option value="">---Seleccione---</option>
+                            </select>
+                            <span asp-validation-for="IdDistrito" class="text-danger"></span>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label mb-1" asp-for="Direccion">Dirección</label>
+                            <input type="text" class="form-control form-control-sm " id="txtDirRegProv" asp-for="Direccion">
+                            <span asp-validation-for="Direccion" class="text-danger"></span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer py-1">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="bi bi-box-arrow-left"></i> Salir</button>
+                <button type="button" class="btn btn-success" id="btnGuardarProveedor"><i class="bi bi-save2"></i> Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>

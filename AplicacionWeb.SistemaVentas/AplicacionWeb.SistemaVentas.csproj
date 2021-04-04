@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <None Include="wwwroot\js\Modal\modalAbono.min.js" />
+    <None Include="wwwroot\js\movie.js" />
   </ItemGroup>
 
   <ItemGroup>

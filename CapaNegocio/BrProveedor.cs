@@ -67,7 +67,7 @@ namespace CapaNegocio
                     con.Open();
                     trx = con.BeginTransaction();
                     _dao.Register(con, trx, oModelo);
-                    _resultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
+                    _resultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk, oModelo.ID_PROVEEDOR.ToString());
                     trx.Commit();
                 }
                 catch (Exception ex)

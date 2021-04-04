@@ -3,10 +3,12 @@ var oModalAbono = {
     init: function () {
 
     },
+    seleccionado: false,
     resolve: null,
     reject: null,
     fechaEmision: '',
     show: function (modelo, flgEditar) {
+        //flgEditar: true => Edición del monto ya ingresado.
         let sgnMoneda = modelo.total.split(' ')[0];
         let abono = modelo.abono == 0 ? '' : modelo.abono;
         let saldo = modelo.saldo == 0 ? '' : oHelper.formatoMoneda(sgnMoneda, modelo.saldo, 2);
@@ -66,7 +68,11 @@ var oModalAbono = {
             document.getElementById('txtAbonoModalAbono').focus();
         });
         modal.addEventListener('hidden.bs.modal', function () {
-            oModalAbono.reject(flgEditar);
+            //Si no se dio click en el boton guardar cambios.
+            if (!oModalAbono.seleccionado)
+                oModalAbono.reject(flgEditar);
+
+            //Destruimos el modal.
             main.removeChild(modal);
         });
 
@@ -77,7 +83,7 @@ var oModalAbono = {
                     saldo: parseFloat(oHelper.numeroSinMiles(document.getElementById('txtSaldoModalAbono').value).split(' ')[1]),
                     fechaCancelacion: document.getElementById('txtFechaModalAbono').value
                 });
-
+                oModalAbono.seleccionado = true;
                 myModal.hide();
             }
         });
@@ -111,11 +117,11 @@ var oModalAbono = {
     },
     validaciones: function () {
         $.validator.addMethod("notEmptyAndZero", function (value, element) {
-            if (value == 0) {
+            if (value == 0) 
                 return false;
-            } else {
+            else
                 return true;
-            }
+
         }, "Debe de ingresar el monto a abonar.");
 
         $.validator.addMethod("notLessDateCurrent", function (value, element) {

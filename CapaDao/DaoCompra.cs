@@ -13,12 +13,13 @@ namespace CapaDao
         public DOC_COMPRA GetData(SqlConnection con, string idSucursal, string idUsuario)
         {
             DOC_COMPRA modelo = null;
-            List<TIPO_DOCUMENTO> listaDocumentos = null;
-            List<TIPO_COMPROBANTE> listaComprobantes = null;
-            List<MONEDA> listaMonedas = null;
+            List<TIPO_DOCUMENTO> listaDocumento = null;
+            List<TIPO_COMPROBANTE> listaComprobante = null;
+            List<MONEDA> listaMoneda = null;
             List<TIPO_PAGO> listaTipPag = null;
             List<TIPO_CONDICION_PAGO> listaTipCon = null;
-            List<ESTADO> listaEstados = null;
+            List<ESTADO> listaEstado = null;
+            List<UBIGEO> listaDepartamento = null;
             decimal tasIgv = 0;
 
             using (SqlCommand cmd = new SqlCommand("PA_MANT_COMPRAS", con))
@@ -32,10 +33,10 @@ namespace CapaDao
                 {
                     if (reader.HasRows)
                     {
-                        listaDocumentos = new List<TIPO_DOCUMENTO>();
+                        listaDocumento = new List<TIPO_DOCUMENTO>();
                         while (reader.Read())
                         {
-                            listaDocumentos.Add(new TIPO_DOCUMENTO()
+                            listaDocumento.Add(new TIPO_DOCUMENTO()
                             {
                                 ID_TIPO_DOCUMENTO = reader.GetInt32(reader.GetOrdinal("ID_TIPO_DOCUMENTO")),
                                 NOM_TIPO_DOCUMENTO = reader.GetString(reader.GetOrdinal("NOM_TIPO_DOCUMENTO")),
@@ -49,10 +50,10 @@ namespace CapaDao
                     {
                         if (reader.HasRows)
                         {
-                            listaComprobantes = new List<TIPO_COMPROBANTE>();
+                            listaComprobante = new List<TIPO_COMPROBANTE>();
                             while (reader.Read())
                             {
-                                listaComprobantes.Add(new TIPO_COMPROBANTE()
+                                listaComprobante.Add(new TIPO_COMPROBANTE()
                                 {
                                     ID_TIPO_COMPROBANTE = reader.GetString(reader.GetOrdinal("ID_TIPO_COMPROBANTE")),
                                     NOM_TIPO_COMPROBANTE = reader.GetString(reader.GetOrdinal("NOM_TIPO_COMPROBANTE")),
@@ -65,10 +66,10 @@ namespace CapaDao
                     {
                         if (reader.HasRows)
                         {
-                            listaMonedas = new List<MONEDA>();
+                            listaMoneda = new List<MONEDA>();
                             while (reader.Read())
                             {
-                                listaMonedas.Add(new MONEDA()
+                                listaMoneda.Add(new MONEDA()
                                 {
                                     ID_MONEDA = reader.GetString(reader.GetOrdinal("ID_MONEDA")),
                                     NOM_MONEDA = reader.GetString(reader.GetOrdinal("NOM_MONEDA")),
@@ -114,13 +115,29 @@ namespace CapaDao
                     {
                         if (reader.HasRows)
                         {
-                            listaEstados = new List<ESTADO>();
+                            listaEstado = new List<ESTADO>();
                             while (reader.Read())
                             {
-                                listaEstados.Add(new ESTADO()
+                                listaEstado.Add(new ESTADO()
                                 {
                                     ID_ESTADO = reader.GetInt32(reader.GetOrdinal("ID_ESTADO")),
                                     NOM_ESTADO = reader.GetString(reader.GetOrdinal("NOM_ESTADO"))
+                                });
+                            }
+                        }
+                    }
+
+                    if (reader.NextResult())
+                    {
+                        if (reader.HasRows)
+                        {
+                            listaDepartamento = new List<UBIGEO>();
+                            while (reader.Read())
+                            {
+                                listaDepartamento.Add(new UBIGEO()
+                                {
+                                    ID_UBIGEO = reader.GetString(reader.GetOrdinal("ID_UBIGEO")),
+                                    UBIGEO_DEPARTAMENTO = reader.GetString(reader.GetOrdinal("UBIGEO_DEPARTAMENTO"))
                                 });
                             }
                         }
@@ -137,12 +154,13 @@ namespace CapaDao
                     }
 
                     modelo = new DOC_COMPRA();
-                    modelo.listaDocumentos = listaDocumentos;
-                    modelo.listaComprobantes = listaComprobantes;
-                    modelo.listaMonedas = listaMonedas;
+                    modelo.listaDocumentos = listaDocumento;
+                    modelo.listaComprobantes = listaComprobante;
+                    modelo.listaMonedas = listaMoneda;
                     modelo.listaTipPag = listaTipPag;
                     modelo.listaTipCon = listaTipCon;
-                    modelo.listaEstados = listaEstados;
+                    modelo.listaEstados = listaEstado;
+                    modelo.listaDepartamentos = listaDepartamento;
                     modelo.TAS_IGV = tasIgv;
                 }
                 reader.Close();
@@ -151,7 +169,7 @@ namespace CapaDao
             return modelo;
         }
 
-        public bool Register(SqlConnection con, SqlTransaction trx, DOC_COMPRA oModelo, ref string nroSerie, ref string nroComprobante)
+        public bool Register(SqlConnection con, SqlTransaction trx, DOC_COMPRA oModelo)
         {
             bool bExito;
             using (SqlCommand cmd = new SqlCommand("PA_MANT_COMPRAS", con, trx))
@@ -161,16 +179,8 @@ namespace CapaDao
                 cmd.Parameters.Add("@ACCION", SqlDbType.VarChar, 3).Value = oModelo.ACCION;
                 cmd.Parameters.Add("@ID_SUCURSAL", SqlDbType.VarChar, 2).Value = oModelo.ID_SUCURSAL;
                 cmd.Parameters.Add("@ID_TIPO_COMPROBANTE", SqlDbType.VarChar, 2).Value = oModelo.ID_TIPO_COMPROBANTE;
-                //
-                SqlParameter paramNroSerie = new SqlParameter("@NRO_SERIE", SqlDbType.VarChar,6);
-                paramNroSerie.Direction = ParameterDirection.InputOutput;
-                paramNroSerie.Value = string.IsNullOrEmpty(oModelo.NRO_SERIE) ? (object)DBNull.Value : oModelo.NRO_SERIE;
-                cmd.Parameters.Add(paramNroSerie);
-                SqlParameter paramNroDocumento = new SqlParameter("@NRO_DOCUMENTO", SqlDbType.Int);
-                paramNroDocumento.Direction = ParameterDirection.InputOutput;
-                paramNroDocumento.Value = oModelo.NRO_DOCUMENTO == 0 ? (object)DBNull.Value : oModelo.NRO_DOCUMENTO;
-                cmd.Parameters.Add(paramNroDocumento);
-                //
+                cmd.Parameters.Add("@NRO_SERIE", SqlDbType.VarChar, 6).Value = oModelo.NRO_SERIE;
+                cmd.Parameters.Add("@NRO_DOCUMENTO", SqlDbType.Int).Value = oModelo.NRO_DOCUMENTO;
                 cmd.Parameters.Add("@ID_PROVEEDOR", SqlDbType.VarChar, 8).Value = oModelo.ID_PROVEEDOR;
                 cmd.Parameters.Add("@ID_MONEDA", SqlDbType.VarChar, 3).Value = oModelo.ID_MONEDA;
                 cmd.Parameters.Add("@FEC_DOCUMENTO", SqlDbType.DateTime).Value = oModelo.FEC_DOCUMENTO;
@@ -184,27 +194,20 @@ namespace CapaDao
                 cmd.Parameters.Add("@ID_USUARIO_REGISTRO", SqlDbType.VarChar, 20).Value = oModelo.ID_USUARIO_REGISTRO;
                 cmd.Parameters.Add("@ID_TIPO_PAGO", SqlDbType.VarChar, 3).Value = oModelo.ID_TIPO_PAGO == "-1" ? (object)DBNull.Value : oModelo.ID_TIPO_PAGO;
                 cmd.Parameters.Add("@ID_TIPO_CONDICION_PAGO", SqlDbType.VarChar, 2).Value = oModelo.ID_TIPO_CONDICION_PAGO == "-1" ? (object)DBNull.Value : oModelo.ID_TIPO_CONDICION_PAGO;
-                cmd.Parameters.Add("@XML_ARTICULOS", SqlDbType.Xml).Value = oModelo.CADENA_ARTICULOS;
-                cmd.Parameters.Add("@FLG_SIN_COSTO", SqlDbType.Bit).Value = oModelo.FLG_SIN_COSTO;
-                //
+                cmd.Parameters.Add("@JSON_ARTICULOS", SqlDbType.VarChar,-1).Value = oModelo.JSON_ARTICULOS;
                 cmd.Parameters.Add("@ABONO", SqlDbType.Decimal).Value = oModelo.ABONO == 0 ? (object)DBNull.Value : oModelo.ABONO;
                 cmd.Parameters.Add("@SALDO", SqlDbType.Decimal).Value = oModelo.SALDO == 0 ? (object)DBNull.Value : oModelo.SALDO;
                 cmd.Parameters.Add("@FECHA_CANCELACION", SqlDbType.DateTime).Value = oModelo.FECHA_CANCELACION == "" ? (object)DBNull.Value : oModelo.FECHA_CANCELACION;
-
                 cmd.Parameters.Add("@FLG_RETIRAR_CAJA", SqlDbType.Bit).Value = oModelo.FLG_RETIRAR_CAJA;
                 cmd.Parameters.Add("@MONTO_RETIRA_CAJA", SqlDbType.Decimal).Value = oModelo.MONTO_RETIRA_CAJA == 0 ? (object)DBNull.Value : oModelo.MONTO_RETIRA_CAJA;
                 cmd.Parameters.Add("@ID_CAJA_CA", SqlDbType.VarChar, 2).Value = string.IsNullOrEmpty(oModelo.ID_CAJA_CA) ? (object)DBNull.Value : oModelo.ID_CAJA_CA;
                 cmd.Parameters.Add("@ID_USUARIO_CA", SqlDbType.VarChar, 20).Value = string.IsNullOrEmpty(oModelo.ID_USUARIO_CA) ? (object)DBNull.Value : oModelo.ID_USUARIO_CA;
                 cmd.Parameters.Add("@CORRELATIVO_CA", SqlDbType.Int).Value = oModelo.CORRELATIVO_CA == 0 ? (object)DBNull.Value : oModelo.CORRELATIVO_CA;
-                cmd.Parameters.Add("@FLG_SIN_COMPROBANTE", SqlDbType.Bit).Value = oModelo.FLG_SIN_COMPROBANTE;
+
                 
                 cmd.ExecuteNonQuery();
                 bExito = true;
-                if (oModelo.ACCION == "INS" && (oModelo.FLG_SIN_COMPROBANTE))
-                {
-                    nroSerie = cmd.Parameters["@NRO_SERIE"].Value.ToString();
-                    nroComprobante = cmd.Parameters["@NRO_DOCUMENTO"].Value.ToString();
-                }
+
             }
             return bExito;
         }
@@ -261,8 +264,7 @@ namespace CapaDao
                             modelo.TOT_COMPRA = reader.GetDecimal(reader.GetOrdinal("TOT_COMPRA"));
                             modelo.FEC_DOCUMENTO = reader.GetString(reader.GetOrdinal("FEC_DOCUMENTO"));
                             modelo.SGN_MONEDA = reader.GetString(reader.GetOrdinal("SGN_MONEDA"));
-                            modelo.FLG_SIN_COSTO = reader.GetBoolean(reader.GetOrdinal("FLG_SIN_COSTO"));
-                            modelo.ID_TIPO_COMPROBANTE = reader.GetString(reader.GetOrdinal("ID_TIPO_COMPROBANTE"));
+                             modelo.ID_TIPO_COMPROBANTE = reader.GetString(reader.GetOrdinal("ID_TIPO_COMPROBANTE"));
                             modelo.NRO_SERIE = reader.GetString(reader.GetOrdinal("NRO_SERIE"));
                             modelo.NRO_DOCUMENTO = reader.GetInt32(reader.GetOrdinal("NRO_DOCUMENTO"));
                             modelo.ID_PROVEEDOR = reader.GetString(reader.GetOrdinal("ID_PROVEEDOR"));
@@ -314,7 +316,6 @@ namespace CapaDao
                             modelo.NRO_DOCUMENTO_PROVEEDOR = reader.GetString(reader.GetOrdinal("NRO_DOCUMENTO_PROVEEDOR"));
                             modelo.FEC_DOCUMENTO = reader.GetString(reader.GetOrdinal("FEC_DOCUMENTO"));
                             modelo.ID_MONEDA = reader.GetString(reader.GetOrdinal("ID_MONEDA"));
-                            modelo.FLG_SIN_COSTO = reader.GetBoolean(reader.GetOrdinal("FLG_SIN_COSTO"));
                             modelo.ID_TIPO_PAGO = reader.IsDBNull(reader.GetOrdinal("ID_TIPO_PAGO")) ? "-1" : reader.GetString(reader.GetOrdinal("ID_TIPO_PAGO"));
                             modelo.ID_TIPO_CONDICION_PAGO = reader.IsDBNull(reader.GetOrdinal("ID_TIPO_CONDICION_PAGO")) ? "-1" : reader.GetString(reader.GetOrdinal("ID_TIPO_CONDICION_PAGO"));
                             modelo.OBS_COMPRA = reader.IsDBNull(reader.GetOrdinal("OBS_COMPRA")) ? default(string) : reader.GetString(reader.GetOrdinal("OBS_COMPRA"));

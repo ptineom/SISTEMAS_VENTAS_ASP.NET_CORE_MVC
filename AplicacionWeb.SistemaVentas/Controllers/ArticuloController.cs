@@ -2,6 +2,7 @@
 using AplicacionWeb.SistemaVentas.Servicios.Seguridad;
 using CapaNegocio;
 using Entidades;
+using Helper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -400,10 +401,11 @@ namespace AplicacionWeb.SistemaVentas.Controllers
         //    return Ok(_resultado);
         //}
 
-        [HttpGet("GetAllByFiltersHelper")]
-        public async Task<IActionResult> GetAllByFiltersHelperAsync([FromQuery] string tipoFiltro = "", [FromQuery] string filtro = "", [FromQuery] string accion = "")
+        [HttpGet("GetAllByFiltersHelper/{tipoFiltro}/{filtro}/{flgCompra}")]
+        public async Task<IActionResult> GetAllByFiltersHelperAsync(string tipoFiltro, string filtro, bool flgCompra)
         {
-            _resultado = await Task.Run(() => _brArticulo.GetAllByFiltersHelper(accion, _idSucursal, tipoFiltro, filtro));
+            string accion = "LIS";
+            _resultado = await Task.Run(() => _brArticulo.GetAllByFiltersHelper(accion, _idSucursal, tipoFiltro, filtro, flgCompra));
 
             if (!_resultado.Resultado)
                 return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
@@ -413,15 +415,36 @@ namespace AplicacionWeb.SistemaVentas.Controllers
 
             List<ARTICULO> lista = (List<ARTICULO>)_resultado.Data;
 
-            _resultado.Data = new
+            if (flgCompra)
             {
-                Lista = lista.Select(x => new
+                _resultado.Data = lista.Select(x => new
                 {
                     IdArticulo = x.ID_ARTICULO,
                     Codigo = string.IsNullOrEmpty(x.CODIGO_BARRA) ? x.ID_ARTICULO : x.CODIGO_BARRA,
-                    NomArticulo = x.NOM_ARTICULO,
-                    NomMarca = x.NOM_MARCA,
-                    NomUm = x.NOM_UM,
+                    NomArticulo = ViewHelper.CapitalizeAll(x.NOM_ARTICULO),
+                    NomMarca = ViewHelper.CapitalizeAll(x.NOM_MARCA),
+                    NomUm = ViewHelper.CapitalizeAll(x.NOM_UM),
+                    StockActual = x.STOCK_ACTUAL,
+                    IdUm = x.ID_UM,
+                    NroFactor = x.NRO_FACTOR,
+                    ListaUm = x.listaArticuloUm.Select(y => new
+                    {
+                        IdUm = y.ID_UM,
+                        NomUm = ViewHelper.CapitalizeAll(y.NOM_UM),
+                        NroFactor = y.NRO_FACTOR
+                    }).ToList(),
+                    StockMinimo = x.STOCK_MINIMO
+                }).ToList();
+            }
+            else
+            {
+                _resultado.Data = lista.Select(x => new
+                {
+                    IdArticulo = x.ID_ARTICULO,
+                    Codigo = string.IsNullOrEmpty(x.CODIGO_BARRA) ? x.ID_ARTICULO : x.CODIGO_BARRA,
+                    NomArticulo = ViewHelper.CapitalizeAll(x.NOM_ARTICULO),
+                    NomMarca = ViewHelper.CapitalizeAll(x.NOM_MARCA),
+                    NomUm = ViewHelper.CapitalizeAll(x.NOM_UM),
                     StockActual = x.STOCK_ACTUAL,
                     PrecioVentaFinal = x.PRECIO_VENTA_FINAL,
                     Descuento1 = x.DESCUENTO1,
@@ -430,7 +453,7 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                     ListaUm = x.listaArticuloUm.Select(y => new
                     {
                         IdUm = y.ID_UM,
-                        NomUm = y.NOM_UM,
+                        NomUm = ViewHelper.CapitalizeAll(y.NOM_UM),
                         NroFactor = y.NRO_FACTOR,
                         Descuento1 = y.DESCUENTO1,
                         PrecioVenta = y.PRECIO_VENTA,
@@ -439,16 +462,16 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                     PrecioBase = x.PRECIO_BASE,
                     PrecioVenta = x.PRECIO_VENTA,
                     StockMinimo = x.STOCK_MINIMO
-                }).ToList()
-            };
+                }).ToList();
+            }
 
             return Ok(_resultado);
         }
 
-        [HttpGet("GetByBarcode/{codigoBarra?}")]
-        public async Task<IActionResult> GetByBarcodeAsync(string codigoBarra)
+        [HttpGet("GetByBarcode/{codigoBarra?}/{flgCompra}")]
+        public async Task<IActionResult> GetByBarcodeAsync(string codigoBarra, bool flgCompra = false)
         {
-            _resultado = await Task.Run(() => _brArticulo.GetAllByFiltersHelper("BAR", _idSucursal, "", codigoBarra));
+            _resultado = await Task.Run(() => _brArticulo.GetAllByFiltersHelper("BAR", _idSucursal, "", codigoBarra, flgCompra));
 
             if (!_resultado.Resultado)
                 return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
@@ -462,11 +485,11 @@ namespace AplicacionWeb.SistemaVentas.Controllers
             {
                 IdArticulo = x.ID_ARTICULO,
                 Codigo = string.IsNullOrEmpty(x.CODIGO_BARRA) ? x.ID_ARTICULO : x.CODIGO_BARRA,
-                NomArticulo = x.NOM_ARTICULO,
+                NomArticulo = ViewHelper.CapitalizeAll(x.NOM_ARTICULO),
                 ListaUm = x.listaArticuloUm.Select(y => new
                 {
                     IdUm = y.ID_UM,
-                    NomUm = y.NOM_UM,
+                    NomUm = ViewHelper.CapitalizeAll(y.NOM_UM),
                     NroFactor = y.NRO_FACTOR,
                     Descuento1 = y.DESCUENTO1,
                     PrecioVenta = y.PRECIO_VENTA,

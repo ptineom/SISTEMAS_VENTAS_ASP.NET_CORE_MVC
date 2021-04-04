@@ -7,9 +7,9 @@ namespace Entidades
 {
 	public class PROVEEDOR
 	{
-		public string ACCION { get; set; }
+        public string ACCION { get; set; }
 		public string ID_PROVEEDOR { get; set; }
-		public int ID_TIPO_DOCUMENTO { get; set; }
+		public int? ID_TIPO_DOCUMENTO { get; set; }
 		public string NRO_DOCUMENTO { get; set; }
 		public string NOM_PROVEEDOR { get; set; }
 		public string DIR_PROVEEDOR { get; set; }

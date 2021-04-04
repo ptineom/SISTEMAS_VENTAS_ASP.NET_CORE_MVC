@@ -94,66 +94,80 @@ var oConfigControls = {
             }
         }
 
+        if (objeto.selector == undefined || objeto.selector == "")
+            throw new Error("Nombre de la tabla no ingresado en la propiedad selector.")
+
         let arrColumns = [];
         if (objeto.arrColumns != undefined) {
-            if (typeof objeto.arrColumns === 'object') {
-                arrColumns = objeto.arrColumns;
-            } else {
+            if (typeof objeto.arrColumns !== 'object')
                 throw new Error("Tipo de dato incorrecto en la propiedad arrColumns");
-            }
+
+            arrColumns = objeto.arrColumns;
         }
+
         let bFilter = false;
         if (objeto.bFilter != undefined) {
-            if (typeof objeto.bFilter === 'boolean') {
-                bFilter = objeto.bFilter;
-            } else {
+            if (typeof objeto.bFilter !== 'boolean')
                 throw new Error("Tipo de dato incorrecto en la propiedad bFilter");
-            }
+
+            bFilter = objeto.bFilter;
         }
+
         let bPaginate = false;
         if (objeto.bPaginate != undefined) {
-            if (typeof objeto.bPaginate === 'boolean') {
-                bPaginate = objeto.bPaginate;
-            } else {
+            if (typeof objeto.bPaginate !== 'boolean')
                 throw new Error("Tipo de dato incorrecto en la propiedad bPaginate");
-            }
+
+            bPaginate = objeto.bPaginate;
         }
+
         let bInfo = false;
         if (objeto.bInfo != undefined) {
-            if (typeof objeto.bInfo === 'boolean') {
-                bInfo = objeto.bInfo;
-            } else {
+            if (typeof objeto.bInfo !== 'boolean')
                 throw new Error("Tipo de dato incorrecto en la propiedad bInfo");
-            }
+
+            bInfo = objeto.bInfo;
         }
+
         let bAutoWidth = false;
         if (objeto.bAutoWidth != undefined) {
-            if (typeof objeto.bAutoWidth === 'boolean') {
-                bAutoWidth = objeto.bAutoWidth;
-            } else {
+            if (typeof objeto.bAutoWidth !== 'boolean')
                 throw new Error("Tipo de dato incorrecto en la propiedad bAutoWidth");
-            }
+
+            bAutoWidth = objeto.bAutoWidth;
         }
+
         if (objeto.fnCallBack != undefined) {
             if (!objeto.fnCallBack === 'function') {
                 throw new Error("Tipo de dato incorrecto en la propiedad fnCallBack");
             }
         }
+
+        let bLengthChange = false;
         let arrLengthMenu = null
-        if (window.innerWidth < 1200) {
-            arrLengthMenu = [[5, 10, 25, 50], [5, 10, 25, 50]];
+
+        if (objeto.bLengthChange != undefined) {
+            if (typeof objeto.bLengthChange !== 'boolean')
+                throw new Error("Tipo de dato incorrecto en la propiedad bAutoWidth");
+
+            bLengthChange = objeto.bLengthChange;
+
+            if (bLengthChange) {
+                if (window.innerWidth < 1200)
+                    arrLengthMenu = [5, 10, 25, 50];
+            }
         }
 
-        var optTable = {
+        var config = {
             bSort: true,
-            //bAutoWidth: bAutoWidth,//calcula el ancho de las columnas y los ajusta según su contenido, pero para que calcule no debe de existir anchos predeterminados en las columnas.(por defecto viene en true)
-            //"aoColumns": arrColumns,// No hace falta las medidas para el width, automaticamente lo calcula segun el contenido y el ancho del webbrowser.
-            //"aaSorting": [], // la primera columna siempre viene con ordenacion asi  estblesca en false, pero con esta propiedad lo establece en false.
+            bAutoWidth: bAutoWidth,//calcula el ancho de las columnas y los ajusta según su contenido, pero para que calcule no debe de existir anchos predeterminados en las columnas.(por defecto viene en true)
+            "aoColumns": arrColumns,// No hace falta las medidas para el width, automaticamente lo calcula segun el contenido y el ancho del webbrowser.
+            "aaSorting": [], // la primera columna siempre viene con ordenacion asi  estblesca en false, pero con esta propiedad lo establece en false.
             //scrollX: true,
             bFilter: bFilter,
             bInfo: bInfo,
             bPaginate: bPaginate,
-            bLengthChange: false, // visualiza la opcion de cambiar las cantidades de registros que se mostrara por pagina.
+            bLengthChange: bLengthChange,//Oculta la opción para cambiar el números de registros a mostrar.
             "lengthMenu": arrLengthMenu,
             "language": {
                 "sProcessing": "Procesando...",
@@ -176,8 +190,24 @@ var oConfigControls = {
                 }
             }
         };
-        if (objeto.fnCallBack != undefined) {
-            objeto.fnCallBack(optTable);
-        }
+        $(objeto.selector).DataTable(config);
+
+        if (objeto.callback != undefined)
+            objeto.callback();
+
     },
+    formReset: function (element) {
+        let form = element;
+
+        //Limpiamos con la ayuda de jquery.validate()
+        var validator = $(form).validate();
+        validator.resetForm();
+
+        //Limpiamos lo generado por el unobtrosive
+        Array.from(form.querySelectorAll("[data-valmsg-replace]")).forEach(span => {
+            span.classList.remove("field-validation-error");
+            span.classList.add("field-validation-valid");
+            span.textContent = "";
+        });
+    }
 }

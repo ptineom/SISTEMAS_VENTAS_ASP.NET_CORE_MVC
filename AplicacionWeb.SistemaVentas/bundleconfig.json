@@ -72,7 +72,8 @@
       "wwwroot/js/utilitarios/alertas.js",
       "wwwroot/js/utilitarios/extensiones.js",
       "wwwroot/js/utilitarios/helpers.js",
-      "wwwroot/js/utilitarios/configControls.js"
+      "wwwroot/js/utilitarios/configControls.js",
+      "wwwroot/js/utilitarios/alertasModal.js"
     ],
     "minify": {
       "enabled": false,

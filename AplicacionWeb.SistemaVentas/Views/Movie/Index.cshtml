@@ -1,0 +1,59 @@
+﻿@using AplicacionWeb.SistemaVentas.Models.Request
+
+@model RegistrationViewModel
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Movie</h1>
+<div class="row">
+    <div class="col-4">
+        <form id="form-contact">
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <label asp-for="Username"></label>
+                    <input asp-for="Username" type="text" id="Username" name="Username" class="form-control" />
+                    <span asp-validation-for="Username" class="text-danger"></span>
+                </div>
+                <div class="col-12 mb-3">
+                    <label asp-for="AcceptedPrivacyPolicy"></label>
+                    <input asp-for="AcceptedPrivacyPolicy" type="checkbox" id="AcceptedPrivacyPolicy" name="AcceptedPrivacyPolicy" />
+                    <span asp-validation-for="AcceptedPrivacyPolicy" class="text-danger"></span>
+                </div>
+                <div class="col-12 mb-3">
+                    <label asp-for="Age"></label>
+                    <input asp-for="Age" type="text" id="Age" name="Age" class="form-control" />
+                    <span asp-validation-for="Age" class="text-danger"></span>
+                </div>
+                <div class="col-12 mb-3">
+                    <label asp-for="Document"></label>
+                    <input asp-for="Document" type="text" id="Document" name="Document" class="form-control" />
+                    <span asp-validation-for="Document" class="text-danger"></span>
+                </div>
+                <div class="col-12 mb-3">
+                    <label asp-for="Note"></label>
+                    <input asp-for="Note" type="text" id="Note" name="Note" class="form-control" />
+                    <span asp-validation-for="Note" class="text-danger"></span>
+                </div>
+                <div class="col-12 mb-3">
+                    <label asp-for="Country"></label>
+                    <input asp-for="Country" type="text" id="Country" name="Country" class="form-control" />
+                    <span asp-validation-for="Country" class="text-danger"></span>
+                </div>
+            </div>
+        </form>
+    </div>
+   
+</div>
+<br />
+<button type="button" class="btn btn-success" id="btnGuardar"><i class="bi bi-save2"></i> Guardar</button>
+
+
+@section myScript{
+
+    <script src="~/js/customValidation.js"></script>
+
+    <script src="~/js/movie.js"></script>
+
+}

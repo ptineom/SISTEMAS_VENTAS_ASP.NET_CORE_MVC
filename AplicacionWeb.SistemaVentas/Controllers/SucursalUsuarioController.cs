@@ -1,4 +1,5 @@
 ﻿using AplicacionWeb.SistemaVentas.Models;
+using AplicacionWeb.SistemaVentas.Models.ViewModel;
 using AplicacionWeb.SistemaVentas.Servicios.Seguridad;
 using CapaNegocio;
 using Entidades;
@@ -39,12 +40,12 @@ namespace AplicacionWeb.SistemaVentas.Controllers
             if (!_resultado.Resultado)
                 return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
 
-            List<SucursalViewModel> sucursales = ((List<SUCURSAL>)_resultado.Data).Select(x => new SucursalViewModel() { 
+            List<SucursalModel> sucursales = ((List<SUCURSAL>)_resultado.Data).Select(x => new SucursalModel() { 
                 IdSucursal = x.ID_SUCURSAL,
                 NomSucursal = x.NOM_SUCURSAL
-            }).ToList<SucursalViewModel>();
+            }).ToList<SucursalModel>();
 
-            sucursales.Insert(0, new SucursalViewModel()
+            sucursales.Insert(0, new SucursalModel()
             {
                 IdSucursal="-1",
                 NomSucursal = "---SELECCIONE---"

@@ -1,4 +1,5 @@
-﻿using AplicacionWeb.SistemaVentas.Models.Seguridad;
+﻿using AplicacionWeb.SistemaVentas.Models.Request;
+using AplicacionWeb.SistemaVentas.Models.Seguridad;
 using AplicacionWeb.SistemaVentas.Servicios.Seguridad;
 using CapaNegocio;
 using Entidades;
@@ -85,6 +86,34 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                 DirCliente = ViewHelper.CapitalizeAll(x.DIR_PROVEEDOR),
                 IdTipoDocumento = x.ID_TIPO_DOCUMENTO
             });
+
+            return Ok(_resultado);
+        }
+
+        [HttpPost("Register")]
+        public async Task<IActionResult> RegisterAsync([FromBody] ProveedorRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { Mesagge = ModelState, Status = "Error" });
+
+            _resultado = await Task.Run(() => _brProveedor.Register(new PROVEEDOR()
+            {
+                ID_TIPO_DOCUMENTO = request.IdTipoDocumento,
+                NRO_DOCUMENTO = request.NroDocumento,
+                NOM_PROVEEDOR = request.RazonSocial,
+                CONTACTO = request.Contacto,
+                EMAIL_PROVEEDOR = request.Email,
+                TEL_PROVEEDOR = request.Telefono,
+                DIR_PROVEEDOR = request.Direccion,
+                ID_UBIGEO = request.IdDistrito,
+                ID_USUARIO_REGISTRO = _idUsuario,
+                OBS_PROVEEDOR = request.Observacion,
+                FLG_INACTIVO = request.FlgInactivo,
+                ACCION = "INS"
+            }));
+
+            if (!_resultado.Resultado)
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
 
             return Ok(_resultado);
         }

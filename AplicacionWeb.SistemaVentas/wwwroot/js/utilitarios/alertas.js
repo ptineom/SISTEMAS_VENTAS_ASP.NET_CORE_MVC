@@ -6,43 +6,60 @@ var oAlerta = {
         let type = !!config.type ? config.type : 'default';
         let header = '', color = '', icon = '';
         let closeAutomatic = config.closeAutomatic != undefined ? config.closeAutomatic : false;
+        let notTitle = !!config.notTitle ? config.notTitle : false;
+        let notIcon = !!config.notIcon ? config.notIcon : false;
+
+        let content;
+        let position;
+        let top;
+
+        if (!!config.contenedor) {
+            content = document.querySelector(config.contenedor);
+            position = "absolute";
+            top= "50"
+        }
+        else {
+            content = document.getElementById('content');
+            position = "fixed";
+            top="60"
+        }
 
         switch (type) {
             case "success":
-                header = "¡Éxito!";
+                header = notTitle ? "" : "¡Éxito!";
                 color = "#008d4c";
                 icon = "bi-check-circle";
                 break;
             case "info":
-                header = "¡Información!"
+                header = notTitle ? "" : "¡Información!"
                 color = "#00a7d0";
                 icon = "bi-info-circle";
                 break;
             case "warning":
-                header = "¡Advertencia!";
+                header = notTitle ? "" : "¡Advertencia!";
                 color = "#db8b0b";
                 icon = "bi-exclamation-triangle";
                 break;
             case "error":
-                header = "¡Error!";
+                header = notTitle ? "" : "¡Error!";
                 color = "#d33724";
                 icon = "bi-exclamation-octagon";
                 break;
             default:
-                header = "¡Alerta!";
+                header = notTitle ? "" : "¡Alerta!";
                 color = "#b5bbc8";
                 icon = "";
                 break;
         }
 
-        if (document.getElementById('alerta') != null) 
+        if (document.getElementById('alerta') != null)
             return;
 
-        let content = document.getElementById('content');
-        let style = `style='position: fixed;top: 60px;z-index: 9999;right: 10px;background-color:${color}; color:#fff; opacity:1'`
+        let style = `style='position: ${position};top: ${top}px;z-index: 9999;right: 10px;background-color:${color}; color:#fff; opacity:1'`
+        let i = notIcon ? '' : `<i class="bi ${icon} fs-2 me-2"></i>`
         let alerta = `<div  class="alert alert-dismissible fade show" role="alert" ${style} id="alerta">
                             <h4 class="mb-0">${header}</h4>
-                            <i class="bi ${icon} fs-2 me-2"></i>
+                            ${i}
                             <strong>${title}</strong> <span>${subtitle}</span>
                             <button type="button" class="btn-close" data-bs-dismiss="alert" style='color:white' aria-label="Close"></button>
                         </div>`;

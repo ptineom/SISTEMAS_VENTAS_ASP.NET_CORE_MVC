@@ -7,73 +7,81 @@ using Entidades;
 using CapaDao;
 using Helper;
 using System.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+
 namespace CapaNegocio
 {
     public class BrUbigeo
     {
-        DaoUbigeo dao = null;
-        ResultadoOperacion oResultado = null;
-        public BrUbigeo()
+        private DaoUbigeo _dao = null;
+        private ResultadoOperacion _resultado = null;
+        private IConfiguration _configuration = null;
+        private Conexion _conexion = null;
+
+        public BrUbigeo(IConfiguration configuration)
         {
-            dao = new DaoUbigeo();
-            oResultado = new ResultadoOperacion();
+            _dao = new DaoUbigeo();
+            _resultado = new ResultadoOperacion();
+            _configuration = configuration;
+            _conexion = new Conexion(_configuration);
         }
-        public ResultadoOperacion listaDepartamentos()
+
+        public ResultadoOperacion GetAllDepartaments()
         {
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
-                    List<UBIGEO> lista = dao.combosDepartamentos(con);
-                
-                    oResultado.SetResultado(true, lista);
+                    List<UBIGEO> lista = _dao.GetAllDepartaments(con);
+
+                    _resultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
                     Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
+                    _resultado.SetResultado(false, ex.Message);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
-        public ResultadoOperacion listaProvincias(string idDepartamento)
+        public ResultadoOperacion GetAllProvinces(string idDepartamento)
         {
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
-                    List<UBIGEO> lista = dao.combosProvincias(con, idDepartamento);
-                 
-                    oResultado.SetResultado(true, lista);
+                    List<UBIGEO> lista = _dao.GetAllProvinces(con, idDepartamento);
+
+                    _resultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
                     Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
+                    _resultado.SetResultado(false, ex.Message);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
-        public ResultadoOperacion listaDistritos(string idProvincia)
+        public ResultadoOperacion GetAllDistricts(string idProvincia)
         {
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
-                    List<UBIGEO> lista = dao.combosDistritos(con, idProvincia);
-                
-                    oResultado.SetResultado(true, lista);
+                    List<UBIGEO> lista = _dao.GetAllDistricts(con, idProvincia);
+
+                    _resultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
                     Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
+                    _resultado.SetResultado(false, ex.Message);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
     }
 }

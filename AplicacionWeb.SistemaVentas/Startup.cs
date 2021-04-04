@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.Mvc.DataAnnotations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -12,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AplicacionWeb.SistemaVentas.CustomValidation;
 
 namespace AplicacionWeb.SistemaVentas
 {
@@ -53,8 +55,17 @@ namespace AplicacionWeb.SistemaVentas
 
             //services.AddMvc(options => options.Filters.Add(new AuthorizeFilter()));
 
+
             services.AddTransient<IResultadoOperacion, ResultadoOperacion>();
             services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
+
+            services.AddRazorPages().AddMvcOptions(options => {
+                options.MaxModelValidationErrors = 50;
+                options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor( _ => "The field is required.");
+            });
+
+            //Validaciones personalizadas
+            services.AddSingleton<IValidationAttributeAdapterProvider, AdapterProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

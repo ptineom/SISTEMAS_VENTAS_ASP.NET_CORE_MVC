@@ -32,8 +32,7 @@ namespace Entidades
         public decimal ABONO { get; set; }
         public decimal SALDO { get; set; }
         public string FECHA_CANCELACION { get; set; }
-        public string CADENA_ARTICULOS { get; set; }
-        public bool FLG_SIN_COSTO { get; set; }
+        public string JSON_ARTICULOS { get; set; }
 
         public List<TIPO_DOCUMENTO> listaDocumentos { get; set; }
         public List<TIPO_COMPROBANTE> listaComprobantes { get; set; }
@@ -41,6 +40,8 @@ namespace Entidades
         public List<TIPO_PAGO> listaTipPag { get; set; }
         public List<TIPO_CONDICION_PAGO> listaTipCon { get; set; }
         public List<ESTADO> listaEstados { get; set; }
+
+        public List<UBIGEO> listaDepartamentos { get; set; }
         public List<DOC_COMPRA_DETALLE> detalle { get; set; }
         //
         public string NOM_PROVEEDOR { get; set; }
@@ -53,7 +54,6 @@ namespace Entidades
         public string ID_CAJA_CA { get; set; }
         public string ID_USUARIO_CA { get; set; }
         public int CORRELATIVO_CA { get; set; }
-        public bool FLG_SIN_COMPROBANTE { get; set; }
         public string SGN_MONEDA { get; set; }
 
 

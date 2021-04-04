@@ -1,15 +1,17 @@
-﻿
+﻿@using AplicacionWeb.SistemaVentas.Models.ViewModel
+@using AplicacionWeb.SistemaVentas.Models.Request
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
-    var listaDocumentos = (List<TipoDocumentosViewModel>)ViewBag.listaDocumentos;
-    var listaComprobantes = (List<TipoComprobanteViewModel>)ViewBag.listaComprobantes;
-    var listaMonedas = (List<MonedaViewModel>)ViewBag.listaMonedas;
-    var listaTipPag = (List<TipoPagoViewModel>)ViewBag.listaTipPag;
-    var listaTipConPag = (List<TipoCondicionPagoViewModel>)ViewBag.listaTipConPag;
-    var listaEstados = (List<EstadoViewModel>)ViewBag.listaEstados;
+    var listaTipoDocumento = (List<TipoDocumentoModel>)ViewBag.listaTipoDocumento;
+    var listaComprobante = (List<TipoComprobanteModel>)ViewBag.listaComprobante;
+    var listaMoneda = (List<MonedaModel>)ViewBag.listaMoneda;
+    var listaTipPag = (List<TipoPagoModel>)ViewBag.listaTipPag;
+    var listaTipConPag = (List<TipoCondicionPagoModel>)ViewBag.listaTipConPag;
+    var listaEstado = (List<EstadoModel>)ViewBag.listaEstado;
     var tasIgv = Convert.ToInt32(ViewBag.TasIgv);
+    var listaDepartamento = (List<DepartamentoModel>)ViewBag.listaDepartamento;
 }
 
 <input type="hidden" id="hddIgv" value="@tasIgv" />
@@ -24,9 +26,9 @@
                     <div class="col-12 col-sm-4 col-md-5 ">
                         <label class="form-label mb-1">Tipo comprobante</label>
                         <select class="form-select form-select-sm" id="cboTipCom" aria-label=".form-select-lg example">
-                            @if (listaComprobantes != null)
+                            @if (listaComprobante != null)
                             {
-                                foreach (var item in listaComprobantes)
+                                foreach (var item in listaComprobante)
                                 {
                                     <option value="@item.IdTipoComprobante" data-flgRendirSunat="@item.FlgRendirSunat">@item.NomTipoComprobante</option>
                                 }
@@ -71,9 +73,9 @@
                     <div class="col-12 col-sm-5 pe-1">
                         <label class="form-label mb-1">Tipo documento</label>
                         <select class="form-select form-select-sm" id="cboTipDoc">
-                            @if (listaDocumentos != null)
+                            @if (listaTipoDocumento != null)
                             {
-                                foreach (var item in listaDocumentos)
+                                foreach (var item in listaTipoDocumento)
                                 {
                                     <option value="@item.IdTipoDocumento" data-maxDigitos="@item.MaxDigitos" data-flgRuc="@item.FlgRuc">@item.Abreviatura</option>
                                 }
@@ -119,9 +121,9 @@
                     <div class="col-12 col-md-3">
                         <label class="form-label mb-1">Moneda</label>
                         <select class="form-select form-select-sm" disabled id="cboMoneda">
-                            @if (listaMonedas != null)
+                            @if (listaMoneda != null)
                             {
-                                foreach (var item in listaMonedas)
+                                foreach (var item in listaMoneda)
                                 {
                                     <option value="@item.IdMoneda" data-flgLocal="@item.FlgLocal" selected="@item.FlgLocal" data-sgnMoneda="@item.SgnMoneda">@item.NomMoneda</option>
                                 }
@@ -293,18 +295,24 @@
 <div class="row mt-1">
     <div class="col-12 text-end">
         <button type="button" class="btn btn-primary" id="btnNuevo"><i class="bi bi-file-earmark-plus-fill"></i> Nuevo [F6]</button>
-        <button type="button" class="btn btn-success" id="btnPagar"><i class="bi bi-cash-stack"></i> Pagar [F7]</button>
+        <button type="button" class="btn btn-success" id="btnGrabar"><i class="bi bi-cash-stack"></i> Grabar [F7]</button>
         <button type="button" class="btn btn-danger" id="btnAnular"><i class="bi bi-trash-fill"></i> Anular</button>
         <button type="button" class="btn btn-info" id="btnBuscar"><i class="bi bi-search"></i> Buscar [F9]</button>
         <button type="button" class="btn btn-secondary" id="btnImprimir"><i class="bi bi-printer"></i> Imprimir</button>
     </div>
 </div>
+
 <partial name="~/Views/Partial/_ViewConsultarProveedor.cshtml"/>
+<partial name="~/Views/Partial/_ViewRegistrarProveedor.cshtml" model="@new ProveedorRequest()"/>
+<partial name="~/Views/Partial/_ViewConsultarArticulo.cshtml"/>
+
+
 
 @section myScript{
-
     <script src="~/js/compra.min.js"></script>
     <script src="~/js/Modal/modalAbono.js"></script>
     <script src="~/js/Modal/modalConsultarProveedor.js"></script>
+    <script src="~/js/Modal/modalRegistrarProveedor.js"></script>
+    <script src="~/js/Modal/modalConsultarArticulo.js"></script>
 }
 

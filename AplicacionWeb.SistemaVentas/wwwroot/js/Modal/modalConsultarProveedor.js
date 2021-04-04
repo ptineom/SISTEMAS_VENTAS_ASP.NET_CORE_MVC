@@ -1,27 +1,26 @@
 ﻿'use strict'
 var oModalConsultarProveedor = {
-    tblConsultarProveedor: null,
+    seleccionado: false,
+    instance: null,
     init: function () {
-        //Nombre del modal
         let modal = document.getElementById('modalConsultarProveedor');
-        let myModal = new bootstrap.Modal(modal, {
-            backdrop: false
-        });
-
-        document.getElementById('prueba').addEventListener('click', () => {
-            debugger;
-            myModal.hide();
-        })
-
         modal.addEventListener('shown.bs.modal', function () {
+            //Inicializamos la configuración del datatable del tabla proveedor
             oModalConsultarProveedor.initTblConsultarProveedor();
+
             document.getElementById('txtFiltroProveedor').focus();
         });
         modal.addEventListener('hidden.bs.modal', function () {
-            debugger;
-            oModalConsultarProveedor.clearDatatable(document.getElementById('tblConsultarProveedor'));
+            //Limpiamos los controles
+            oModalConsultarProveedor.clearTblConsultarProveedor();
             document.getElementById('txtFiltroProveedor').value = "";
-            document.getElementById('rbPorDescripcion').cheked = true;
+            document.getElementById('rbProveedorPorDescripcion').cheked = true;
+
+            //Será reject cada vez que cierre el modal sin haber seleccionado algún registro.
+            if (!oModalConsultarProveedor.seleccionado)
+                oModalConsultarProveedor.reject();
+            else
+                oModalConsultarProveedor.seleccionado = false;
         });
 
         document.getElementById('txtFiltroProveedor').addEventListener('keyup', (e) => {
@@ -30,7 +29,7 @@ var oModalConsultarProveedor = {
         })
         document.getElementById('btnBuscarProveedor').addEventListener('click', oModalConsultarProveedor.consultar);
 
-        Array.from(modalConsultarProveedor.querySelectorAll('input[type=radio][name="radioFiltros"]')).forEach(rb => {
+        Array.from(modal.querySelectorAll('input[type=radio][name="rbProveedor"]')).forEach(rb => {
             rb.addEventListener('change', () => {
                 let txtFiltroProveedor = document.getElementById('txtFiltroProveedor');
                 txtFiltroProveedor.value = "";
@@ -41,27 +40,17 @@ var oModalConsultarProveedor = {
         $("#tblConsultarProveedor").find("tbody").on("click", "td button", (e) => {
             let button = e.currentTarget;
             let row = button.parentElement.parentElement;
+
             let modelo = {
                 idProveedor: row.cells[1].textContent,
                 nomProveedor: row.cells[2].textContent,
                 idTipoDocumento: row.cells[6].textContent,
                 numDocumento: row.cells[4].textContent
             }
-            myModal.hide();
+
+            oModalConsultarProveedor.seleccionado = true;
             oModalConsultarProveedor.resolve(modelo);
-            let hh = "";
-            //setTimeout(function () {
-            //    myModal.hide();
-            //},3000)
-
-
-            ////Nombre del modal
-            //let modal = document.getElementById('modalConsultarProveedor');
-
-            //let myModal = new bootstrap.Modal(modal, {});
-
-            // myModal.toggle()
-            //$("#modalConsultarProveedor").hide();
+            oModalConsultarProveedor.instance.hide();
         });
     },
     initTblConsultarProveedor: function () {
@@ -74,35 +63,33 @@ var oModalConsultarProveedor = {
             { "bSortable": true },
             { "bSortable": false }];
 
-        let config = {
+        oConfigControls.inicializarDataTable({
+            selector: "#tblConsultarProveedor",
             arrColumns: aoColumns,
             bPaginate: true,
-            bInfo: true,
-            fnCallBack: function (optTable) {
-                oModalConsultarProveedor.tblConsultarProveedor = $('#tblConsultarProveedor').DataTable(optTable);
-            },
-        };
-        oConfigControls.inicializarDataTable(config);
+            bInfo: true
+        });
     },
     resolve: null,
     reject: null,
     show: function () {
         let options = {};
-        let modalConsultarProveedor = document.getElementById('modalConsultarProveedor')
-        let myModalConsultarProveedor = new bootstrap.Modal(modalConsultarProveedor, options);
+        let modal = document.getElementById('modalConsultarProveedor');
 
-        myModalConsultarProveedor.show();
+        //Creamos las instancia para usar los metodos del modal.
+        oModalConsultarProveedor.instance = new bootstrap.Modal(modal, options);
+        oModalConsultarProveedor.instance.show();
 
         return new Promise((resolve, reject) => {
             oModalConsultarProveedor.resolve = resolve;
             oModalConsultarProveedor.reject = reject;
         })
     },
-    clearDatatable: function (table) {
-        oHelper.limpiarTabla(table);
-        if (oModalConsultarProveedor.tblConsultarProveedor != null) {
-            oModalConsultarProveedor.tblConsultarProveedor.rows().remove().draw();
-            oModalConsultarProveedor.tblConsultarProveedor.destroy();
+    clearTblConsultarProveedor: function () {
+        let tblConsultarProveedor = $("#tblConsultarProveedor").DataTable();
+        if (tblConsultarProveedor != null) {
+            tblConsultarProveedor.rows().remove().draw();
+            tblConsultarProveedor.destroy();
         }
     },
     consultar: function () {
@@ -114,15 +101,15 @@ var oModalConsultarProveedor = {
             });
             return;
         }
-
+        
         //Checkbox seleccionado.
-        let tipoFiltro = document.querySelector('#modalConsultarProveedor input[type=radio][name="radioFiltros"]:checked').value;
+        let tipoFiltro = document.querySelector('#modalConsultarProveedor input[type=radio][name="rbProveedor"]:checked').value;
 
         let table = document.getElementById('tblConsultarProveedor');
         let tbody = table.getElementsByTagName('tbody')[0];
 
-        //Limpiamos la tabla(tabla nativa y datatable)
-        oModalConsultarProveedor.clearDatatable(table);
+        //Limpiamos la tabla
+        oModalConsultarProveedor.clearTblConsultarProveedor();
 
         oHelper.showLoading("#modalConsultarProveedor .modal-content");
         axios.get(`/Proveedor/GetAllByFilters/${tipoFiltro}/${txtFiltro.value}/false`).then(response => {
@@ -143,7 +130,8 @@ var oModalConsultarProveedor = {
                 frag.appendChild(tr);
             });
             tbody.appendChild(frag);
-           oModalConsultarProveedor.initTblConsultarProveedor();
+
+            oModalConsultarProveedor.initTblConsultarProveedor();
         }).catch(error => {
             oAlerta.alerta({
                 title: error.response.data.Message,
@@ -152,8 +140,6 @@ var oModalConsultarProveedor = {
         }).finally(() => oHelper.hideLoading());
     }
 }
-$(document).ready(function () {
-    oModalConsultarProveedor.init();
-})
-//document.addEventListener('DOMContentLoaded', oModalConsultarProveedor.init);
+
+document.addEventListener('DOMContentLoaded', oModalConsultarProveedor.init);
 

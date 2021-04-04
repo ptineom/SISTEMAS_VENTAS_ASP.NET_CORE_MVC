@@ -96,7 +96,7 @@ namespace CapaDao
                 cmd.CommandTimeout = 0;
                 cmd.Parameters.Add("@ACCION", SqlDbType.VarChar, 3).Value = oModelo.ACCION;
 
-                SqlParameter paramIdCliente = new SqlParameter("@ID_CLIENTE", SqlDbType.VarChar,8);
+                SqlParameter paramIdCliente = new SqlParameter("@ID_CLIENTE", SqlDbType.VarChar, 8);
                 paramIdCliente.Direction = ParameterDirection.InputOutput;
                 paramIdCliente.Value = oModelo.ID_CLIENTE == "" ? (object)DBNull.Value : oModelo.ID_CLIENTE;
                 cmd.Parameters.Add(paramIdCliente);
@@ -125,10 +125,9 @@ namespace CapaDao
                 cmd.Parameters.Add("@ID_USUARIO_REGISTRO", SqlDbType.VarChar, 20).Value = oModelo.ID_USUARIO_REGISTRO;
                 cmd.ExecuteNonQuery();
                 bExito = true;
+
                 if (oModelo.ACCION == "INS")
-                {
                     oModelo.ID_CLIENTE = cmd.Parameters["@ID_CLIENTE"].Value.ToString();
-                }
             }
             return bExito;
         }

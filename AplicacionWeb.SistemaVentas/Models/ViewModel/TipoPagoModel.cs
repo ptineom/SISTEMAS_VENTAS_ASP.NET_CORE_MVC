@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AplicacionWeb.SistemaVentas.Models
+namespace AplicacionWeb.SistemaVentas.Models.ViewModel
 {
-    public class TipoPagoViewModel
+    public class TipoPagoModel
     {
         public string IdTipoPago { get; set; }
         public string NomTipoPago { get; set; }

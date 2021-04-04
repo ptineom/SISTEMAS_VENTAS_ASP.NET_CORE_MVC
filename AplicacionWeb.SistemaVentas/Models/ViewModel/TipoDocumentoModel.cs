@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AplicacionWeb.SistemaVentas.Models
+namespace AplicacionWeb.SistemaVentas.Models.ViewModel
 {
-    public class TipoDocumentosViewModel
+    public class TipoDocumentoModel
     {
-        public int IdTipoDocumento { get; set; }
+        public int? IdTipoDocumento { get; set; }
         public string NomTipoDocumento { get; set; }
         public string Abreviatura { get; set; }
         public int MaxDigitos { get; set; }

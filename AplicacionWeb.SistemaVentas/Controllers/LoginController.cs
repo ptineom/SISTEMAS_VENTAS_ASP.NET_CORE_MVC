@@ -1,5 +1,6 @@
 ﻿using AplicacionWeb.SistemaVentas.Models;
 using AplicacionWeb.SistemaVentas.Models.Seguridad;
+using AplicacionWeb.SistemaVentas.Models.ViewModel;
 using AplicacionWeb.SistemaVentas.Servicios.Seguridad;
 using CapaNegocio;
 using Entidades;
@@ -70,7 +71,7 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                 if (countSedes == 0)
                     return NotFound(new { Message = "Este usuario no tiene configurado al menos una sede.", Status = "Error" });
 
-                ResultadoLoginViewModel resultadoLogin = null;
+                ResultadoLoginModel resultadoLogin = null;
 
                 //**** Si tiene una sede asignada, generamos el token.
                 if (countSedes == 1)
@@ -78,7 +79,7 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                     //Generamos la identidad y cookie.
                     await IdentitySignInAsync(modelo);
 
-                    resultadoLogin = new ResultadoLoginViewModel()
+                    resultadoLogin = new ResultadoLoginModel()
                     {
                         ReturnUrl = "/Home/Index",
                         MasDeUnaSucursal = false
@@ -95,14 +96,14 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                     if (!_resultado.Resultado)
                         return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
 
-                    List<SucursalViewModel> sucursales = ((List<SUCURSAL>)_resultado.Data).Select(x => new SucursalViewModel()
+                    List<SucursalModel> sucursales = ((List<SUCURSAL>)_resultado.Data).Select(x => new SucursalModel()
                     {
                         IdSucursal = x.ID_SUCURSAL,
                         NomSucursal = x.NOM_SUCURSAL
-                    }).ToList<SucursalViewModel>();
-                    sucursales.Insert(0, new SucursalViewModel() { IdSucursal = "-1", NomSucursal = "---SELECCIONE---" });
+                    }).ToList<SucursalModel>();
+                    sucursales.Insert(0, new SucursalModel() { IdSucursal = "-1", NomSucursal = "---SELECCIONE---" });
 
-                    resultadoLogin = new ResultadoLoginViewModel()
+                    resultadoLogin = new ResultadoLoginModel()
                     {
                         MasDeUnaSucursal = true,
                         Sucursales = sucursales

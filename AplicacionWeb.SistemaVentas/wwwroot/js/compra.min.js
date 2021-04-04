@@ -3,9 +3,28 @@ var oCompra = {
     intervalId: 0,
     modeloAbono: null,
     init: function () {
-        oConfigControls.inicializarDatePicker(".date-picker");
+        oConfigControls.inicializarDatePicker("#txtFecVen");
 
-        document.getElementById('txtIgv').addEventListener('keypress', (e) => oHelper.soloNumerosEnteros(e));
+        let $txtFecEmi = $("#txtFecEmi").datepicker({
+            autoclose: true,
+            todayHighlight: true,
+            language: 'es' //debes de descargar el nombredelarchivo.es.js, será el encargado de traducirlo en español. 
+        });
+        $txtFecEmi.prev().on('click', function () {
+            $(this).next().focus();
+        });
+        $txtFecEmi.on('change', function (e) {
+            //Agregar el valor de forma nativa se actuliza pero cuando sales del focus con tab o enter se borra.
+            $('#txtFecVen').datepicker('update', e.target.value);
+        });
+
+        let txtIgv = document.getElementById('txtIgv');
+        txtIgv.addEventListener('keypress', (e) => oHelper.soloNumerosEnteros(e));
+        txtIgv.addEventListener('blur', (e) => {
+            let txt = e.target;
+            if (txt.value == "")
+                txt.value = document.getElementById('hddIgv').value;
+        })
 
         let txtSerie = document.getElementById('txtSerie');
         txtSerie.addEventListener('keyup', (e) => oHelper.teclaEnter(e, "txtNumero"));
@@ -16,7 +35,7 @@ var oCompra = {
 
         let txtFecEmi = document.getElementById('txtFecEmi');
         txtFecEmi.addEventListener('keyup', (e) => oHelper.teclaEnter(e, "txtFecVen"));
-
+  
         let txtNumDoc = document.getElementById('txtNumDoc');
         txtNumDoc.addEventListener('keypress', (e) => oHelper.soloNumerosEnteros(e));
         txtNumDoc.addEventListener('keyup', (e) => {
@@ -32,7 +51,7 @@ var oCompra = {
         document.getElementById('cboTipCom').addEventListener('change', (e) => {
             let cbo = e.target;
 
-            if (cbo.value == "-1")
+            if (cbo.value == "")
                 return;
 
             let nomTipCom = cbo.options[cbo.selectedIndex].text;
@@ -42,7 +61,7 @@ var oCompra = {
             Array.from(cboTipDoc.querySelectorAll("option")).forEach(opt => {
                 opt.disabled = true;
 
-                if (opt.value != "-1") {
+                if (opt.value != "") {
                     //Si es factura entonces se habilitaran solo los documento con el flagRuc.
                     if (nomTipCom.slice(0, 3).toUpperCase() == "FAC") {
                         let flgRuc = opt.getAttribute("data-flgruc") == "True" ? true : false;
@@ -58,16 +77,16 @@ var oCompra = {
                 }
             });
 
-            if (nomTipCom.slice(0, 3).toUpperCase() == "FAC" && cboTipDoc.value != "-1") {
+            if (nomTipCom.slice(0, 3).toUpperCase() == "FAC" && cboTipDoc.value != "") {
                 let flgRuc = cboTipDoc.options[cboTipDoc.selectedIndex].getAttribute("data-flgruc") == "True" ? true : false;
                 //Si es ruc(es una ayuda), inicializamos los controles del proveedor. 
                 if (flgRuc)
                     oCompra.inicializarDatosProveedor(cboTipDoc);
                 else
                     oCompra.limpiarProveedor(true);
-             };
+            };
 
-            cboTipDoc.focus();
+            document.getElementById('txtSerie').focus();
         });
 
         document.getElementById('btnBusPorNum').addEventListener('click', oCompra.obtenerProveedorPorDocumento);
@@ -100,11 +119,11 @@ var oCompra = {
             let cells = row.cells;
 
             let nroFactor = "";
-            if (cbo.value != "-1")
+            if (cbo.value != "")
                 nroFactor = cbo.options[cbo.selectedIndex].getAttribute('data-nroFactor');
 
             cells[3].textContent = nroFactor;
-            cells[5].children[0].focus();
+            cells[4].children[0].focus();
 
         });
 
@@ -123,7 +142,9 @@ var oCompra = {
             let td = input.parentElement;
             let cells = td.parentElement.cells;
 
-            if (td.cellIndex == 5 && e.key == "Enter") {
+            if (td.cellIndex == 4 && e.key == "Enter") {
+                cells[5].children[0].focus();
+            }else if (td.cellIndex == 5 && e.key == "Enter") {
                 cells[6].children[0].focus();
             } else if (td.cellIndex == 6 && e.key == "Enter") {
                 cells[7].children[0].focus();
@@ -227,6 +248,7 @@ var oCompra = {
             let input = e.target;
             //Controlamos para que no se ingrese mayor a 100
             let dscto = input.value;
+
             if (!!dscto) {
                 //Esto es solo porque a veces estando el numero 100 y apretamos una tecla numerica
                 if (dscto.length == 4) {
@@ -253,32 +275,82 @@ var oCompra = {
 
         oCompra.limpiarAbono();
 
-        //Configuración modal consultar proveedor
-
-
         document.getElementById('btnConPro').addEventListener('click', (e) => {
             oModalConsultarProveedor.show().then(response => {
-                document.getElementById('hddIdPro').value = response.idProveedor;
-                document.getElementById('txtRazSoc').value = response.nomProveedor;
-                document.getElementById('cboTipDoc').value = response.idTipoDocumento;
-                document.getElementById('txtNumDoc').value = response.numDocumento;
-
-                ////Nombre del modal
-                //let modal = document.getElementById('modalConsultarProveedor');
-
-                //let myModal = new bootstrap.Modal(modal, {});
-                //myModal.hide();
-
-                //
-                document.getElementById('btnBusPorNum').disabled = false;
-                let txtNumDoc = document.getElementById('txtNumDoc');
-                txtNumDoc.disabled = false;
-                txtNumDoc.maxLength = cbo.options[cbo.selectedIndex].getAttribute("data-maxDigitos");
-                txtNumDoc.focus();
+                oCompra.bindingProveedor(response);
             }).catch(error => {
-        
             });
-         });
+        });
+
+        document.getElementById('btnNuePro').addEventListener('click', (e) => {
+            oModalRegistrarProveedor.show().then(response => {
+                oCompra.bindingProveedor(response);
+            }).catch(error => {
+            });
+        });
+
+        document.getElementById('btnAgrArt').addEventListener('click', () => {
+            oModalConsultarArticulo.show((modelo) => {
+                //Agregamos el artículo encontrado al detalle.
+                oCompra.agregarArticulo(modelo).then(() => {
+
+                }).catch(error => {
+                    oAlerta.alerta({
+                        title: error,
+                        type: "warning",
+                        closeAutomatic: true
+                    });
+                });
+            }, document.getElementById('tblDetalle'));
+        });
+
+        document.getElementById('btnNuevo').addEventListener('click', oCompra.nuevo);
+        document.getElementById('btnGrabar').addEventListener('click', () => {
+            oCompra.validar().then((response) => {
+                oCompra.grabar(response);
+            }).catch(error => {
+                oAlerta.alerta({
+                    title: error,
+                    type: "warning"
+                });
+            })
+        });
+        document.getElementById('btnAnular').addEventListener('click', () => {
+            oAlertaModal.showConfirmation({
+                title: "Artículo",
+                message: "¿Desea guardar los datos?"
+            }).then((ok) => {
+                alert("ok");
+            }).catch((cancelar) => {
+                alert("cancelar");
+            })
+            return;
+        })
+    },
+    bindingProveedor: function (modelo) {
+        let cboTipDoc = document.getElementById('cboTipDoc');
+        let txtNumDoc = document.getElementById('txtNumDoc');
+
+        //bindig con los datos traidos del dialogo de buscar proveedor.
+        document.getElementById('hddIdPro').value = modelo.idProveedor;
+        document.getElementById('txtRazSoc').value = modelo.nomProveedor;
+        cboTipDoc.value = modelo.idTipoDocumento;
+        txtNumDoc.value = modelo.numDocumento;
+
+        //habilitamos el boton buscar por numero doc. altermos el maxlenght del numero doc.
+        document.getElementById('btnBusPorNum').disabled = false;
+        txtNumDoc.disabled = false;
+        txtNumDoc.maxLength = cboTipDoc.options[cboTipDoc.selectedIndex].getAttribute("data-maxDigitos");
+
+        //Si el el tipo doc. del proveedor(consulta, registro) seleccionado esta desabilitado en el combo tipo doc.
+        //de compras, habilitamos todos los documento y limpiamos el comprobante.
+        let options = Array.from(cboTipDoc.querySelectorAll('option'));
+
+        let disabled = options.find(x => x.value == response.idTipoDocumento).disabled;
+        if (disabled) {
+            options.forEach(y => y.disabled = false);
+            document.getElementById('cboTipCom').value = "";
+        }
     },
     limpiarTotales: function () {
         document.getElementById('lblSubTot').textContent = "0.00";
@@ -295,6 +367,10 @@ var oCompra = {
     },
     getIgv: function () {
         return (parseFloat(document.getElementById('txtIgv').value) / 100);
+    },
+    esAcredito: function () {
+        let cbo = document.getElementById('cboForPag');
+        return cbo.options[cbo.selectedIndex].getAttribute("data-flgEvaluaCredito") == "True" ? true : false;
     },
     calcularTotales: function () {
         let table = document.getElementById('tblDetalle');
@@ -341,12 +417,17 @@ var oCompra = {
 
         if (subTotal == 0)
             document.getElementById('txtTasDes').value = "";
+
+        if (oCompra.esAcredito) {
+            oCompra.limpiarAbono();
+            document.getElementById('cboForPag').value = "";
+        }
     },
     obtenerProveedorPorDocumento: function () {
         let cboTipDoc = document.getElementById('cboTipDoc');
         let txtNumDoc = document.getElementById('txtNumDoc');
 
-        if (cboTipDoc.value == '-1') {
+        if (cboTipDoc.value == '') {
             oAlerta.alerta({
                 title: "Debe de seleccionar el tipo de documento",
                 type: "warning"
@@ -389,7 +470,7 @@ var oCompra = {
             })
 
         oHelper.showLoading();
-        axios.get(`/Articulo/GetByBarcode/${txtCodBar.value}`).then((response) => {
+        axios.get(`/Articulo/GetByBarcode/${txtCodBar.value}/${true}`).then((response) => {
             let result = response.data;
             if (!result.Resultado)
                 return;
@@ -442,9 +523,15 @@ var oCompra = {
                 return reject(error);
 
             //Construímos las UM del articulo.
-            let option = '<option value=-1>---Seleccione---</option>';
+            let selected =  '', nroFactor='';
+            if (modelo.jsonListaUm.length == 1) {
+                selected = 'selected';
+                nroFactor = modelo.jsonListaUm[0].NroFactor;
+            }
+
+            let option = '<option value>---Seleccione---</option>';
             modelo.jsonListaUm.forEach(x => {
-                option += `<option value="${x.IdUm}" data-nroFactor="${x.NroFactor}">${x.NomUm}</option>`
+                option += `<option value="${x.IdUm}" ${selected} data-nroFactor="${x.NroFactor}">${x.NomUm}</option>`
             });
 
             let cboUm = `<select class="form-select form-select-sm">${option}</select>`;
@@ -454,9 +541,9 @@ var oCompra = {
             let txtImporte = '<input class="form-control form-control-sm text-end" type="text" style="width:100px"/>';
 
             let td = `<td>${modelo.codigo}</td>
-                    <td>${modelo.descripcion.toString().capitalizeAll()}</td>
+                    <td>${modelo.descripcion}</td>
                     <td>${cboUm}</td>
-                    <td class='text-end'></td>
+                    <td class='text-end'>${nroFactor}</td>
                     <td class='text-end'>${txtPrecio}</td>
                     <td>${txtCantidad}</td>
                     <td>${txtDescuento}</td>
@@ -476,9 +563,9 @@ var oCompra = {
         oCompra.limpiarProveedor(false);
 
         let txtNumDoc = document.getElementById('txtNumDoc');
-        if (cbo.value == "-1") {
-            txtNumDoc.disabled = true;
+        if (cbo.value == "") {
             document.getElementById('btnBusPorNum').disabled = true;
+            txtNumDoc.disabled = true;
         } else {
             document.getElementById('btnBusPorNum').disabled = false;
             txtNumDoc.disabled = false;
@@ -488,7 +575,7 @@ var oCompra = {
     },
     limpiarProveedor: function (bLimpiarTipDoc) {
         if (!!bLimpiarTipDoc)
-            document.getElementById('cboTipDoc').value = "-1";
+            document.getElementById('cboTipDoc').value = "";
 
         document.getElementById('hddIdPro').value = "";
         document.getElementById('txtNumDoc').value = "";
@@ -504,7 +591,7 @@ var oCompra = {
                     type: "warning",
                     closeAutomatic: true
                 });
-                document.getElementById('cboForPag').value = "-1";
+                document.getElementById('cboForPag').value = "";
                 return;
             }; txtFecVen
 
@@ -514,7 +601,7 @@ var oCompra = {
                     title: "Debe de seleccionar la fecha de vencimiento si la forma de pago es a crédito",
                     type: "warning"
                 });
-                document.getElementById('cboForPag').value = "-1";
+                document.getElementById('cboForPag').value = "";
                 return;
             } else {
                 let fechaActual = moment(new Date()).format("DD/MM/YYYY");
@@ -525,7 +612,7 @@ var oCompra = {
                         title: "La fecha de vencimiento no puede ser menor a la fecha actual.",
                         type: "warning"
                     });
-                    document.getElementById('cboForPag').value = "-1";
+                    document.getElementById('cboForPag').value = "";
                     return;
                 }
             };
@@ -544,7 +631,7 @@ var oCompra = {
             }).catch((editar) => {
                 if (!editar) {
                     oCompra.limpiarAbono();
-                    document.getElementById('cboForPag').value = "-1";
+                    document.getElementById('cboForPag').value = "";
                 }
             });
         } else {
@@ -570,6 +657,165 @@ var oCompra = {
         document.getElementById('txtAbono').value = "";
         document.getElementById('txtSaldo').value = "";
         oCompra.modeloAbono = null;
+    },
+    nuevo: function () {
+        document.getElementById('cboTipCom').value = "";
+        document.getElementById('txtSerie').value = "";
+        document.getElementById('txtNumero').value = "";
+        document.getElementById('txtFecEmi').value = "";
+        document.getElementById('txtFecVen').value = "";
+        document.getElementById('cboTipDoc').value = "";
+        document.getElementById('hddIdPro').value = "";
+        let txtNumDoc = document.getElementById('txtNumDoc');
+        txtNumDoc.disabled = true;
+        txtNumDoc.value = "";
+        document.getElementById('txtRazSoc').value = "";
+        document.getElementById('txtCodBar').value = "";
+        document.getElementById('txtIgv').value = document.getElementById('hddIgv').value;
+
+        oHelper.limpiarTabla(document.getElementById('tblDetalle'));
+
+        document.getElementById('cboTipPag').value = "";
+        document.getElementById('cboForPag').value = "";
+        document.getElementById('txtObservacion').value = "";
+
+        oCompra.limpiarAbono();
+
+        let iniTot = (0).toFixed(2);
+        document.getElementById('lblSubTot').textContent = iniTot;
+        document.getElementById('lblTotDes').textContent = iniTot;
+        document.getElementById('lblTotIgv').textContent = iniTot;
+        document.getElementById('lblTotal').textContent = iniTot;
+        document.getElementById('lblTotRed').textContent = iniTot;
+        document.getElementById('lblTotPag').textContent = oHelper.formatoMoneda(oCompra.getSgnMoneda(), 0, 2);
+        document.getElementById('txtTasDes').value = "";
+
+    },
+    validar: function () {
+        return new Promise((resolve, reject) => {
+            if (document.getElementById('cboTipCom').value == "")
+                return reject("Seleccione el tipo de comprobante.");
+
+            if (document.getElementById('txtSerie').value == "")
+                return reject("Ingrese la serie del comprobante.");
+
+            if (document.getElementById('txtNumero').value == "")
+                return reject("Ingrese el n° de documento del comprobante.");
+
+            if (document.getElementById('txtFecEmi').value == "")
+                return reject("Seleccione la fecha de emision del comprobante");
+
+            if (document.getElementById('txtFecVen').value == "")
+                return reject("Seleccione la fecha de vencimiento del comprobante.");
+
+            let fechaEmision = document.getElementById('txtFecEmi').value;
+            let fechaVencimiento = document.getElementById('txtFecVen').value;
+            let fechaActual = moment().format("YYYY/MM/DD");
+
+            if (moment(fechaEmision, 'DD/MM/YYYY').isAfter(moment(fechaActual))) {
+                return reject("La fecha de emisión no puede ser mayor a la fecha actual.");
+            }
+
+            if (moment(fechaVencimiento, 'DD/MM/YYYY').isBefore(moment(fechaEmision, 'DD/MM/YYYY'))) {
+                return reject("La fecha de vencimiento no puede ser menor a la fecha de emisión.");
+            }
+
+            if (document.getElementById('hddIdPro').value == "")
+                return reject("Ingrese el proveedor.");
+
+            if (document.getElementById('cboTipPag').value == "")
+                return reject("Seleccione el tipo de pago.");
+
+            if (document.getElementById('cboTipPag').value == "")
+                return reject("Seleccione el tipo de pago.");
+
+            if (document.getElementById('cboTipPag').value == "")
+                return reject("Seleccione la forma de pago.");
+
+            let table = document.getElementById('tblDetalle');
+            let tbody = table.getElementsByTagName('tbody')[0];
+            let rows = tbody.rows;
+            let count = rows.length;
+
+            if (count == 0)
+                return reject("No existe detalle en la compra.");
+
+            let messageError = "";
+            let detalle = [];
+            for (let i = 0; i < count; i++) {
+                if (rows[i].cells[2].children[0].value == "") {
+                    messageError = `seleccione la unidad de medida del artículo ${rows[i].cells[1].textContent}.`;
+                    break;
+                }
+
+                if (rows[i].cells[4].children[0].value == 0) {
+                    messageError = `Ingrese el precio en el artículo ${rows[i].cells[1].textContent}.`;
+                    break;
+                }
+
+                if (rows[i].cells[5].children[0].value == 0) {
+                    messageError = `Ingrese la cantidad en el artículo ${rows[i].cells[1].textContent}.`;
+                    break;
+                }
+                let tasDescuento = rows[i].cells[6].children[0].value;
+                detalle.push({
+                    IdArticulo: rows[i].cells[9].textContent,
+                    IdUm: rows[i].cells[2].children[0].value,
+                    NroFactor: rows[i].cells[3].textContent,
+                    PrecioArticulo: rows[i].cells[4].children[0].value,
+                    Cantidad: rows[i].cells[5].children[0].value,
+                    TasDescuento: tasDescuento == "" ? 0 : tasDescuento,
+                    Importe: rows[i].cells[7].children[0].value
+                })
+            }
+            if (messageError != "")
+                return reject(messageError);
+
+            return resolve({ jsonArticulo: JSON.stringify(detalle) });
+        })
+    },
+    grabar: function (params) {
+        oAlertaModal.showConfirmation().then((ok) => {
+            alert("ok");
+        }).catch((cancelar) => {
+            alert("cancelar");
+        })
+        return;
+        let jsonArticulo = params.jsonArticulo
+
+        let parameters = {
+            IdTipoComprobante: document.getElementById('cboTipCom').value,
+            NroSerie: document.getElementById('txtSerie').value,
+            NroDocumento: document.getElementById('txtNumero').value,
+            IdProveedor: document.getElementById('hddIdPro').value,
+            IdMoneda: document.getElementById('cboMoneda').value,
+            FecCompra: document.getElementById('txtFecEmi').value,
+            FecVencimiento: document.getElementById('txtFecVen').value,
+            IdTipoPago: document.getElementById('cboTipPag').value,
+            IdTipoCondicionPago: document.getElementById('cboForPag').value,
+            TotBruto: document.getElementById('lblSubTot').textContent,
+            TotDescuento: document.getElementById('lblTotDes').textContent,
+            TasDescuento: document.getElementById('txtTasDes').value == "" ? 0 : document.getElementById('txtTasDes').value,
+            TasIgv: document.getElementById('txtIgv').value,
+            TotImpuesto: document.getElementById('lblTotIgv').textContent,
+            TotCompra: document.getElementById('lblTotal').textContent,
+            JsonArticulos: jsonArticulo,
+            Abono: oCompra.modeloAbono != null ? oCompra.modeloAbono.abono: 0,
+            Saldo: oCompra.modeloAbono != null ? oCompra.modeloAbono.saldo : 0,
+            Observacion: document.getElementById('txtObservacion').value
+        };
+
+        oHelper.showLoading();
+
+        axios.post("/Compra/Register", parameters).then((response) => {
+            let data = response.data;
+            alert("grabado");
+        }).catch((error) => {
+            oAlerta.alerta({
+                title: error.response.data.Message,
+                type: "warning"
+            });
+        }).finally(() => oHelper.hideLoading());
     }
 }
 

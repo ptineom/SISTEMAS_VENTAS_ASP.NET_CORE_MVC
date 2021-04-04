@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AplicacionWeb.SistemaVentas.Models
+namespace AplicacionWeb.SistemaVentas.Models.ViewModel
 {
-    public class MonedaViewModel
+    public class MonedaModel
     {
         public string IdMoneda { get; set; }
         public string NomMoneda { get; set; }

@@ -74,14 +74,14 @@ namespace CapaNegocio
             return _resultado;
         }
 
-        public ResultadoOperacion GetAllByFiltersHelper(string accion, string idSucursal, string tipoFiltro, string filtro)
+        public ResultadoOperacion GetAllByFiltersHelper(string accion, string idSucursal, string tipoFiltro, string filtro, bool flgCompra = false)
         {
             using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
-                    List<ARTICULO> lista = _dao.GetAllByFiltersHelper(con, accion, idSucursal, tipoFiltro, filtro);
+                    List<ARTICULO> lista = _dao.GetAllByFiltersHelper(con, accion, idSucursal, tipoFiltro, filtro, flgCompra);
 
                     if (lista != null)
                     {

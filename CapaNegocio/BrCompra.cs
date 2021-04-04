@@ -44,7 +44,7 @@ namespace CapaNegocio
             return _resultado;
         }
 
-        public ResultadoOperacion Register(DOC_COMPRA oModelo, ref string nroSerie, ref string nroComprobante)
+        public ResultadoOperacion Register(DOC_COMPRA oModelo)
         {
             SqlTransaction trx = null;
             using (SqlConnection con = new SqlConnection(_conexion.getConexion))
@@ -53,7 +53,7 @@ namespace CapaNegocio
                 {
                     con.Open();
                     trx = con.BeginTransaction();
-                    _dao.Register(con, trx, oModelo, ref nroSerie, ref nroComprobante);
+                    _dao.Register(con, trx, oModelo);
                     _resultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
                     trx.Commit();
                 }

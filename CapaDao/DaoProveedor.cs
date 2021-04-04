@@ -94,8 +94,13 @@ namespace CapaDao
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.CommandTimeout = 0;
                 cmd.Parameters.Add("@ACCION", SqlDbType.VarChar, 3).Value = oModelo.ACCION;
-                cmd.Parameters.Add("@ID_PROVEEDOR", SqlDbType.VarChar, 8).Value = oModelo.ID_PROVEEDOR == "" ? (object)DBNull.Value: oModelo.ID_PROVEEDOR;
-                cmd.Parameters.Add("@ID_TIPO_DOCUMENTO", SqlDbType.Int).Value = oModelo.ID_TIPO_DOCUMENTO == -1 ? (object)DBNull.Value : oModelo.ID_TIPO_DOCUMENTO;
+
+                SqlParameter paramIdProveedor = new SqlParameter("@ID_PROVEEDOR", SqlDbType.VarChar, 8);
+                paramIdProveedor.Direction = ParameterDirection.InputOutput;
+                paramIdProveedor.Value = oModelo.ID_PROVEEDOR == "" ? (object)DBNull.Value : oModelo.ID_PROVEEDOR;
+                cmd.Parameters.Add(paramIdProveedor);
+
+                cmd.Parameters.Add("@ID_TIPO_DOCUMENTO", SqlDbType.Int).Value = oModelo.ID_TIPO_DOCUMENTO == null ? (object)DBNull.Value : oModelo.ID_TIPO_DOCUMENTO;
                 cmd.Parameters.Add("@NRO_DOCUMENTO", SqlDbType.VarChar, 20).Value = oModelo.NRO_DOCUMENTO == "" ? (object)DBNull.Value : oModelo.NRO_DOCUMENTO;
                 cmd.Parameters.Add("@DIR_PROVEEDOR", SqlDbType.VarChar, 100).Value = oModelo.DIR_PROVEEDOR == "" ? (object)DBNull.Value : oModelo.DIR_PROVEEDOR;
                 cmd.Parameters.Add("@TEL_PROVEEDOR", SqlDbType.VarChar, 20).Value = oModelo.TEL_PROVEEDOR == "" ? (object)DBNull.Value : oModelo.TEL_PROVEEDOR;
@@ -108,6 +113,9 @@ namespace CapaDao
                 cmd.Parameters.Add("@ID_USUARIO_REGISTRO", SqlDbType.VarChar, 20).Value = oModelo.ID_USUARIO_REGISTRO;
                 cmd.ExecuteNonQuery();
                 bExito = true;
+
+                if (oModelo.ACCION == "INS")
+                    oModelo.ID_PROVEEDOR = cmd.Parameters["@ID_PROVEEDOR"].Value.ToString();
             }
             return bExito;
         }

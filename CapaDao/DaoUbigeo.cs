@@ -10,7 +10,7 @@ namespace CapaDao
 {
     public class DaoUbigeo
     {
-        public List<UBIGEO> combosDepartamentos(SqlConnection con)
+        public List<UBIGEO> GetAllDepartaments(SqlConnection con)
         {
             List<UBIGEO> listaDepartamento = null;
             UBIGEO oDepartamento = null;
@@ -38,7 +38,7 @@ namespace CapaDao
             }
             return listaDepartamento;
         }
-        public List<UBIGEO> combosProvincias(SqlConnection con, string idDepartamento)
+        public List<UBIGEO> GetAllProvinces(SqlConnection con, string idDepartamento)
         {
             List<UBIGEO> listaProvincia = null;
             UBIGEO oProvincia = null;
@@ -67,7 +67,7 @@ namespace CapaDao
             }
             return listaProvincia;
         }
-        public List<UBIGEO> combosDistritos(SqlConnection con, string idProvincia)
+        public List<UBIGEO> GetAllDistricts(SqlConnection con, string idProvincia)
         {
             List<UBIGEO> listaDistrito = null;
             UBIGEO oDistrito = null;

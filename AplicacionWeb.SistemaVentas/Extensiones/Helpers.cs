@@ -7,7 +7,7 @@ namespace AplicacionWeb.SistemaVentas.Extensiones
 {
     public static class Helpers
     {
-        public static object getValueProperty(this object objeto, string propiedad)
+        public static object GetValueProperty(this object objeto, string propiedad)
         {
             var propertyInfo = objeto.GetType().GetProperty(propiedad);
             return propertyInfo.GetValue(objeto, null);

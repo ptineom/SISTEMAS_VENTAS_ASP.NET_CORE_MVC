@@ -54,11 +54,10 @@ namespace CapaDao
             return lista;
         }
 
-        public List<ARTICULO> GetAllByFiltersHelper(SqlConnection con, string accion, string idSucursal, string tipoFiltro, string filtro)
+        public List<ARTICULO> GetAllByFiltersHelper(SqlConnection con, string accion, string idSucursal, string tipoFiltro, string filtro, bool flgCompra)
         {
             List<ARTICULO> lista = null;
             ARTICULO modelo = null;
-            MONEDA oMoneda = null;
             using (SqlCommand cmd = new SqlCommand("PA_MANT_ARTICULO", con))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
@@ -66,6 +65,8 @@ namespace CapaDao
                 cmd.Parameters.Add("@ID_SUCURSAL", SqlDbType.VarChar, 4).Value = idSucursal;
                 cmd.Parameters.Add("@TIPO_FILTRO", SqlDbType.VarChar, 20).Value = string.IsNullOrEmpty(tipoFiltro) ? (object)DBNull.Value : tipoFiltro;
                 cmd.Parameters.Add("@FILTRO", SqlDbType.VarChar, 160).Value = filtro;
+                cmd.Parameters.Add("@FLG_COMPRA", SqlDbType.Bit).Value = flgCompra;
+
                 SqlDataReader reader = cmd.ExecuteReader();
                 if (reader != null)
                 {
@@ -87,7 +88,7 @@ namespace CapaDao
                             modelo.PRECIO_COMPRA = reader.GetDecimal(reader.GetOrdinal("PRECIO_COMPRA"));
                             modelo.STOCK_ACTUAL = reader.GetDecimal(reader.GetOrdinal("STOCK_ACTUAL"));
                             modelo.STOCK_MINIMO = reader.GetDecimal(reader.GetOrdinal("STOCK_MINIMO"));
-                            modelo.DESCUENTO1 = reader.GetDecimal(reader.GetOrdinal("DESCUENTO1"));
+                            modelo.DESCUENTO1 = reader.IsDBNull(reader.GetOrdinal("DESCUENTO1")) ? default(decimal) : reader.GetDecimal(reader.GetOrdinal("DESCUENTO1"));
                             modelo.ID_UM = reader.IsDBNull(reader.GetOrdinal("ID_UM")) ? string.Empty : reader.GetString(reader.GetOrdinal("ID_UM"));
                             modelo.NOM_UM = reader.IsDBNull(reader.GetOrdinal("NOM_UM")) ? string.Empty : reader.GetString(reader.GetOrdinal("NOM_UM"));
                             modelo.NRO_FACTOR = reader.IsDBNull(reader.GetOrdinal("NRO_FACTOR")) ? default(decimal) : reader.GetDecimal(reader.GetOrdinal("NRO_FACTOR"));

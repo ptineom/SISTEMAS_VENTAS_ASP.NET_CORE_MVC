@@ -65,6 +65,10 @@ table.dataTable{
     margin-top:0px !important;
 }
 
+.modal-footer {
+    background-color: #FAFAFA
+}
+
 body {
     background: #fafafa;
 }
