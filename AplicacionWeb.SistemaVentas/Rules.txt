@@ -1,0 +1,5 @@
+﻿0.- La fecha de vencimiento del documento hace referencia al día limite que debe realizar el pago en caso nose haya cancelado 
+	en ese momento, si pasa del día limite(fecha de vencimiento) el emisor de la factura puede solicitar una mora o ejercer un reclamo judicial.
+1.- La fecha de cancelacion en abonar de ventas y compras hace referencia al día que piensa abonar el siguiente pago o cobranza, 
+	logico que debe ser antes de cumplirse la fecha de vencimiento del documento.
+2.- la misma funcion tendra en cobranzas y pagos, se agregará la efcha de cancelacion si es que aun dejara alguna deuda.

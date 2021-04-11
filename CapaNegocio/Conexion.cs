@@ -35,7 +35,7 @@ namespace CapaNegocio
         {
             get
             {
-                return ViewHelper.getValueConfiguration("CONNECTION_STRINGS:CONEXION_SQL");
+                return ViewHelper.GetValueConfiguration("CONNECTION_STRINGS:CONEXION_SQL");
             }
         }
     }

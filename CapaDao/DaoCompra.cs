@@ -184,6 +184,7 @@ namespace CapaDao
                 cmd.Parameters.Add("@ID_PROVEEDOR", SqlDbType.VarChar, 8).Value = oModelo.ID_PROVEEDOR;
                 cmd.Parameters.Add("@ID_MONEDA", SqlDbType.VarChar, 3).Value = oModelo.ID_MONEDA;
                 cmd.Parameters.Add("@FEC_DOCUMENTO", SqlDbType.DateTime).Value = oModelo.FEC_DOCUMENTO;
+                cmd.Parameters.Add("@FEC_VENCIMIENTO", SqlDbType.DateTime).Value = oModelo.FEC_VENCIMIENTO;
                 cmd.Parameters.Add("@OBS_COMPRA", SqlDbType.VarChar, 200).Value = string.IsNullOrEmpty(oModelo.OBS_COMPRA) ? (object)DBNull.Value : oModelo.OBS_COMPRA;
                 cmd.Parameters.Add("@TOT_BRUTO", SqlDbType.Decimal).Value = oModelo.TOT_BRUTO == 0 ? (object)DBNull.Value : oModelo.TOT_BRUTO;
                 cmd.Parameters.Add("@TOT_DESCUENTO", SqlDbType.Decimal).Value = oModelo.TOT_DESCUENTO == 0 ? (object)DBNull.Value : oModelo.TOT_DESCUENTO;
@@ -197,13 +198,12 @@ namespace CapaDao
                 cmd.Parameters.Add("@JSON_ARTICULOS", SqlDbType.VarChar,-1).Value = oModelo.JSON_ARTICULOS;
                 cmd.Parameters.Add("@ABONO", SqlDbType.Decimal).Value = oModelo.ABONO == 0 ? (object)DBNull.Value : oModelo.ABONO;
                 cmd.Parameters.Add("@SALDO", SqlDbType.Decimal).Value = oModelo.SALDO == 0 ? (object)DBNull.Value : oModelo.SALDO;
-                cmd.Parameters.Add("@FECHA_CANCELACION", SqlDbType.DateTime).Value = oModelo.FECHA_CANCELACION == "" ? (object)DBNull.Value : oModelo.FECHA_CANCELACION;
+                cmd.Parameters.Add("@FEC_CANCELACION", SqlDbType.DateTime).Value = oModelo.FEC_CANCELACION == "" ? (object)DBNull.Value : oModelo.FEC_CANCELACION;
                 cmd.Parameters.Add("@FLG_RETIRAR_CAJA", SqlDbType.Bit).Value = oModelo.FLG_RETIRAR_CAJA;
                 cmd.Parameters.Add("@MONTO_RETIRA_CAJA", SqlDbType.Decimal).Value = oModelo.MONTO_RETIRA_CAJA == 0 ? (object)DBNull.Value : oModelo.MONTO_RETIRA_CAJA;
                 cmd.Parameters.Add("@ID_CAJA_CA", SqlDbType.VarChar, 2).Value = string.IsNullOrEmpty(oModelo.ID_CAJA_CA) ? (object)DBNull.Value : oModelo.ID_CAJA_CA;
                 cmd.Parameters.Add("@ID_USUARIO_CA", SqlDbType.VarChar, 20).Value = string.IsNullOrEmpty(oModelo.ID_USUARIO_CA) ? (object)DBNull.Value : oModelo.ID_USUARIO_CA;
                 cmd.Parameters.Add("@CORRELATIVO_CA", SqlDbType.Int).Value = oModelo.CORRELATIVO_CA == 0 ? (object)DBNull.Value : oModelo.CORRELATIVO_CA;
-
                 
                 cmd.ExecuteNonQuery();
                 bExito = true;
@@ -212,8 +212,8 @@ namespace CapaDao
             return bExito;
         }
 
-        public bool Delete(SqlConnection con, SqlTransaction trx, string idSucursal, string idTipoComprobante,
-    string nroSerie, int nroDocumento, string idProveedor, string idUsuario)
+        public bool Delete(SqlConnection con, SqlTransaction trx, string idSucursal, string idUsuario, string idTipoComprobante,
+    string nroSerie, int nroDocumento, string idProveedor)
         {
             bool bExito;
             using (SqlCommand cmd = new SqlCommand("PA_MANT_COMPRAS", con, trx))
@@ -234,7 +234,7 @@ namespace CapaDao
         }
 
         public List<DOC_COMPRA_LISTADO> GetAllByFilters(SqlConnection con, string idSucursal, string idTipoComprobante,
-            string nroSerie, int nroDocumento, string fechaInicio, string fechaFinal, int idEstado)
+            string nroSerie, int nroDocumento, string idProveedor, string fechaInicio, string fechaFinal, int idEstado)
         {
             List<DOC_COMPRA_LISTADO> lista = null;
             DOC_COMPRA_LISTADO modelo = null;
@@ -242,13 +242,14 @@ namespace CapaDao
             {
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.Add("@ACCION", SqlDbType.VarChar, 3).Value = "SEL";
-                cmd.Parameters.Add("@ID_SUCURSAL", SqlDbType.VarChar, 2).Value = idSucursal;
+                cmd.Parameters.Add("@ID_SUCURSAL", SqlDbType.VarChar, 2).Value = idSucursal; 
                 cmd.Parameters.Add("@ID_TIPO_COMPROBANTE", SqlDbType.VarChar, 2).Value = string.IsNullOrEmpty(idTipoComprobante) ? (object)DBNull.Value : idTipoComprobante;
                 cmd.Parameters.Add("@NRO_SERIE", SqlDbType.VarChar,6).Value = string.IsNullOrEmpty(nroSerie ) ? (object)DBNull.Value : nroSerie;
                 cmd.Parameters.Add("@NRO_DOCUMENTO", SqlDbType.Int).Value = nroDocumento == 0 ? (object)DBNull.Value : nroDocumento;
-                cmd.Parameters.Add("@FECHA_INICIO", SqlDbType.VarChar, 10).Value = string.IsNullOrEmpty(fechaInicio) ? (object)DBNull.Value : fechaInicio;
-                cmd.Parameters.Add("@FECHA_FINAL", SqlDbType.VarChar, 10).Value = string.IsNullOrEmpty(fechaFinal) ? (object)DBNull.Value : fechaFinal;
-                cmd.Parameters.Add("@ID_ESTADO", SqlDbType.Int).Value = idEstado;
+                cmd.Parameters.Add("@ID_PROVEEDOR", SqlDbType.VarChar, 2).Value = string.IsNullOrEmpty(idProveedor) ? (object)DBNull.Value : idProveedor;
+                cmd.Parameters.Add("@FECHA_INICIO", SqlDbType.VarChar, 10).Value = fechaInicio;
+                cmd.Parameters.Add("@FECHA_FINAL", SqlDbType.VarChar, 10).Value = fechaFinal;
+                cmd.Parameters.Add("@ID_ESTADO", SqlDbType.Int).Value = idEstado == 0 ? (object)DBNull.Value: idEstado;
                 SqlDataReader reader = cmd.ExecuteReader();
                 if (reader != null)
                 {
@@ -271,7 +272,7 @@ namespace CapaDao
                             modelo.NOM_TIPO_CONDICION_PAGO = reader.GetString(reader.GetOrdinal("NOM_TIPO_CONDICION_PAGO"));
                             modelo.EST_DOCUMENTO = reader.GetInt32(reader.GetOrdinal("EST_DOCUMENTO"));
                             modelo.NOM_ESTADO = reader.GetString(reader.GetOrdinal("NOM_ESTADO"));
-                            modelo.FLG_NO_EVALUA_CREDITO = reader.GetBoolean(reader.GetOrdinal("FLG_NO_EVALUA_CREDITO"));
+                            modelo.FLG_EVALUA_CREDITO = reader.GetBoolean(reader.GetOrdinal("FLG_EVALUA_CREDITO"));
                             lista.Add(modelo);
                         }
                     }
@@ -282,12 +283,12 @@ namespace CapaDao
             return lista;
         }
 
-        public DOC_COMPRA_INFORME GetById(SqlConnection con, string idSucursal, string idTipoComprobante, string nroSerie,
+        public DOC_COMPRA GetById(SqlConnection con, string idSucursal, string idTipoComprobante, string nroSerie,
             int nroDocumento, string idProveedor)
         {
-            DOC_COMPRA_INFORME modelo = null;
-            List<DOC_COMPRA_DETALLE> listaDetalle = null;
-            DOC_COMPRA_DETALLE detalle = null;
+            DOC_COMPRA docCompra = null;
+            DOC_COMPRA_DETALLE docCompraDetalle = null;
+            List<DOC_COMPRA_DETALLE> listaDocCompraDetalle = null;
             using (SqlCommand cmd = new SqlCommand("PA_MANT_COMPRAS", con))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
@@ -304,55 +305,54 @@ namespace CapaDao
                     {
                         if (reader.Read())
                         {
-                            modelo = new DOC_COMPRA_INFORME();
-                            modelo.COMPROBANTE = reader.GetString(reader.GetOrdinal("COMPROBANTE"));
-                            modelo.ID_TIPO_COMPROBANTE = reader.GetString(reader.GetOrdinal("ID_TIPO_COMPROBANTE"));
-                            modelo.NRO_SERIE = reader.GetString(reader.GetOrdinal("NRO_SERIE"));
-                            modelo.NRO_DOCUMENTO = reader.GetInt32(reader.GetOrdinal("NRO_DOCUMENTO"));
-                            modelo.ID_PROVEEDOR = reader.GetString(reader.GetOrdinal("ID_PROVEEDOR"));
-                            modelo.NOM_PROVEEDOR = reader.GetString(reader.GetOrdinal("NOM_PROVEEDOR"));
-                            modelo.DIR_PROVEEDOR = reader.IsDBNull(reader.GetOrdinal("DIR_PROVEEDOR")) ? default(string) : reader.GetString(reader.GetOrdinal("DIR_PROVEEDOR"));
-                            modelo.ID_TIPO_DOCUMENTO = reader.GetInt32(reader.GetOrdinal("ID_TIPO_DOCUMENTO"));
-                            modelo.NRO_DOCUMENTO_PROVEEDOR = reader.GetString(reader.GetOrdinal("NRO_DOCUMENTO_PROVEEDOR"));
-                            modelo.FEC_DOCUMENTO = reader.GetString(reader.GetOrdinal("FEC_DOCUMENTO"));
-                            modelo.ID_MONEDA = reader.GetString(reader.GetOrdinal("ID_MONEDA"));
-                            modelo.ID_TIPO_PAGO = reader.IsDBNull(reader.GetOrdinal("ID_TIPO_PAGO")) ? "-1" : reader.GetString(reader.GetOrdinal("ID_TIPO_PAGO"));
-                            modelo.ID_TIPO_CONDICION_PAGO = reader.IsDBNull(reader.GetOrdinal("ID_TIPO_CONDICION_PAGO")) ? "-1" : reader.GetString(reader.GetOrdinal("ID_TIPO_CONDICION_PAGO"));
-                            modelo.OBS_COMPRA = reader.IsDBNull(reader.GetOrdinal("OBS_COMPRA")) ? default(string) : reader.GetString(reader.GetOrdinal("OBS_COMPRA"));
-                            modelo.TOT_BRUTO = reader.GetDecimal(reader.GetOrdinal("TOT_BRUTO"));
-                            modelo.TOT_IMPUESTO = reader.GetDecimal(reader.GetOrdinal("TOT_IMPUESTO"));
-                            modelo.TOT_COMPRA = reader.GetDecimal(reader.GetOrdinal("TOT_COMPRA"));
-                            modelo.TOT_COMPRA_REDONDEO = reader.GetDecimal(reader.GetOrdinal("TOT_COMPRA_REDONDEO"));
-                            modelo.TOT_DESCUENTO = reader.GetDecimal(reader.GetOrdinal("TOT_DESCUENTO"));
-                            modelo.TAS_DESCUENTO = reader.GetDecimal(reader.GetOrdinal("TAS_DESCUENTO"));
-                            modelo.TAS_IGV = reader.GetDecimal(reader.GetOrdinal("TAS_IGV"));
-                            modelo.EST_DOCUMENTO = reader.GetInt32(reader.GetOrdinal("EST_DOCUMENTO"));
-                            modelo.SGN_MONEDA = reader.GetString(reader.GetOrdinal("SGN_MONEDA"));
-                            modelo.NOM_TIPO_PAGO = reader.GetString(reader.GetOrdinal("NOM_TIPO_PAGO"));
-                            modelo.NOM_TIPO_CONDICION_PAGO = reader.GetString(reader.GetOrdinal("NOM_TIPO_CONDICION_PAGO"));
-                            modelo.TEL_PROVEEDOR = reader.GetString(reader.GetOrdinal("TEL_PROVEEDOR"));
+                            docCompra = new DOC_COMPRA();
+                            docCompra.COMPROBANTE = reader.GetString(reader.GetOrdinal("COMPROBANTE"));
+                            docCompra.ID_TIPO_COMPROBANTE = reader.GetString(reader.GetOrdinal("ID_TIPO_COMPROBANTE"));
+                            docCompra.NRO_SERIE = reader.GetString(reader.GetOrdinal("NRO_SERIE"));
+                            docCompra.NRO_DOCUMENTO = reader.GetInt32(reader.GetOrdinal("NRO_DOCUMENTO"));
+                            docCompra.ID_PROVEEDOR = reader.GetString(reader.GetOrdinal("ID_PROVEEDOR"));
+                            docCompra.NOM_PROVEEDOR = reader.GetString(reader.GetOrdinal("NOM_PROVEEDOR"));
+                            docCompra.DIR_PROVEEDOR = reader.IsDBNull(reader.GetOrdinal("DIR_PROVEEDOR")) ? default(string) : reader.GetString(reader.GetOrdinal("DIR_PROVEEDOR"));
+                            docCompra.ID_TIPO_DOCUMENTO = reader.GetInt32(reader.GetOrdinal("ID_TIPO_DOCUMENTO"));
+                            docCompra.NRO_DOCUMENTO_PROVEEDOR = reader.GetString(reader.GetOrdinal("NRO_DOCUMENTO_PROVEEDOR"));
+                            docCompra.FEC_DOCUMENTO = reader.GetString(reader.GetOrdinal("FEC_DOCUMENTO"));
+                            docCompra.FEC_VENCIMIENTO = reader.GetString(reader.GetOrdinal("FEC_VENCIMIENTO"));
+                            docCompra.ID_MONEDA = reader.GetString(reader.GetOrdinal("ID_MONEDA"));
+                            docCompra.ID_TIPO_PAGO = reader.IsDBNull(reader.GetOrdinal("ID_TIPO_PAGO")) ? "" : reader.GetString(reader.GetOrdinal("ID_TIPO_PAGO"));
+                            docCompra.ID_TIPO_CONDICION_PAGO = reader.IsDBNull(reader.GetOrdinal("ID_TIPO_CONDICION_PAGO")) ? "" : reader.GetString(reader.GetOrdinal("ID_TIPO_CONDICION_PAGO"));
+                            docCompra.OBS_COMPRA = reader.IsDBNull(reader.GetOrdinal("OBS_COMPRA")) ? default(string) : reader.GetString(reader.GetOrdinal("OBS_COMPRA"));
+                            docCompra.TOT_BRUTO = reader.GetDecimal(reader.GetOrdinal("TOT_BRUTO"));
+                            docCompra.TOT_IMPUESTO = reader.GetDecimal(reader.GetOrdinal("TOT_IMPUESTO"));
+                            docCompra.TOT_COMPRA = reader.GetDecimal(reader.GetOrdinal("TOT_COMPRA"));
+                            docCompra.TOT_COMPRA_REDONDEO = reader.GetDecimal(reader.GetOrdinal("TOT_COMPRA_REDONDEO"));
+                            docCompra.TOT_DESCUENTO = reader.GetDecimal(reader.GetOrdinal("TOT_DESCUENTO"));
+                            docCompra.TAS_DESCUENTO = reader.GetDecimal(reader.GetOrdinal("TAS_DESCUENTO"));
+                            docCompra.TAS_IGV = reader.GetDecimal(reader.GetOrdinal("TAS_IGV"));
+                            docCompra.EST_DOCUMENTO = reader.GetInt32(reader.GetOrdinal("EST_DOCUMENTO"));
+                            docCompra.SGN_MONEDA = reader.GetString(reader.GetOrdinal("SGN_MONEDA"));
+                            docCompra.NOM_ESTADO = reader.GetString(reader.GetOrdinal("NOM_ESTADO"));
                         }
                         if (reader.NextResult())
                         {
                             if (reader.HasRows)
                             {
-                                listaDetalle = new List<DOC_COMPRA_DETALLE>();
+                                listaDocCompraDetalle = new List<DOC_COMPRA_DETALLE>();
                                 while (reader.Read())
                                 {
-                                    detalle = new DOC_COMPRA_DETALLE();
-                                    detalle.ID_ARTICULO = reader.GetString(reader.GetOrdinal("ID_ARTICULO"));
-                                    detalle.NOM_ARTICULO = reader.GetString(reader.GetOrdinal("NOM_ARTICULO"));
-                                    detalle.PRECIO_ARTICULO = reader.GetDecimal(reader.GetOrdinal("PRECIO_ARTICULO"));
-                                    detalle.PRECIO_COMPRA = reader.GetDecimal(reader.GetOrdinal("PRECIO_COMPRA"));
-                                    detalle.ID_UM = reader.GetString(reader.GetOrdinal("ID_UM"));
-                                    detalle.NOM_UM = reader.GetString(reader.GetOrdinal("NOM_UM"));
-                                    detalle.CANTIDAD = reader.GetDecimal(reader.GetOrdinal("CANTIDAD"));
-                                    detalle.TAS_DESCUENTO = reader.GetDecimal(reader.GetOrdinal("TAS_DESCUENTO"));
-                                    detalle.IMPORTE = reader.GetDecimal(reader.GetOrdinal("IMPORTE"));
-                                    detalle.NRO_FACTOR = reader.GetDecimal(reader.GetOrdinal("NRO_FACTOR"));
-                                    listaDetalle.Add(detalle);
+                                    docCompraDetalle = new DOC_COMPRA_DETALLE();
+                                    docCompraDetalle.ID_ARTICULO = reader.GetString(reader.GetOrdinal("ID_ARTICULO"));
+                                    docCompraDetalle.NOM_ARTICULO = reader.GetString(reader.GetOrdinal("NOM_ARTICULO"));
+                                    docCompraDetalle.PRECIO_ARTICULO = reader.GetDecimal(reader.GetOrdinal("PRECIO_ARTICULO"));
+                                    docCompraDetalle.ID_UM = reader.GetString(reader.GetOrdinal("ID_UM"));
+                                    docCompraDetalle.NOM_UM = reader.GetString(reader.GetOrdinal("NOM_UM"));
+                                    docCompraDetalle.CANTIDAD = reader.GetDecimal(reader.GetOrdinal("CANTIDAD"));
+                                    docCompraDetalle.TAS_DESCUENTO = reader.GetDecimal(reader.GetOrdinal("TAS_DESCUENTO"));
+                                    docCompraDetalle.IMPORTE = reader.GetDecimal(reader.GetOrdinal("IMPORTE"));
+                                    docCompraDetalle.NRO_FACTOR = reader.GetDecimal(reader.GetOrdinal("NRO_FACTOR"));
+                                    docCompraDetalle.CODIGO_BARRA = reader.IsDBNull(reader.GetOrdinal("CODIGO_BARRA")) ? string.Empty : reader.GetString(reader.GetOrdinal("CODIGO_BARRA"));
+                                    listaDocCompraDetalle.Add(docCompraDetalle);
                                 }
-                                modelo.detalle = listaDetalle;
+                                docCompra.detalle = listaDocCompraDetalle;
                             }
                         }
                     }
@@ -360,7 +360,7 @@ namespace CapaDao
                 reader.Close();
                 reader.Dispose();
             }
-            return modelo;
+            return docCompra;
         }
     }
 }

@@ -15,6 +15,7 @@ namespace Entidades
         public string ID_PROVEEDOR { get; set; }
         public string ID_MONEDA { get; set; }
         public string FEC_DOCUMENTO { get; set; }
+        public string FEC_VENCIMIENTO { get; set; }
         public int EST_DOCUMENTO { get; set; }
         public string OBS_COMPRA { get; set; }
         public decimal TOT_BRUTO { get; set; }
@@ -31,8 +32,12 @@ namespace Entidades
         // 
         public decimal ABONO { get; set; }
         public decimal SALDO { get; set; }
-        public string FECHA_CANCELACION { get; set; }
+        public string FEC_CANCELACION { get; set; }
         public string JSON_ARTICULOS { get; set; }
+
+        public string COMPROBANTE { get; set; }
+
+        public string NOM_ESTADO { get; set; }
 
         public List<TIPO_DOCUMENTO> listaDocumentos { get; set; }
         public List<TIPO_COMPROBANTE> listaComprobantes { get; set; }
@@ -60,16 +65,14 @@ namespace Entidades
     }
     public class DOC_COMPRA_LISTADO : DOC_COMPRA
     {
-        public string COMPROBANTE { get; set; }
         public string DOC_PROVEEDOR { get; set; }
 
         public string NOM_TIPO_CONDICION_PAGO { get; set; }
-        public string NOM_ESTADO { get; set; }
-        public bool FLG_NO_EVALUA_CREDITO { get; set; }
+
+        public bool FLG_EVALUA_CREDITO { get; set; }
     }
     public class DOC_COMPRA_INFORME: DOC_COMPRA
     {
-        public string COMPROBANTE { get; set; }
         public string NOM_TIPO_CONDICION_PAGO { get; set; }
         public string NOM_TIPO_PAGO { get; set; }
         public string TEL_PROVEEDOR { get; set; }
@@ -85,7 +88,8 @@ namespace Entidades
         public decimal TAS_DESCUENTO { get; set; }
         public decimal IMPORTE { get; set; }
         public decimal NRO_FACTOR { get; set; }
-        public string XML_UM { get; set; }
+        public string JSON_UM { get; set; }
         public decimal PRECIO_COMPRA { get; set; }
+        public string CODIGO_BARRA { get; set; }
     }
 }

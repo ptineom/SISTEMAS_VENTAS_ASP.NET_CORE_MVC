@@ -17,14 +17,14 @@ namespace Helper
             
         }
 
-        public static string getValueConfiguration(string section)
+        public static string GetValueConfiguration(string section)
         {
             var path = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json");
             var configBuilder = new ConfigurationBuilder();
             configBuilder.AddJsonFile(path, false);
             return configBuilder.Build().GetSection(section).Value;
         }
-        public static string getNroComprobante(string numero)
+        public static string GetNroComprobante(string numero)
         {
             int tamanioMax = 6;
             string cadena = $"00000{numero}";

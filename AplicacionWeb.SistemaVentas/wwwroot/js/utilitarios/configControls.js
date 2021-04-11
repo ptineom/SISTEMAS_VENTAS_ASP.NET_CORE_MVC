@@ -144,19 +144,16 @@ var oConfigControls = {
         }
 
         let bLengthChange = false;
-        let arrLengthMenu = null
-
         if (objeto.bLengthChange != undefined) {
             if (typeof objeto.bLengthChange !== 'boolean')
-                throw new Error("Tipo de dato incorrecto en la propiedad bAutoWidth");
+                throw new Error("Tipo de dato incorrecto en la propiedad bLengthChange");
 
             bLengthChange = objeto.bLengthChange;
-
-            if (bLengthChange) {
-                if (window.innerWidth < 1200)
-                    arrLengthMenu = [5, 10, 25, 50];
-            }
         }
+
+        let arrLengthMenu = [10, 25, 50]
+        if (window.innerWidth < 1200)
+            arrLengthMenu = [5, 10, 25, 50];
 
         var config = {
             bSort: true,

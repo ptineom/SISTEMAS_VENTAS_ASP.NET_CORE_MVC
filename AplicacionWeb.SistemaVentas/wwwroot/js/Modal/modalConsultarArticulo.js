@@ -84,7 +84,6 @@ var oModalConsultarArticulo = {
         oModalConsultarArticulo.instance.show();
     },
     initTblConsultarArticulo: function () {
-        debugger;
         let aoColumns = [
             { "bSortable": false },
             { "bSortable": true },

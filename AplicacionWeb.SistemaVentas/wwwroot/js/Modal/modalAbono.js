@@ -7,13 +7,15 @@ var oModalAbono = {
     resolve: null,
     reject: null,
     fechaEmision: '',
+    fechaVencimiento: '',
     show: function (modelo, flgEditar) {
         //flgEditar: true => Edición del monto ya ingresado.
         let sgnMoneda = modelo.total.split(' ')[0];
         let abono = modelo.abono == 0 ? '' : modelo.abono;
         let saldo = modelo.saldo == 0 ? '' : oHelper.formatoMoneda(sgnMoneda, modelo.saldo, 2);
-        let fechaVencimiento = modelo.fechaVencimiento == '' ? '' : modelo.fechaVencimiento;
+
         oModalAbono.fechaEmision = modelo.fechaEmision;
+        oModalAbono.fechaCancelacion = modelo.fechaCancelacion;
 
         let html = `<div class="modal fade" id="modalAbono" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" >
                         <div class="modal-dialog modal-sm">
@@ -38,10 +40,10 @@ var oModalAbono = {
                                                 <input class="form-control form-control-sm text-end" name='txtAbono' value='${abono}' type="text" autocomplete="off" id="txtAbonoModalAbono">
                                             </div>
                                             <div class="col-12">
-                                                <label class="form-label mb-1">Fecha de vencimiento</label>
+                                                <label class="form-label mb-1">Fecha a cancelar</label>
                                                 <div class="input-group input-group-sm date">
                                                     <span class="input-group-text" id="basic-addon2"><i class="bi bi-calendar-check"></i></span>
-                                                    <input type="text" class="form-control date-picker" name='txtFechaModalAbono' value='${fechaVencimiento}' id="txtFechaModalAbono" data-date-format="dd/mm/yyyy" autocomplete="off">
+                                                    <input type="text" class="form-control date-picker" name='txtFechaModalAbono' value='${oModalAbono.fechaCancelacion}' id="txtFechaModalAbono" data-date-format="dd/mm/yyyy" autocomplete="off">
                                                 </div>
                                              </div>
                                         </div>
@@ -124,22 +126,21 @@ var oModalAbono = {
 
         }, "Debe de ingresar el monto a abonar.");
 
-        $.validator.addMethod("notLessDateCurrent", function (value, element) {
-            let fechaActual = moment(new Date()).format("DD/MM/YYYY");
-            fechaActual = moment(fechaActual, "DD/MM/YYYY");
+        $.validator.addMethod("notOlderDateExpiration", function (value, element) {
+            let fechaVencimiento = dayjs(oModalAbono.fechaVencimiento, "DD/MM/YYYY");
 
-            //Si la fecha es menor a la fecha actual retorna false
-            if (moment(value, "DD/MM/YYYY").isBefore(fechaActual)) 
+            //Si la fecha es mayor a la fecha de vencimiento retorna false
+            if (dayjs(value, "DD/MM/YYYY").isAfter(fechaVencimiento)) 
                 return false;
 
             return true;
-        }, "La fecha ingresada no debe ser menor a la fecha actual.");
+        }, "La fecha ingresada no debe ser mayor a la fecha de vencimiento.");
 
         $.validator.addMethod("notLessDateIssue", function (value, element) {
-            let fechaEmision = moment(oModalAbono.fechaEmision, "DD/MM/YYYY");
+            let fechaEmision = dayjs(oModalAbono.fechaEmision, "DD/MM/YYYY");
 
             //Si la fecha es menor que la fecha de emision retorna false
-            if (moment(value, "DD/MM/YYYY").isBefore(fechaEmision)) 
+            if (dayjs(value, "DD/MM/YYYY").isBefore(fechaEmision)) 
                 return false;
 
             return true;
@@ -149,7 +150,7 @@ var oModalAbono = {
             rules: {
                 txtFechaModalAbono: {
                     required: true,
-                    notLessDateCurrent: true,
+                    notOlderDateExpiration: true,
                     notLessDateIssue: true
                 },
                 txtAbono: {

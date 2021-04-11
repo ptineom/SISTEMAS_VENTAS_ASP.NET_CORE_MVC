@@ -25,6 +25,7 @@ namespace AplicacionWeb.SistemaVentas.Models.Request
         public string JsonArticulos { get; set; }
         public decimal Abono { get; set; }
         public decimal Saldo { get; set; }
+        public string FechaCancelacion { get; set; }
         public string Observacion { get; set; }
 
 

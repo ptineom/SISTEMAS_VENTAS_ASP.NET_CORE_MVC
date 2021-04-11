@@ -12,7 +12,7 @@ namespace Helper
         {
             get
             {
-                return Convert.ToInt32(ViewHelper.getValueConfiguration("AppSettings:TamanioMaxArchiboMb"));
+                return Convert.ToInt32(ViewHelper.GetValueConfiguration("AppSettings:TamanioMaxArchiboMb"));
             }
 
         }
@@ -21,7 +21,7 @@ namespace Helper
         {
             get
             {
-                return ViewHelper.getValueConfiguration("AppSettings:Upload:Articulos").Replace("/", @"\");
+                return ViewHelper.GetValueConfiguration("AppSettings:Upload:Articulos").Replace("/", @"\");
             }
         }
 
@@ -29,7 +29,7 @@ namespace Helper
         {
             get
             {
-                return ViewHelper.getValueConfiguration("AppSettings:Upload:Empleados").Replace("/", @"\");
+                return ViewHelper.GetValueConfiguration("AppSettings:Upload:Empleados").Replace("/", @"\");
             }
         }
 
@@ -37,14 +37,14 @@ namespace Helper
         {
             get
             {
-                return ViewHelper.getValueConfiguration("AppSettings:Upload:Empresa").Replace("/", @"\");
+                return ViewHelper.GetValueConfiguration("AppSettings:Upload:Empresa").Replace("/", @"\");
             }
         }
         public static int[] SCALES_IMAGES_ARTICULOS
         {
             get
             {
-                string[] scales = ViewHelper.getValueConfiguration("AppSettings:ScalesImagesArticulos").Split(',');
+                string[] scales = ViewHelper.GetValueConfiguration("AppSettings:ScalesImagesArticulos").Split(',');
                 return scales.Select(int.Parse).ToArray().OrderByDescending(x => x).ToArray();
             }
         }

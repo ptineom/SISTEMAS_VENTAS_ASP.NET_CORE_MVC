@@ -67,8 +67,8 @@ namespace CapaNegocio
             return _resultado;
         }
 
-        public ResultadoOperacion Delete(string idSucursal, string idTipoComprobante,
-            string nroSerie, int nroDocumento, string idProveedor, string idUsuario)
+        public ResultadoOperacion Delete(string idSucursal, string idUsuario, string idTipoComprobante,
+            string nroSerie, int nroDocumento, string idProveedor)
         {
             SqlTransaction trx = null;
             using (SqlConnection con = new SqlConnection(_conexion.getConexion))
@@ -77,7 +77,7 @@ namespace CapaNegocio
                 {
                     con.Open();
                     trx = con.BeginTransaction();
-                    _dao.Delete(con, trx, idSucursal, idTipoComprobante, nroSerie, nroDocumento, idProveedor, idUsuario);
+                    _dao.Delete(con, trx, idSucursal, idUsuario, idTipoComprobante, nroSerie, nroDocumento, idProveedor);
                     _resultado.SetResultado(true, Helper.Constantes.sMensajeEliminadoOk);
                     trx.Commit();
                 }
@@ -91,7 +91,7 @@ namespace CapaNegocio
             return _resultado;
         }
 
-        public ResultadoOperacion GetAllByFilters(string idSucursal, string idTipoComprobante, string nroSerie, int nroDocumento, string fechaInicio, 
+        public ResultadoOperacion GetAllByFilters(string idSucursal, string idTipoComprobante, string nroSerie, int nroDocumento, string idProveedor, string fechaInicial, 
             string fechaFinal, int idEstado)
         {
             using (SqlConnection con = new SqlConnection(_conexion.getConexion))
@@ -99,7 +99,7 @@ namespace CapaNegocio
                 try
                 {
                     con.Open();
-                    var lista = _dao.GetAllByFilters(con, idSucursal, idTipoComprobante, nroSerie, nroDocumento, fechaInicio, fechaFinal, idEstado);
+                    var lista = _dao.GetAllByFilters(con, idSucursal, idTipoComprobante, nroSerie, nroDocumento, idProveedor, fechaInicial, fechaFinal, idEstado);
                     _resultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
@@ -119,7 +119,7 @@ namespace CapaNegocio
                 try
                 {
                     con.Open();
-                    DOC_COMPRA_INFORME modelo = _dao.GetById(con, idSucursal, idTipoComprobante, nroSerie, nroDocumento, idProveedor);
+                    DOC_COMPRA modelo = _dao.GetById(con, idSucursal, idTipoComprobante, nroSerie, nroDocumento, idProveedor);
                     _resultado.SetResultado(true, modelo);
                 }
                 catch (Exception ex)

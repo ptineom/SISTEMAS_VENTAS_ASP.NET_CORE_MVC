@@ -120,7 +120,7 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                     IdEstado = x.ID_ESTADO,
                     NomEstado = ViewHelper.CapitalizeFirstLetter(x.NOM_ESTADO)
                 }).ToList<EstadoModel>();
-                listaEstado.Insert(0, new EstadoModel() { IdEstado = null, NomEstado = "---Seleccione---" });
+                listaEstado.Insert(0, new EstadoModel() { IdEstado = null, NomEstado = "---Todos---" });
             }
 
             if (docCompra.listaDepartamentos != null)
@@ -180,7 +180,7 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                     ID_PROVEEDOR = request.IdProveedor,
                     ID_MONEDA = request.IdMoneda,
                     FEC_DOCUMENTO = request.FecCompra,
-                    FECHA_CANCELACION = request.FecVencimiento,
+                    FEC_VENCIMIENTO = request.FecVencimiento,
                     OBS_COMPRA = request.Observacion,
                     TOT_BRUTO = request.TotBruto,
                     TOT_DESCUENTO = request.TotDescuento,
@@ -191,11 +191,127 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                     ID_TIPO_CONDICION_PAGO = request.IdTipoCondicionPago,
                     ABONO = request.Abono,
                     SALDO = request.Saldo,
+                    FEC_CANCELACION = request.FechaCancelacion,
                     JSON_ARTICULOS = request.JsonArticulos,
                     TAS_IGV = request.TasIgv
                 };
 
                 return _brCompra.Register(docCompra);
+            });
+
+            if (!_resultado.Resultado)
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
+
+            return Ok(_resultado);
+        }
+
+        [HttpGet("GetAllByFilters")]
+        public async Task<IActionResult> GetAllByFiltersAsync([FromQuery] string idTipoComprobante, [FromQuery] string nroSerie,
+            [FromQuery] int nroDocumento, [FromQuery] string idProveedor, [FromQuery] string fechaInicial, [FromQuery] string fechaFinal, [FromQuery] int idEstado)
+        {
+            _resultado = await Task.Run(() => _brCompra.GetAllByFilters(_idSucursal, idTipoComprobante, nroSerie, nroDocumento, idProveedor, fechaInicial, fechaFinal, idEstado));
+
+            if (!_resultado.Resultado)
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
+
+            if (_resultado.Data == null)
+                return NotFound(new { Message = "No se encontraron datos.", Status = "Error" });
+
+            List<DOC_COMPRA_LISTADO> listaCompra = (List<DOC_COMPRA_LISTADO>)_resultado.Data; ;
+
+            _resultado.Data = listaCompra.Select(x => new
+            {
+                Comprobante = x.COMPROBANTE,
+                DocProveedor = x.DOC_PROVEEDOR,
+                NomProveedor = ViewHelper.CapitalizeAll(x.NOM_PROVEEDOR),
+                SgnMoneda = x.SGN_MONEDA,
+                TotCompra = x.TOT_COMPRA,
+                FecDocumento = x.FEC_DOCUMENTO,
+                FlgEvaluaCredito = x.FLG_EVALUA_CREDITO,
+                NomTipoCondicionPago = ViewHelper.CapitalizeFirstLetter(x.NOM_TIPO_CONDICION_PAGO),
+                EstDocumento = x.EST_DOCUMENTO,
+                NomEstado = ViewHelper.CapitalizeAll(x.NOM_ESTADO),
+                IdTipoComprobante = x.ID_TIPO_COMPROBANTE,
+                NroSerie = x.NRO_SERIE,
+                NroDocumento = x.NRO_DOCUMENTO,
+                IdProveedor = x.ID_PROVEEDOR
+            }).ToList<object>();
+
+            return Ok(_resultado);
+        }
+
+        [HttpGet("GetById/{idTipoComprobante}/{nroSerie}/{nroDocumento}/{idProveedor}")]
+        public async Task<IActionResult> GetByIdAsync(string idTipoComprobante, string nroSerie, int nroDocumento, string idProveedor)
+        {
+            _resultado = await Task.Run(() => _brCompra.GetById(_idSucursal, idTipoComprobante, nroSerie, nroDocumento, idProveedor));
+
+            if (!_resultado.Resultado)
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
+
+            if (_resultado.Data == null)
+                return NotFound(new { Message = "No se encontraron datos.", Status = "Error" });
+
+            DOC_COMPRA docCompra = (DOC_COMPRA)_resultado.Data;
+
+            //Construímos la data que queremos mostrar al cliente.
+            _resultado.Data = new
+            {
+                Cabecera = new
+                {
+                    IdTipoComprobante = docCompra.ID_TIPO_COMPROBANTE,
+                    NroSerie = docCompra.NRO_SERIE,
+                    NroDocumento = Helper.ViewHelper.GetNroComprobante(docCompra.NRO_DOCUMENTO.ToString()),
+                    IdProveedor = docCompra.ID_PROVEEDOR,
+                    NomProveedor = ViewHelper.CapitalizeAll(docCompra.NOM_PROVEEDOR),
+                    DirProveedor = docCompra.DIR_PROVEEDOR,
+                    IdTipoDocumento = docCompra.ID_TIPO_DOCUMENTO,
+                    NroDocumentoProveedor = docCompra.NRO_DOCUMENTO_PROVEEDOR,
+                    IdMoneda = docCompra.ID_MONEDA,
+                    SgnMoneda = docCompra.SGN_MONEDA,
+                    IdTipoPago = docCompra.ID_TIPO_PAGO,
+                    IdTipoCondicion = docCompra.ID_TIPO_CONDICION_PAGO,
+                    FecDocumento = docCompra.FEC_DOCUMENTO,
+                    FecVencimiento = docCompra.FEC_VENCIMIENTO,
+                    Observacion = docCompra.OBS_COMPRA,
+                    TotBruto = docCompra.TOT_BRUTO,
+                    TotDescuento = docCompra.TOT_DESCUENTO,
+                    TotImpuesto = docCompra.TOT_IMPUESTO,
+                    TotCompra = docCompra.TOT_COMPRA,
+                    TotCompraRedondeo = docCompra.TOT_COMPRA_REDONDEO,
+                    TasDescuento = docCompra.TAS_DESCUENTO,
+                    EstDocumento = docCompra.EST_DOCUMENTO,
+                    TasIgv = docCompra.TAS_IGV,
+                    NomEstado = ViewHelper.CapitalizeAll(docCompra.NOM_ESTADO)
+                },
+                Detalle = docCompra.detalle.Select(x => new
+                {
+                    IdArticulo = x.ID_ARTICULO,
+                    NomArticulo = ViewHelper.CapitalizeAll(x.NOM_ARTICULO),
+                    IdUm = x.ID_UM,
+                    NomUm = ViewHelper.CapitalizeAll(x.NOM_UM),
+                    Cantidad = x.CANTIDAD,
+                    TasDescuento = x.TAS_DESCUENTO,
+                    NroFactor = x.NRO_FACTOR,
+                    PrecioArticulo = x.PRECIO_ARTICULO,
+                    Importe = x.IMPORTE,
+                    Codigo = string.IsNullOrEmpty(x.CODIGO_BARRA) ? x.ID_ARTICULO : x.CODIGO_BARRA
+                }).ToList<object>()
+            };
+
+            return Ok(_resultado);
+        }
+
+        [HttpPost("Delete")]
+        public async Task<IActionResult> DeleteAsync([FromBody] DeleteCompraRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { Mesagge = ModelState, Status = "Error" });
+
+            //Ejecutar el grabado de la venta.
+            _resultado = await Task.Run(() =>
+            {
+                 return _brCompra.Delete(_idSucursal, _idUsuario, 
+                     request.IdTipoComprobante, request.NroSerie, request.NroDocumento, request.IdProveedor);
             });
 
             if (!_resultado.Resultado)

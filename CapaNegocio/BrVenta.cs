@@ -52,7 +52,7 @@ namespace CapaNegocio
 
                     dao.grabarVenta(con, trx, oModelo, ref nroSerie, ref numero);
 
-                    nroComprobante = ViewHelper.getNroComprobante(numero);
+                    nroComprobante = ViewHelper.GetNroComprobante(numero);
                     oResultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
 
                     trx.Commit();

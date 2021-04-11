@@ -31,7 +31,7 @@
     <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="~/icons/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet" />
     <link href="~/lib/dataTables-bootstrap5/dist/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
-    <link href="~/lib/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" />
     <link href="~/css/site.bundle.min.css" rel="stylesheet" asp-append-version="true" />
 
 </head>
@@ -84,11 +84,17 @@
     <script src="~/lib/jquery-mCustomScrollbar/dis/js/jquery.mCustomScrollbar.concat.min.js"></script>
     <script src="~/lib/axios.min.js"></script>
     <script src="~/lib/decimal.min.js"></script>
-    <script src="~/lib/moment.min.js"></script>
+    <script src="~/lib/dayjs/dayjs.min.js"></script>
+    <script src="~/lib/dayjs/plugin/customParseFormat.js"></script>
     <script src="~/js/utilitarios/utils.bundle.min.js" asp-append-version="true"></script>
     <script src="~/js/main.min.js" asp-append-version="true"></script>
 
     @*@await RenderSectionAsync("Scripts", required: false)*@
+
+    <script>
+        dayjs.extend(window.dayjs_plugin_customParseFormat);
+    </script>
+
     @if (IsSectionDefined("myScript"))
     {
         @RenderSection("myScript", false);

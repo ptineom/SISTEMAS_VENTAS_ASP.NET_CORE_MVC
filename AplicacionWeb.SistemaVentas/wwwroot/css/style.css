@@ -68,3 +68,8 @@ table.dataTable{
 .modal-footer {
     background-color: #FAFAFA
 }
+
+/**datepicker*/
+.datepicker table th{
+    font-weight:bold;
+}

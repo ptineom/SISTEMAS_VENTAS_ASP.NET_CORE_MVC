@@ -5,7 +5,7 @@ var oAlertaModal = {
     aceptar: false,
     showConfirmation: function (config) {
         if (typeof config != 'object')
-            throw new Error("El parámetro debe ser un objeto");
+            throw new Error("El parámetro del modal de confirmación debe ser un objeto");
 
         let title = "Confirmación";
         let message = "";
@@ -36,7 +36,7 @@ var oAlertaModal = {
         if (config.size != undefined)
             size = config.size;
 
-        let html = `<div class="modal fade" tabindex="-1" aria-hidden="true" id="alerta-modal">
+        let html = `<div class="modal fade" tabindex="-1" aria-hidden="true" id="alerta-modal" aria-labelledby="staticBackdropLabel">
                       <div class="modal-dialog ${size}">
                         <div class="modal-content">
                           <div class="modal-header py-3">
@@ -47,8 +47,8 @@ var oAlertaModal = {
                             <p>${message}</p>
                           </div>
                           <div class="modal-footer py-2">
-                            <button type="button" class="btn btn-danger" id="btnCancelar" data-bs-dismiss="modal">${iconButton1} ${textButton1}</button>
-                            <button type="button" class="btn btn-success" id="btnAceptar">${iconButton2} ${textButton2}</button>
+                            <button type="button" class="btn btn-danger" id="btnCancelarAlerta" data-bs-dismiss="modal">${iconButton1} ${textButton1}</button>
+                            <button type="button" class="btn btn-success" id="btnAceptarAlerta">${iconButton2} ${textButton2}</button>
                           </div>
                         </div>
                       </div>
@@ -60,7 +60,7 @@ var oAlertaModal = {
         main.insertAdjacentHTML("afterbegin", html);
 
         let options = {
-            backdrop:false
+            backdrop: "static"
         };
         let modal = document.getElementById('alerta-modal')
         let myModal = new bootstrap.Modal(modal, options)
@@ -78,7 +78,7 @@ var oAlertaModal = {
             main.removeChild(modal);
         });
 
-        modal.querySelector('#btnAceptar').addEventListener('click', () => {
+        modal.querySelector('#btnAceptarAlerta').addEventListener('click', () => {
             oAlertaModal.aceptar = true;
             oAlertaModal.resolve();
             myModal.hide();
