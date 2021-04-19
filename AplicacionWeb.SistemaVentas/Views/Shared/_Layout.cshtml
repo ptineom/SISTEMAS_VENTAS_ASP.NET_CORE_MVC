@@ -1,23 +1,26 @@
 ﻿@using AplicacionWeb.SistemaVentas.Servicios.Seguridad
+@using AplicacionWeb.SistemaVentas.Servicios
 @using Microsoft.AspNetCore.Hosting;
 @using Microsoft.AspNetCore.Http;
 @using Helper;
 @using AplicacionWeb.SistemaVentas.Models.Seguridad;
 @using Microsoft.Extensions.Configuration;
+@using System.Text.Json;
 
 @inject IWebHostEnvironment enviroment
 @inject IHttpContextAccessor  accessor
 @inject IConfiguration configuration
 
 @{
-    UsuarioLogueadoViewModel usuarioActual = new Session(accessor, enviroment).GetUserLoggedFull();
-    MenuItem menu = new Menu(configuration).GetMenuByUserId(usuarioActual.IdUsuario);
+    UsuarioLogueadoModel usuarioActual = new Session(accessor, enviroment).GetUserLoggedFull();
+    MenuItemModel menu = new Menu(configuration).GetMenuByUserId(usuarioActual.IdUsuario);
 
     object modeloSidebarMenu = new
     {
         UsuarioActual = usuarioActual,
         Menu = menu
     };
+
 }
 
 <!DOCTYPE html>
@@ -32,10 +35,14 @@
     <link href="~/icons/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet" />
     <link href="~/lib/dataTables-bootstrap5/dist/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
     <link href="~/lib/bootstrap-datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" />
+
+    <link href="~/lib/bootstrap-timepicker/css/bootstrap-timepicker.min.css" rel="stylesheet" />
+    <link href="~/css/compatibilityTimePicker.css" rel="stylesheet" />
     <link href="~/css/site.bundle.min.css" rel="stylesheet" asp-append-version="true" />
 
 </head>
 <body>
+
     <!-- Sidebar  -->
     <nav id="sidebar">
         <div class="sidebar-header px-2 py-3">
@@ -71,8 +78,10 @@
                 &copy; 2021 - AplicacionWeb.SistemaVentas - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
             </div>
         </footer>
+
     </div>
 
+ 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/dataTables-bootstrap5/dist/js/jquery.dataTables.min.js"></script>
@@ -86,14 +95,25 @@
     <script src="~/lib/decimal.min.js"></script>
     <script src="~/lib/dayjs/dayjs.min.js"></script>
     <script src="~/lib/dayjs/plugin/customParseFormat.js"></script>
+    <script src="~/lib/bootstrap-timepicker/js/bootstrap-timepicker.min.js"></script>
     <script src="~/js/utilitarios/utils.bundle.min.js" asp-append-version="true"></script>
+    <script src="~/js/Modal/modalCajaApertura.js"></script>
     <script src="~/js/main.min.js" asp-append-version="true"></script>
 
     @*@await RenderSectionAsync("Scripts", required: false)*@
 
+    @*Agregando pluyin para trabajar con formatos con dayjs.js*@
     <script>
         dayjs.extend(window.dayjs_plugin_customParseFormat);
     </script>
+
+    @*<script>
+        $(document).ready(function () {
+            $('#timepicker1').timepicker({
+                minuteStep: 5
+            });
+        })
+    </script>*@
 
     @if (IsSectionDefined("myScript"))
     {

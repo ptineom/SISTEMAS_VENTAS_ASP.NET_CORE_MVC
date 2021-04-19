@@ -1270,8 +1270,6 @@ var oCompra = {
                     type: "warning"
                 });
             }).finally(() => oHelper.hideLoading());
-        }).catch((cancelar) => {
-            alert(cancelar);
         })
 
     },

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AplicacionWeb.SistemaVentas.Models.Seguridad
 {
-    public class ReqLoginViewModel
+    public class LoginRequest
     {
         [Required(ErrorMessage = "Debe de ingresar el {0}")]
         [Display(Name = "Usuario")]
@@ -17,7 +17,7 @@ namespace AplicacionWeb.SistemaVentas.Models.Seguridad
         public string password { get; set; }
     }
 
-    public class ReqSeleccionSucursalViewModel : ReqLoginViewModel
+    public class SeleccionSucursalRequest : LoginRequest
     {
         [Required(ErrorMessage = "Debe de ingresar el {0}")]
         public string idSucursal { get; set; }

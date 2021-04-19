@@ -32,7 +32,7 @@ namespace AplicacionWeb.SistemaVentas.Controllers
             _configuration = configuration;
             _brCompra = new BrCompra(_configuration);
             _accessor = accessor;
-            UsuarioLogueadoViewModel usuario = new Session(_accessor).GetUserLogged();
+            UsuarioLogueadoModel usuario = new Session(_accessor).GetUserLogged();
             _idUsuario = usuario.IdUsuario;
             _idSucursal = usuario.IdSucursal;
         }

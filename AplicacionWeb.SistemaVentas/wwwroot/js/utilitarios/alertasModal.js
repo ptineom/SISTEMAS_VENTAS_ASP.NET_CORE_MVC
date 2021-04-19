@@ -54,10 +54,19 @@ var oAlertaModal = {
                       </div>
                     </div>`;
 
-        //Lo agregamos temporalmente al main del html
-        let content = document.getElementsByTagName('body')[0]; // document.getElementById('content');
-        let main = content.querySelector('main');
-        main.insertAdjacentHTML("afterbegin", html);
+        let main = '';
+        if (config.contenedor != undefined) {
+            if (document.querySelector(config.contenedor) == null) 
+                throw new Error("Elemento contenedor no existe en el DOM.");
+
+            main = document.querySelector(config.contenedor);
+            main.insertAdjacentHTML("afterbegin", html)
+        } else {
+            //Lo agregamos temporalmente al main del html
+            let content = document.getElementsByTagName('body')[0]; // document.getElementById('content');
+            main = content.querySelector('main');
+            main.insertAdjacentHTML("afterbegin", html);
+        }
 
         let options = {
             backdrop: "static"

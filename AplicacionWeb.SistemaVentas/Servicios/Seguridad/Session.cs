@@ -42,9 +42,9 @@ namespace AplicacionWeb.SistemaVentas.Servicios.Seguridad
             return bExiste;
         }
         
-        public UsuarioLogueadoViewModel GetUserLoggedFull()
+        public UsuarioLogueadoModel GetUserLoggedFull()
         {
-            UsuarioLogueadoViewModel modelo = null;
+            UsuarioLogueadoModel modelo = null;
             if (_accessor.HttpContext.User != null && _accessor.HttpContext.User.Identity.IsAuthenticated)
             {
                 ClaimsIdentity identity = (ClaimsIdentity)_accessor.HttpContext.User.Identity;
@@ -62,7 +62,7 @@ namespace AplicacionWeb.SistemaVentas.Servicios.Seguridad
                         avatarB64 = Convert.ToBase64String(file);
                     }
 
-                    modelo = new UsuarioLogueadoViewModel
+                    modelo = new UsuarioLogueadoModel
                     {
                         IdUsuario = claims.FirstOrDefault(x => x.Type == ClaimTypes.Name).Value,
                         NomUsuario = claims.FirstOrDefault(x => x.Type == "fullName").Value,
@@ -78,9 +78,9 @@ namespace AplicacionWeb.SistemaVentas.Servicios.Seguridad
             return modelo;
         }
 
-        public UsuarioLogueadoViewModel GetUserLogged()
+        public UsuarioLogueadoModel GetUserLogged()
         {
-            UsuarioLogueadoViewModel modelo = null;
+            UsuarioLogueadoModel modelo = null;
             if (_accessor.HttpContext.User != null && _accessor.HttpContext.User.Identity.IsAuthenticated)
             {
                 ClaimsIdentity identity = (ClaimsIdentity)_accessor.HttpContext.User.Identity;
@@ -88,7 +88,7 @@ namespace AplicacionWeb.SistemaVentas.Servicios.Seguridad
                 {
                     var claims = identity.Claims;
 
-                    modelo = new UsuarioLogueadoViewModel
+                    modelo = new UsuarioLogueadoModel
                     {
                         IdUsuario = claims.FirstOrDefault(x => x.Type == ClaimTypes.Name).Value,
                         NomUsuario = claims.FirstOrDefault(x => x.Type == "fullName").Value,

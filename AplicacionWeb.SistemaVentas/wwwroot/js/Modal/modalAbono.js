@@ -74,6 +74,9 @@ var oModalAbono = {
             if (!oModalAbono.seleccionado)
                 oModalAbono.reject(flgEditar);
 
+            oModalAbono.fechaEmision = '';
+            oModalAbono.fechaCancelacion = '';
+            oModalAbono.seleccionado = false;
             //Destruimos el modal.
             main.removeChild(modal);
         });
@@ -90,7 +93,8 @@ var oModalAbono = {
             }
         });
 
-        document.getElementById('txtAbonoModalAbono').addEventListener('input', (e) => {
+        let txtAbonoModalAbono = document.getElementById('txtAbonoModalAbono');
+        txtAbonoModalAbono.addEventListener('input', (e) => {
             //calculamos el saldo.
             let abono = e.target.value;
             abono = abono == '' ? 0 : abono;
@@ -104,7 +108,8 @@ var oModalAbono = {
             let saldo = total.minus(abono).toNumber();
 
             document.getElementById('txtSaldoModalAbono').value = oHelper.formatoMoneda(sgnMoneda, saldo, 2);
-        })
+        });
+        txtAbonoModalAbono.addEventListener('keypress', (e) => oHelper.numerosDecimales(e));
 
         oConfigControls.inicializarDatePicker("#modalAbono .date-picker");
 
@@ -118,14 +123,16 @@ var oModalAbono = {
         })
     },
     validaciones: function () {
+        //No deb ser vacío ni cero.
         $.validator.addMethod("notEmptyAndZero", function (value, element) {
             if (value == 0) 
                 return false;
             else
                 return true;
 
-        }, "Debe de ingresar el monto a abonar.");
+        }, "Ingrese el monto a abonar.");
 
+        //No debe ser mayor a la fecha de vencimiento.
         $.validator.addMethod("notOlderDateExpiration", function (value, element) {
             let fechaVencimiento = dayjs(oModalAbono.fechaVencimiento, "DD/MM/YYYY");
 
@@ -136,6 +143,7 @@ var oModalAbono = {
             return true;
         }, "La fecha ingresada no debe ser mayor a la fecha de vencimiento.");
 
+        //No debe ser menor a la fecha de emisión.
         $.validator.addMethod("notLessDateIssue", function (value, element) {
             let fechaEmision = dayjs(oModalAbono.fechaEmision, "DD/MM/YYYY");
 

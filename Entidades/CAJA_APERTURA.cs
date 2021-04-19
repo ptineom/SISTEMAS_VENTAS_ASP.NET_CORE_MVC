@@ -16,7 +16,8 @@ namespace Entidades
         public string ID_USUARIO_REGISTRO { get; set; }
 		public string FECHA_APERTURA { get; set; }
         public string FECHA_CIERRE { get; set; }
-		public decimal MONTO_APERTURA { get; set; }
+        public string HORA_CIERRE { get; set; }
+        public decimal MONTO_APERTURA { get; set; }
 		public bool FLG_CIERRE { get; set; }
 		public decimal MONTO_COBRADO { get; set; }
         public string ID_MONEDA { get; set; }
@@ -27,6 +28,7 @@ namespace Entidades
         public int ITEM { get; set; }
         public bool FLG_REAPERTURADO { get; set; }
         public string NOM_MONEDA { get; set; }
+        public bool FLG_CIERRE_DIFERIDO { get; set; }
     }
 
     public class DINERO_EN_CAJA

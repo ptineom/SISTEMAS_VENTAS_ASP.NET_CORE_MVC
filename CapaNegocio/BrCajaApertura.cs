@@ -7,28 +7,73 @@ using Entidades;
 using CapaDao;
 using Helper;
 using System.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+
 namespace CapaNegocio
 {
     public class BrCajaApertura
     {
-        DaoCajaApertura dao = null;
-        ResultadoOperacion oResultado = null;
-        public BrCajaApertura()
+        private DaoCajaApertura _dao = null;
+        private ResultadoOperacion _resultado = null;
+        private IConfiguration _configuration = null;
+        private Conexion _conexion = null;
+        public BrCajaApertura(IConfiguration configuration)
         {
-            dao = new DaoCajaApertura();
-            oResultado = new ResultadoOperacion();
+            _dao = new DaoCajaApertura();
+            _resultado = new ResultadoOperacion();
+            _configuration = configuration;
+            _conexion = new Conexion(_configuration);
         }
+
         #region Proceso CajaApertura
-        public ResultadoOperacion cajaAbiertaXusuario(string idSucursal, string idCaja, string idUsuario, int correlativo)
+        public ResultadoOperacion GetStateBox(string idSucursal, string idUsuario)
         {
-            ResultadoOperacion oResultado = new ResultadoOperacion();
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
-                    var modelo = dao.cajaAbiertaXusuario(con, idSucursal,idCaja, idUsuario, correlativo);
-                
+                    var modelo = _dao.GetStateBox(con, idSucursal, "", idUsuario, 0);
+
+                    _resultado.SetResultado(true, modelo);
+                }
+                catch (Exception ex)
+                {
+                    Elog.save(this, ex);
+                    _resultado.SetResultado(false, ex.Message);
+                }
+            }
+            return _resultado;
+        }
+        public ResultadoOperacion GetStateBox(string idSucursal, string idCaja, string idUsuario, int correlativo)
+        {
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
+            {
+                try
+                {
+                    con.Open();
+                    var modelo = _dao.GetStateBox(con, idSucursal, idCaja, idUsuario, correlativo);
+
+                    _resultado.SetResultado(true, modelo);
+                }
+                catch (Exception ex)
+                {
+                    Elog.save(this, ex);
+                    _resultado.SetResultado(false, ex.Message);
+                }
+            }
+            return _resultado;
+        }
+        public ResultadoOperacion GetTotalsByUserId(string idSucursal, string idCaja, string idUsuario, int correlativo)
+        {
+            ResultadoOperacion oResultado = new ResultadoOperacion();
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
+            {
+                try
+                {
+                    con.Open();
+                    var modelo = _dao.GetTotalsByUserId(con, idSucursal, idCaja, idUsuario, correlativo);
+
                     oResultado.SetResultado(true, modelo);
                 }
                 catch (Exception ex)
@@ -39,59 +84,63 @@ namespace CapaNegocio
             }
             return oResultado;
         }
-        public ResultadoOperacion totalCobranzaXcaja(string idSucursal, string idCaja, string idUsuario, int correlativo)
-        {
-            ResultadoOperacion oResultado = new ResultadoOperacion();
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
-            {
-                try
-                {
-                    con.Open();
-                    var modelo = dao.totalCobranzaXcaja(con, idSucursal, idCaja, idUsuario, correlativo);
-               
-                    oResultado.SetResultado(true, modelo);
-                }
-                catch (Exception ex)
-                {
-                    Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
-                }
-            }
-            return oResultado;
-        }
-        public ResultadoOperacion grabarCajaApertura(CAJA_APERTURA oModelo)
+        public ResultadoOperacion Register(CAJA_APERTURA oModelo)
         {
             SqlTransaction trx = null;
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
                     trx = con.BeginTransaction();
-                    var modelo = dao.grabarCajaApertura(con, trx, oModelo);
-               
-                    oResultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk, modelo);
+                    var modelo = _dao.Register(con, trx, oModelo);
+
+                    _resultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk, modelo);
                     trx.Commit();
                 }
                 catch (Exception ex)
                 {
-                    oResultado.SetResultado(false, ex.Message.ToString());
+                    _resultado.SetResultado(false, ex.Message.ToString());
                     trx.Rollback();
                     Elog.save(this, ex);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
 
-        public ResultadoOperacion validarCaja(string idSucursal, string idCaja, string idUsuario, int correlativoCa)
+        public ResultadoOperacion ReopenBox(CAJA_APERTURA oModelo)
         {
-            ResultadoOperacion oResultado = new ResultadoOperacion();
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            SqlTransaction trx = null;
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
-                    bool value = dao.validarCaja(con, idSucursal, idCaja, idUsuario, correlativoCa);
+                    trx = con.BeginTransaction();
+                    _dao.ReopenBox(con, trx, oModelo);
+
+                    _resultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
+                    trx.Commit();
+                }
+                catch (Exception ex)
+                {
+                    _resultado.SetResultado(false, ex.Message.ToString());
+                    trx.Rollback();
+                    Elog.save(this, ex);
+                }
+            }
+            return _resultado;
+        }
+
+        public ResultadoOperacion ValidateBox(string idSucursal, string idCaja, string idUsuario, int correlativoCa)
+        {
+            ResultadoOperacion oResultado = new ResultadoOperacion();
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
+            {
+                try
+                {
+                    con.Open();
+                    bool value = _dao.ValidateBox(con, idSucursal, idCaja, idUsuario, correlativoCa);
                     oResultado.SetResultado(value, "OK");
                 }
                 catch (Exception ex)
@@ -103,109 +152,107 @@ namespace CapaNegocio
             return oResultado;
         }
 
-        public ResultadoOperacion cajaXusuario(string idSucursal, string idUsuario)
-        {
-            ResultadoOperacion oResultado = new ResultadoOperacion();
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
-            {
-                try
-                {
-                    con.Open();
-                    var modelo = dao.cajaXusuario(con, idSucursal, idUsuario);
-                 
-                    oResultado.SetResultado(true, modelo);
-                }
-                catch (Exception ex)
-                {
-                    Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
-                }
-            }
-            return oResultado;
-        }
-
-        public ResultadoOperacion combosCajaApertura(string idSucursal, string idUsuario, 
+        public ResultadoOperacion GetData(string idSucursal, string idUsuario,
             ref List<MONEDA> listaMonedas, ref List<CAJA> listaCajas)
         {
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
-                    dao.combosCajaApertura(con, idSucursal, idUsuario, ref listaMonedas,ref listaCajas);
-                    oResultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
+                    _dao.GetData(con, idSucursal, idUsuario, ref listaMonedas, ref listaCajas);
+
+                    _resultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
                 }
                 catch (Exception ex)
                 {
-                    oResultado.SetResultado(false, ex.Message.ToString());
+                    _resultado.SetResultado(false, ex.Message.ToString());
                     Elog.save(this, ex);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
 
-        public ResultadoOperacion listaAperturasCajasXusuario(string idSucursal, string idUsuario, string fecIni, string fecFin)
+        public ResultadoOperacion GetAllByFilters(string idSucursal, string idCaja, string idUsuario, string fecIni, string fecFin)
         {
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try
                 {
                     con.Open();
-                    var lista = dao.listaAperturasCajasXusuario(con, idSucursal, idUsuario, fecIni, fecFin);
-                  
-                    oResultado.SetResultado(true, lista);
+                    var lista = _dao.GetAllByFilters(con, idSucursal, idCaja, idUsuario, fecIni, fecFin);
+
+                    _resultado.SetResultado(true, lista);
                 }
                 catch (Exception ex)
                 {
                     Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
+                    _resultado.SetResultado(false, ex.Message);
                 }
             }
-            return oResultado;
+            return _resultado;
         }
-       
+
+        public ResultadoOperacion GetDataQuerys(string idSucursal, ref List<USUARIO> listaUsuario, ref List<CAJA> listaCaja)
+        {
+            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
+            {
+                try
+                {
+                    con.Open();
+                    _dao.GetDataQuerys(con, idSucursal, ref listaUsuario, ref listaCaja);
+
+                    _resultado.SetResultado(true, Helper.Constantes.sMensajeGrabadoOk);
+                }
+                catch (Exception ex)
+                {
+                    _resultado.SetResultado(false, ex.Message.ToString());
+                    Elog.save(this, ex);
+                }
+            }
+            return _resultado;
+        }
+
         #endregion
 
         #region Consultas y reportes
-        public ResultadoOperacion combosReportesCajaArqueo(string idSucursal)
-        {
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
-            {
-                try
-                {
-                    con.Open();
-                    COMBOS_REPORTE_CAJA_ARQUEO modelo = dao.combosReportesCajaArqueo(con, idSucursal);
-                
-                    oResultado.SetResultado(true, modelo);
-                }
-                catch (Exception ex)
-                {
-                    Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
-                }
-            }
-            return oResultado;
-        }
+        //public ResultadoOperacion combosReportesCajaArqueo(string idSucursal)
+        //{
+        //    using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+        //    {
+        //        try
+        //        {
+        //            con.Open();
+        //            COMBOS_REPORTE_CAJA_ARQUEO modelo = _dao.combosReportesCajaArqueo(con, idSucursal);
+        //            _resultado.SetResultado(true, modelo);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Elog.save(this, ex);
+        //            _resultado.SetResultado(false, ex.Message);
+        //        }
+        //    }
+        //    return _resultado;
+        //}
 
-        public ResultadoOperacion listaArqueoCaja(string idSucursal, string fecIni, string fecFin, string idUsuario, string idCaja)
-        {
-            using (SqlConnection con = new SqlConnection(Conexion.sConexion))
-            {
-                try
-                {
-                    con.Open();
-                    var lista = dao.listaArqueoCaja(con, idSucursal, fecIni, fecFin, idUsuario, idCaja);
-                  
-                    oResultado.SetResultado(true, lista);
-                }
-                catch (Exception ex)
-                {
-                    Elog.save(this, ex);
-                    oResultado.SetResultado(false, ex.Message);
-                }
-            }
-            return oResultado;
-        }
+        //public ResultadoOperacion listaArqueoCaja(string idSucursal, string fecIni, string fecFin, string idUsuario, string idCaja)
+        //{
+        //    using (SqlConnection con = new SqlConnection(Conexion.sConexion))
+        //    {
+        //        try
+        //        {
+        //            con.Open();
+        //            var lista = _dao.listaArqueoCaja(con, idSucursal, fecIni, fecFin, idUsuario, idCaja);
+        //            _resultado.SetResultado(true, lista);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Elog.save(this, ex);
+        //            _resultado.SetResultado(false, ex.Message);
+        //        }
+        //    }
+        //    return _resultado;
+        //}
         #endregion
     }
 }

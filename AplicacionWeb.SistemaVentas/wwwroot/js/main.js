@@ -75,6 +75,34 @@ var oMain = {
         }, function (error) {
             return Promise.reject(error);
         });
+
+        //Botón de aperturar caja
+        let btnAperturarCaja = document.getElementById('btnAperturarCaja');
+        btnAperturarCaja.addEventListener('click', () => {
+            oModalCajaApertura.show().then(() => { }).catch(() => { });
+        });
+
+        //Verificar estado de la caja
+        oModalCajaApertura.verificarEstadoCaja().then((bCajaAbierta) => {
+            if (bCajaAbierta) {
+                btnAperturarCaja.classList.remove("btn-warning");
+                btnAperturarCaja.classList.add("btn-success");
+
+                btnAperturarCaja.querySelector('i').classList.remove('bi-lock');
+                btnAperturarCaja.querySelector('i').classList.add('bi-unlock');
+            } else {
+                btnAperturarCaja.classList.remove("btn-success");
+                btnAperturarCaja.classList.add("btn-warning");
+
+                btnAperturarCaja.querySelector('i').classList.remove('bi-unlock');
+                btnAperturarCaja.querySelector('i').classList.add('bi-lock');
+            }
+        }).catch((error) => {
+            oAlerta.alerta({
+                title: error,
+                type: "warning"
+            });
+        })
     },
 
     showComponentsLayout: function () {

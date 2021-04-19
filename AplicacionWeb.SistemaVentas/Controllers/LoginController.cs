@@ -42,12 +42,12 @@ namespace AplicacionWeb.SistemaVentas.Controllers
         [Route("[action]")]
         public IActionResult Index()
         {
-            return View(new ReqLoginViewModel());
+            return View(new LoginRequest());
         }
 
         [HttpPost("ValidateUser")]
         [AllowAnonymous]
-        public async Task<IActionResult> ValidateUserAsync([FromBody] ReqLoginViewModel request)
+        public async Task<IActionResult> ValidateUserAsync([FromBody] LoginRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new { Mesagge = ModelState, Status = "Error" });
@@ -129,7 +129,7 @@ namespace AplicacionWeb.SistemaVentas.Controllers
 
         [AllowAnonymous]
         [HttpPost("CreateIdentitySignIn")]
-        public async Task<IActionResult> CreateIdentitySignInAsync([FromBody] ReqSeleccionSucursalViewModel request)
+        public async Task<IActionResult> CreateIdentitySignInAsync([FromBody] SeleccionSucursalRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new { Mesagge = ModelState, Status = "Error" });
@@ -162,7 +162,7 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                 return BadRequest(new { Mesagge = ModelState, Status = "Error" });
 
             //Obtenemos el usuario actual 
-            UsuarioLogueadoViewModel userCurrent = new Session(_accessor, _environment).GetUserLogged();
+            UsuarioLogueadoModel userCurrent = new Session(_accessor, _environment).GetUserLogged();
 
             //Datos del usuario
             USUARIO modelo = new USUARIO()

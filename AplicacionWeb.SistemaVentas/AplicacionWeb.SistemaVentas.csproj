@@ -28,6 +28,11 @@
   <ItemGroup>
     <None Include="wwwroot\js\Modal\modalAbono.min.js" />
     <None Include="wwwroot\js\movie.js" />
+    <None Include="wwwroot\lib\bootstrap-timepicker\CHANGELOG.md" />
+    <None Include="wwwroot\lib\bootstrap-timepicker\css\timepicker.less" />
+    <None Include="wwwroot\lib\bootstrap-timepicker\js\bootstrap-timepicker.js" />
+    <None Include="wwwroot\lib\bootstrap-timepicker\js\bootstrap-timepicker.min.js" />
+    <None Include="wwwroot\lib\bootstrap-timepicker\README.md" />
   </ItemGroup>
 
   <ItemGroup>

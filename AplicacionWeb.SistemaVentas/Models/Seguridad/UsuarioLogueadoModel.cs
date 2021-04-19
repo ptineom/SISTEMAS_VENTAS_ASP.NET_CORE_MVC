@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace AplicacionWeb.SistemaVentas.Models.Seguridad
 {
-    public class UsuarioLogueadoViewModel
+    public class UsuarioLogueadoModel
     {
         public string IdUsuario { get; set; }
         public string NomUsuario { get; set; }
