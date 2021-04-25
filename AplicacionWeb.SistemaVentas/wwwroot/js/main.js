@@ -1,6 +1,8 @@
 ﻿'use strict'
+
 var oMain = {
     init: function () {
+
         //Scroll
         $("#sidebar").mCustomScrollbar({
             theme: "minimal"
@@ -16,12 +18,12 @@ var oMain = {
 
         //Mostrar vista del menú
         Array.from(document.querySelectorAll('#sidebar-menu li a[data-flgFormulario="True"]')).forEach(a => {
-             a.addEventListener('click', (e) => {
+            a.addEventListener('click', (e) => {
                 let elem = e.currentTarget;
 
                 //Se usa un sessionStorage con el fin a que se elimine cuando cerramos la ventana si nos olvidamos cerrar sessión.
                 sessionStorage.setItem("breadcrumb", elem.getAttribute("data-breadcrumb"));
-     
+
                 window.location.href = elem.getAttribute("data-route");
             });
         })
@@ -60,7 +62,7 @@ var oMain = {
         document.getElementById('btnCerrarSesion').addEventListener('click', (e) => {
             e.preventDefault();
 
-            if (sessionStorage.getItem('breadcrumb') != null) 
+            if (sessionStorage.getItem('breadcrumb') != null)
                 sessionStorage.removeItem("breadcrumb");
 
             window.location.href = "/Login/IdentitySignOn";
@@ -76,35 +78,77 @@ var oMain = {
             return Promise.reject(error);
         });
 
-        //Botón de aperturar caja
+        //Botón de aperturar/cerrar caja
         let btnAperturarCaja = document.getElementById('btnAperturarCaja');
         btnAperturarCaja.addEventListener('click', () => {
-            oModalCajaApertura.show().then(() => { }).catch(() => { });
+            oModalCajaApertura.show().then(() => {
+                //Verificar estado de la caja
+                oMain.verificarEstadoCaja(true);
+            });
+        });
+    
+        //Verificar estado de la caja
+        oMain.verificarEstadoCaja(false);
+
+        ///*Configurando signalr*/
+        var connection = new signalR.HubConnectionBuilder().withUrl("/cambiarestadocajahub").build();
+
+        //Iniciamos la conección
+        connection.start().then(() => {
+            console.log("Signalr conectado");
+        }).catch((error) => {
+            console.error(error.toString());
+            //setTimeout(() => start(), 5000);
         });
 
-        //Verificar estado de la caja
-        oModalCajaApertura.verificarEstadoCaja().then((bCajaAbierta) => {
-            if (bCajaAbierta) {
-                btnAperturarCaja.classList.remove("btn-warning");
-                btnAperturarCaja.classList.add("btn-success");
+        //connection.onclose(async () => start());
 
-                btnAperturarCaja.querySelector('i').classList.remove('bi-lock');
-                btnAperturarCaja.querySelector('i').classList.add('bi-unlock');
-            } else {
-                btnAperturarCaja.classList.remove("btn-success");
-                btnAperturarCaja.classList.add("btn-warning");
-
-                btnAperturarCaja.querySelector('i').classList.remove('bi-unlock');
-                btnAperturarCaja.querySelector('i').classList.add('bi-lock');
-            }
-        }).catch((error) => {
-            oAlerta.alerta({
-                title: error,
-                type: "warning"
-            });
-        })
+        //Método que se invocará desde el servidor.
+        connection.on("actualizarEstadoCaja", () => {
+            console.log("entro");
+            //Verificar estado de la caja
+            oMain.verificarEstadoCaja(true);
+        });
     },
+    //start: async function () {
+    //    try {
+    //        await connection.start();
+    //    } catch (err) {
+    //        setTimeout(() => start(), 5000);
+    //    }
+    //},
+    verificarEstadoCaja: function (reload) {
+        if (reload == undefined)
+            reload = false;
 
+        //Se recargará la pagina cuando es llamado desde el modal de apertura/cierre de caja y al usar el metodo de signalr.
+        //con el fin que las vistas que trabajen segun el estado de la caja, púedan detectar algun cambio en la caja.
+        if (reload) {
+            location.reload(true);
+        } else {
+            oModalCajaApertura.verificarEstadoCaja().then((bCajaAbierta) => {
+                if (bCajaAbierta) {
+                    btnAperturarCaja.classList.remove("btn-warning");
+                    btnAperturarCaja.classList.add("btn-success");
+
+                    btnAperturarCaja.querySelector('i').classList.remove('bi-lock');
+                    btnAperturarCaja.querySelector('i').classList.add('bi-unlock');
+                } else {
+                    btnAperturarCaja.classList.remove("btn-success");
+                    btnAperturarCaja.classList.add("btn-warning");
+
+                    btnAperturarCaja.querySelector('i').classList.remove('bi-unlock');
+                    btnAperturarCaja.querySelector('i').classList.add('bi-lock');
+                }
+
+            }).catch((error) => {
+                oAlerta.alerta({
+                    title: error,
+                    type: "warning"
+                });
+            })
+        }
+    },
     showComponentsLayout: function () {
         //Si detecta que tiene un breadcrumb los mostrará y expandira el menú referente al breadcrumb.
         let breadcrumb = sessionStorage.getItem('breadcrumb');

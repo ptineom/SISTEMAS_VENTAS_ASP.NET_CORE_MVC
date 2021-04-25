@@ -1,4 +1,4 @@
-﻿using AplicacionWeb.SistemaVentas.Models.Seguridad;
+﻿using AplicacionWeb.SistemaVentas.Models.ViewModel;
 using AplicacionWeb.SistemaVentas.Servicios.Seguridad;
 using CapaNegocio;
 using Entidades;

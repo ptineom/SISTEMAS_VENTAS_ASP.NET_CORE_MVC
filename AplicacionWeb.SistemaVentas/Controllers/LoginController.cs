@@ -1,5 +1,4 @@
-﻿using AplicacionWeb.SistemaVentas.Models;
-using AplicacionWeb.SistemaVentas.Models.Seguridad;
+﻿using AplicacionWeb.SistemaVentas.Models.Request;
 using AplicacionWeb.SistemaVentas.Models.ViewModel;
 using AplicacionWeb.SistemaVentas.Servicios.Seguridad;
 using CapaNegocio;
@@ -200,6 +199,7 @@ namespace AplicacionWeb.SistemaVentas.Controllers
             {
                 new Claim(ClaimTypes.Role, usuario.NOM_ROL),
                 new Claim(ClaimTypes.Name, usuario.ID_USUARIO),
+                new Claim(ClaimTypes.NameIdentifier, usuario.ID_USUARIO),
                 new Claim("fullName", usuario.NOM_USUARIO),
                 new Claim("idSucursal", usuario.ID_SUCURSAL),
                 new Claim("nomSucursal", usuario.NOM_SUCURSAL),

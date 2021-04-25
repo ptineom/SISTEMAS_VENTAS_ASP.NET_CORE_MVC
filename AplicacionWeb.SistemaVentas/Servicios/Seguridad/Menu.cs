@@ -1,4 +1,4 @@
-﻿using AplicacionWeb.SistemaVentas.Models.Seguridad;
+﻿using AplicacionWeb.SistemaVentas.Models.ViewModel;
 using CapaNegocio;
 using Entidades;
 using Microsoft.Extensions.Configuration;

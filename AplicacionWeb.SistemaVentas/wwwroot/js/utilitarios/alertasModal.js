@@ -3,6 +3,7 @@ var oAlertaModal = {
     resolve: null,
     reject: null,
     aceptar: false,
+    instance:null,
     showConfirmation: function (config) {
         if (typeof config != 'object')
             throw new Error("El parámetro del modal de confirmación debe ser un objeto");
@@ -36,65 +37,59 @@ var oAlertaModal = {
         if (config.size != undefined)
             size = config.size;
 
-        let html = `<div class="modal fade" tabindex="-1" aria-hidden="true" id="alerta-modal" aria-labelledby="staticBackdropLabel">
-                      <div class="modal-dialog ${size}">
-                        <div class="modal-content">
+        let html = `<div class="modal fade" tabindex="-1" aria-hidden="true" id="alerta-modal" aria-labelledby="staticBackdropLabel" style="z-index:99999">
+                      <div class="modal-dialog ${size} modal-dialog-centered">
+                        <div class="modal-content" >
                           <div class="modal-header py-3">
                             <h5 class="modal-title">${title}</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" class="btn-close" aria-label="Close" id="btnCloseAlerta"></button>
                           </div>
                           <div class="modal-body">
-                            <p>${message}</p>
+                            <div class="row">
+                                <div class="col-9"><p class="mb-0">${message}</p></div>
+                                <div class="col-3 "><i class="bi bi-question-circle-fill text-primary h2"></i></div>
+                            </div>
                           </div>
                           <div class="modal-footer py-2">
-                            <button type="button" class="btn btn-danger" id="btnCancelarAlerta" data-bs-dismiss="modal">${iconButton1} ${textButton1}</button>
+                            <button type="button" class="btn btn-danger" id="btnCancelarAlerta" >${iconButton1} ${textButton1}</button>
                             <button type="button" class="btn btn-success" id="btnAceptarAlerta">${iconButton2} ${textButton2}</button>
                           </div>
                         </div>
                       </div>
                     </div>`;
 
-        let main = '';
-        if (config.contenedor != undefined) {
-            if (document.querySelector(config.contenedor) == null) 
-                throw new Error("Elemento contenedor no existe en el DOM.");
-
-            main = document.querySelector(config.contenedor);
-            main.insertAdjacentHTML("afterbegin", html)
-        } else {
-            //Lo agregamos temporalmente al main del html
-            let content = document.getElementsByTagName('body')[0]; // document.getElementById('content');
-            main = content.querySelector('main');
-            main.insertAdjacentHTML("afterbegin", html);
-        }
+        //Lo agregamos temporalmente al main del html
+        let content = document.getElementsByTagName('body')[0]; // document.getElementById('content');
+        let main = content.querySelector('main');
+        main.insertAdjacentHTML("afterbegin", html);
 
         let options = {
             backdrop: "static"
         };
-        let modal = document.getElementById('alerta-modal')
-        let myModal = new bootstrap.Modal(modal, options)
+        let alertaModal = document.getElementById('alerta-modal')
+        oAlertaModal.instance = new bootstrap.Modal(alertaModal, options);
 
-        modal.addEventListener('shown.bs.modal', function () {
-
-        });
-        modal.addEventListener('hidden.bs.modal', function () {
-            //Si no se dio click en el boton guardar cambios.
+        alertaModal.addEventListener('hidden.bs.modal', function () {
             if (!oAlertaModal.aceptar)
                 oAlertaModal.reject();
 
-            oAlertaModal.aceptar = false;
             //Destruimos el modal.
-            main.removeChild(modal);
+            alertaModal.parentElement.removeChild(alertaModal);
         });
 
-        modal.querySelector('#btnAceptarAlerta').addEventListener('click', () => {
+        alertaModal.querySelector('#btnAceptarAlerta').addEventListener('click', () => {
             oAlertaModal.aceptar = true;
             oAlertaModal.resolve();
-            myModal.hide();
+            oAlertaModal.instance.hide();
+        });
+
+        Array.from(alertaModal.querySelectorAll('#btnCancelarAlerta, #btnCloseAlerta')).forEach(btn => {
+            btn.addEventListener('click', () => {
+                oAlertaModal.instance.hide();
+            })
         })
 
-
-        myModal.show();
+        oAlertaModal.instance.show();
 
         return new Promise((resolve, reject) => {
             oAlertaModal.resolve = resolve;

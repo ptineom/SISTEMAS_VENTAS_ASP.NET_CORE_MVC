@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AplicacionWeb.SistemaVentas.CustomValidation;
+using AplicacionWeb.SistemaVentas.Hubs;
 
 namespace AplicacionWeb.SistemaVentas
 {
@@ -66,6 +67,8 @@ namespace AplicacionWeb.SistemaVentas
 
             //Validaciones personalizadas
             services.AddSingleton<IValidationAttributeAdapterProvider, AdapterProvider>();
+
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -92,6 +95,7 @@ namespace AplicacionWeb.SistemaVentas
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapHub<CambiarEstadoCajaHub>("/cambiarestadocajahub");
             });
 
 

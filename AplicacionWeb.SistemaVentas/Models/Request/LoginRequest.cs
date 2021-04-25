@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AplicacionWeb.SistemaVentas.Models.Seguridad
+namespace AplicacionWeb.SistemaVentas.Models.Request
 {
     public class LoginRequest
     {

@@ -1,4 +1,4 @@
-﻿using AplicacionWeb.SistemaVentas.Models.Seguridad;
+﻿using AplicacionWeb.SistemaVentas.Models.ViewModel;
 using Entidades;
 using Helper;
 using Microsoft.AspNetCore.Authentication;

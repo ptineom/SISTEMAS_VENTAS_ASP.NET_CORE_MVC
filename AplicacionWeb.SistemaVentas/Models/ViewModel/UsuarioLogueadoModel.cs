@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AplicacionWeb.SistemaVentas.Models.Seguridad
+namespace AplicacionWeb.SistemaVentas.Models.ViewModel
 {
     public class UsuarioLogueadoModel
     {

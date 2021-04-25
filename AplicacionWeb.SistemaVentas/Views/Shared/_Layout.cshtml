@@ -3,7 +3,7 @@
 @using Microsoft.AspNetCore.Hosting;
 @using Microsoft.AspNetCore.Http;
 @using Helper;
-@using AplicacionWeb.SistemaVentas.Models.Seguridad;
+@using AplicacionWeb.SistemaVentas.Models.ViewModel;
 @using Microsoft.Extensions.Configuration;
 @using System.Text.Json;
 
@@ -81,7 +81,7 @@
 
     </div>
 
- 
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/dataTables-bootstrap5/dist/js/jquery.dataTables.min.js"></script>
@@ -98,6 +98,7 @@
     <script src="~/lib/bootstrap-timepicker/js/bootstrap-timepicker.min.js"></script>
     <script src="~/js/utilitarios/utils.bundle.min.js" asp-append-version="true"></script>
     <script src="~/js/Modal/modalCajaApertura.js"></script>
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
     <script src="~/js/main.min.js" asp-append-version="true"></script>
 
     @*@await RenderSectionAsync("Scripts", required: false)*@
@@ -107,13 +108,6 @@
         dayjs.extend(window.dayjs_plugin_customParseFormat);
     </script>
 
-    @*<script>
-        $(document).ready(function () {
-            $('#timepicker1').timepicker({
-                minuteStep: 5
-            });
-        })
-    </script>*@
 
     @if (IsSectionDefined("myScript"))
     {

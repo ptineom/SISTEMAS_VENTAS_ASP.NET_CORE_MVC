@@ -1,6 +1,5 @@
 ﻿using AplicacionWeb.SistemaVentas.Models;
 using AplicacionWeb.SistemaVentas.Models.Request;
-using AplicacionWeb.SistemaVentas.Models.Seguridad;
 using AplicacionWeb.SistemaVentas.Models.ViewModel;
 using AplicacionWeb.SistemaVentas.Servicios.Seguridad;
 using CapaNegocio;

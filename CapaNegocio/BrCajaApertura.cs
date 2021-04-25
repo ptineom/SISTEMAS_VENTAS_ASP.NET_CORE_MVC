@@ -175,6 +175,14 @@ namespace CapaNegocio
 
         public ResultadoOperacion GetAllByFilters(string idSucursal, string idCaja, string idUsuario, string fecIni, string fecFin)
         {
+            //Validar rango de fechas.
+            string messageError = ViewHelper.ValidateRangeDate(fecIni, fecFin);
+            if (!string.IsNullOrEmpty(messageError))
+            {
+                _resultado.SetResultado(false, messageError);
+                return _resultado;
+            }
+
             using (SqlConnection con = new SqlConnection(_conexion.getConexion))
             {
                 try

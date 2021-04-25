@@ -97,7 +97,11 @@ var oModalConsultarProveedor = {
         if (txtFiltro.value == "") {
             oAlerta.alerta({
                 title: "Debe de ingresar al menos 1 caracter.",
-                type: "warning"
+                type: "warning",
+                contenedor: "#modalConsultarProveedor .modal-dialog",
+                closeAutomatic: true,
+                notTitle: true,
+                notIcon: true
             });
             return;
         }
@@ -135,7 +139,11 @@ var oModalConsultarProveedor = {
         }).catch(error => {
             oAlerta.alerta({
                 title: error.response.data.Message,
-                type: "warning"
+                type: "warning",
+                contenedor: "#modalConsultarProveedor .modal-dialog",
+                closeAutomatic: true,
+                notTitle: true,
+                notIcon: true
             });
         }).finally(() => oHelper.hideLoading());
     }

@@ -33,6 +33,10 @@ label.error {
     width:100%;
 }
 
+.btn-sm {
+    line-height: 1.0 !important
+}
+
 /*totales ventas y compras*/
 .totales {
     background-color: #EEEEEE;

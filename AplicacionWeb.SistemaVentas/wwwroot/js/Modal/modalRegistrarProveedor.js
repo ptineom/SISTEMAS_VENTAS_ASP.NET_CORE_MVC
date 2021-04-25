@@ -51,7 +51,7 @@ var oModalRegistrarProveedor = {
         document.getElementById('btnGuardarProveedor').addEventListener('click', oModalRegistrarProveedor.grabar);
 
         oModalRegistrarProveedor.validaciones();
-       
+
     },
     show: function () {
         let options = {};
@@ -144,41 +144,47 @@ var oModalRegistrarProveedor = {
     },
     grabar: function () {
         if ($("#form-proveedor").valid()) {
-            let cboTipDoc = document.getElementById('cboTipDocRegProv');
-            let txtNumDoc = document.getElementById('txtNumDocRegProv');
-            let txtRazSoc = document.getElementById('txtRazSocRegProv');
+            //Modal de confirmación.
+            oAlertaModal.showConfirmation({
+                title: "Registro de proveedor",
+                message: "¿Desea guardar los datos?"
+            }).then(() => {
+                let cboTipDoc = document.getElementById('cboTipDocRegProv');
+                let txtNumDoc = document.getElementById('txtNumDocRegProv');
+                let txtRazSoc = document.getElementById('txtRazSocRegProv');
 
-            let parameters = {
-                IdTipoDocumento: cboTipDoc.value == "" ? undefined: cboTipDoc.value,
-                NroDocumento: txtNumDoc.value,
-                RazonSocial: txtRazSoc.value,
-                Contacto: document.getElementById('txtConRegProv').value,
-                Email: document.getElementById('txtEmaRegProv').value,
-                Telefono: document.getElementById('txtTelRegProv').value,
-                Direccion: document.getElementById('txtDirRegProv').value,
-                IdDepartamento: document.getElementById('cboDepRegProv').value,
-                IdProvincia: document.getElementById('cboProRegProv').value,
-                IdDistrito: document.getElementById('cboDisRegProv').value,
-                MaxDigitosDocumento: cboTipDoc.options[cboTipDoc.selectedIndex].getAttribute("data-max-digitos")
-            };
+                let parameters = {
+                    IdTipoDocumento: cboTipDoc.value == "" ? undefined : cboTipDoc.value,
+                    NroDocumento: txtNumDoc.value,
+                    RazonSocial: txtRazSoc.value,
+                    Contacto: document.getElementById('txtConRegProv').value,
+                    Email: document.getElementById('txtEmaRegProv').value,
+                    Telefono: document.getElementById('txtTelRegProv').value,
+                    Direccion: document.getElementById('txtDirRegProv').value,
+                    IdDepartamento: document.getElementById('cboDepRegProv').value,
+                    IdProvincia: document.getElementById('cboProRegProv').value,
+                    IdDistrito: document.getElementById('cboDisRegProv').value,
+                    MaxDigitosDocumento: cboTipDoc.options[cboTipDoc.selectedIndex].getAttribute("data-max-digitos")
+                };
 
-            oHelper.showLoading("#modalRegistrarProveedor .modal-content");
+                oHelper.showLoading("#modalRegistrarProveedor .modal-content");
 
-            axios.post("/Proveedor/Register", parameters).then((response) => {
-                oModalRegistrarProveedor.resolve({
-                    idTipoDocumento: cboTipDoc.value,
-                    numDocumento: txtNumDoc.value,
-                    idProveedor: response.data.Data,
-                    nomProveedor: txtRazSoc.value.capitalizeAll()
-                });
-                oModalRegistrarProveedor.ok = true;
-                oModalRegistrarProveedor.instance.hide();
-            }).catch((error) => {
-                oAlerta.alerta({
-                    title: error.response.data.Message,
-                    type: "warning"
-                });
-            }).finally(() => oHelper.hideLoading());
+                axios.post("/Proveedor/Register", parameters).then((response) => {
+                    oModalRegistrarProveedor.resolve({
+                        idTipoDocumento: cboTipDoc.value,
+                        numDocumento: txtNumDoc.value,
+                        idProveedor: response.data.Data,
+                        nomProveedor: txtRazSoc.value.capitalizeAll()
+                    });
+                    oModalRegistrarProveedor.ok = true;
+                    oModalRegistrarProveedor.instance.hide();
+                }).catch((error) => {
+                    oAlerta.alerta({
+                        title: error.response.data.Message,
+                        type: "warning"
+                    });
+                }).finally(() => oHelper.hideLoading());
+            }).catch(() => { })
         }
     },
     validaciones: function () {

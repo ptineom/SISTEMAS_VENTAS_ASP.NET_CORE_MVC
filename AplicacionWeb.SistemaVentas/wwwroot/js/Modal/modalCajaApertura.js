@@ -1,5 +1,6 @@
 ﻿'use strict'
 var oModalCajaApertura = {
+    instance: null,
     intervalTime: null,
     bCajaAbierta: false,
     modelo: null,
@@ -45,7 +46,7 @@ var oModalCajaApertura = {
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <span class="py-2 px-3 mt-1" style="background-color: #B71C1C !important; color:#fff">
-                        Fecha y hora de apertura de caja: <span id="spnFechaHoraApertura">12/04/2021 10:30</span> 
+                        Fecha y hora de apertura de caja: <span id="spnFechaHoraApertura"></span> 
                     </span>
                     <div class="modal-body pt-1">
                         <form method="post" id="form-cajaApertura">
@@ -68,10 +69,10 @@ var oModalCajaApertura = {
                                 <div class="col-md-4">
                                     <label class="form-label mb-1">Hora cierre</label>
                                     <div class="input-group input-group-sm bootstrap-timepicker timepicker">
-                                        <input id="txtHorCie_ca" type="text" class="form-control input-small" name="txtHorCie_ca">
                                         <span class="input-group-text input-group-addon">
                                             <i class="glyphicon glyphicon-time"></i>
                                         </span>
+                                        <input id="txtHorCie_ca" type="text" class="form-control input-small" name="txtHorCie_ca">
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-6">
@@ -141,20 +142,20 @@ var oModalCajaApertura = {
         </div>`;
 
         //Lo agregamos al main del html
-        let content = document.getElementById('content');
+        let content = document.getElementsByTagName('body')[0]; // document.getElementById('content');
         let main = content.querySelector('main');
         main.insertAdjacentHTML("afterbegin", html);
 
         let options = {};
-        let modal = document.getElementById('modalCajaApertura')
-        let myModal = new bootstrap.Modal(modal, options)
+        let modalCajaApertura = document.getElementById('modalCajaApertura')
+        oModalCajaApertura.instance = new bootstrap.Modal(modalCajaApertura, options)
 
-        modal.addEventListener('shown.bs.modal', function () {
+        modalCajaApertura.addEventListener('shown.bs.modal', function () {
             oModalCajaApertura.inicializarSegunEstadoCaja();
         });
-        modal.addEventListener('hidden.bs.modal', function () {
+        modalCajaApertura.addEventListener('hidden.bs.modal', function () {
             //Destruimos el modal.
-            main.removeChild(modal);
+            main.removeChild(modalCajaApertura);
 
             //Limpiamos el intervalo utilizado par mostrar la hora.
             clearInterval(oModalCajaApertura.intervalTime);
@@ -166,7 +167,7 @@ var oModalCajaApertura = {
         let txtMonApe_ca = document.getElementById('txtMonApe_ca');
 
         txtHorCie_ca.addEventListener('click', function () {
-            this.nextElementSibling.click();
+            this.previousElementSibling.click();
         });
         $(txtHorCie_ca).timepicker({
             minuteStep: 5,
@@ -202,11 +203,11 @@ var oModalCajaApertura = {
 
         oModalCajaApertura.validaciones();
 
-        myModal.show();
+        oModalCajaApertura.instance.show();
 
         return new Promise((resolve, reject) => {
-            oModalAbono.resolve = resolve;
-            oModalAbono.reject = reject;
+            oModalCajaApertura.resolve = resolve;
+            oModalCajaApertura.reject = reject;
         })
     },
     montosTotalesCaja: function () {
@@ -325,6 +326,7 @@ var oModalCajaApertura = {
         let txtHorCie_ca = document.getElementById('txtHorCie_ca');
 
         if (oModalCajaApertura.bCajaAbierta) {
+            spnFechaHoraApertura.textContent = oModalCajaApertura.modelo.fechaApertura;
             //Configuración para el cierre diferido
             chkCieDif_ca.disabled = oModalCajaApertura.modelo.flgReaperturado;
             chkCieDif_ca.checked = oModalCajaApertura.modelo.flgCierreDiferido;
@@ -349,8 +351,15 @@ var oModalCajaApertura = {
 
             //Monto apertura
             let txtMonApe_ca = document.getElementById('txtMonApe_ca');
+
+            if (oModalCajaApertura.modelo.montoApertura == "")
+                oModalCajaApertura.modelo.montoApertura = 0;
+
+            if (oModalCajaApertura.modelo.montoApertura > 0)
+                txtMonApe_ca.value = oHelper.formatoMoneda(oModalCajaApertura.modelo.sgnMoneda, oModalCajaApertura.modelo.montoApertura)
+
             txtMonApe_ca.disabled = true;
-            txtMonApe_ca.value = oModalCajaApertura.modelo.montoApertura;
+
 
             oModalCajaApertura.moneda = {
                 idMoneda: oModalCajaApertura.modelo.idMoneda,
@@ -389,27 +398,32 @@ var oModalCajaApertura = {
             let titulo = bCajaAbierta ? `Caja ${oModalCajaApertura.modelo.flgReaperturado ? "reaperturada" : "abierta"}` : "Caja cerrada";
             let pregunta = `¿Desea ${bCajaAbierta ? "cerrar la caja" : "abrir la caja"}?`;
 
+            //Abrimos el modal de confirmación.
             oAlertaModal.showConfirmation({
                 title: titulo,
-                message: pregunta,
-                contenedor: "#modalCajaApertura .modal-content"
+                message: pregunta
             }).then(() => {
+                //Si es aceptar
+
                 oHelper.showLoading("#modalCajaApertura .modal-content");
 
                 let fechaCierre = "";
                 if (document.getElementById('chkCieDif_ca').checked)
                     fechaCierre = `${document.getElementById('txtFecCie_ca').value} ${document.getElementById('txtHorCie_ca').value}`;
 
+                let txtMonApe_ca = document.getElementById('txtMonApe_ca');
+
                 let parameters = {
                     Accion: bCajaAbierta ? "UPD" : "INS",
-                    MontoApertura: document.getElementById('txtMonApe_ca').value == "" ? 0 : document.getElementById('txtMonApe_ca').value,
-                    IdMoneda: oModalCajaApertura.modelo.idMoneda,
+                    MontoApertura: bCajaAbierta ? oModalCajaApertura.modelo.montoApertura : txtMonApe_ca.value == "" ? 0 : txtMonApe_ca.value,
+                    IdMoneda: bCajaAbierta ? oModalCajaApertura.modelo.idMoneda : oModalCajaApertura.moneda.idMoneda,
                     IdCaja: document.getElementById('cboCaja_ca').value,
                     FechaCierre: fechaCierre,
                     MontoTotal: bCajaAbierta ? modelo.montoTotal : 0,
                     Correlativo: bCajaAbierta ? modelo.correlativo : 0,
                     FlgReaperturado: bCajaAbierta ? modelo.flgReaperturado : false,
                     Item: bCajaAbierta ? modelo.item : 0,
+                    FlgCierreDiferido: document.getElementById('chkCieDif_ca').checked
                 };
 
                 axios.post("/CajaApertura/Register", parameters).then((response) => {
@@ -433,7 +447,13 @@ var oModalCajaApertura = {
                     } else {
                         oModalCajaApertura.bCajaAbierta = false;
                     }
-                    myModal.hide();
+
+                    //Si esta todo ok
+                    oModalCajaApertura.resolve();
+
+                    //Cerramos el modal de apertura de caja.
+                    oModalCajaApertura.instance.hide();
+
                 }).catch((error) => {
                     oAlerta.alerta({
                         title: error.response.data.Message,
@@ -442,13 +462,13 @@ var oModalCajaApertura = {
                 }).finally(() => {
                     oHelper.hideLoading();
                 });
-            }).catch(error => {
-                console.error(error);
-            })
+
+                //Si es cancelar en el modal de confirmación.
+            }).catch(cancelar => { })
         }
-     },
+    },
     validaciones: function () {
-        //Fecha de cierre requerido 
+        //Seleccionar caja 
         $.validator.addMethod("requiredBox", function (value, element) {
             if (!oModalCajaApertura.bCajaAbierta) {
                 if (!!value)
@@ -471,10 +491,10 @@ var oModalCajaApertura = {
             return true;
         }, "Ingrese la fecha de cierre.");
 
-        //Validar fecha de cierre
+        //Fecha de cierre que no sea menor a la fecha de apertura.
         $.validator.addMethod("notLessDateOpening", function (value, element) {
             if (document.getElementById('chkCieDif_ca').checked) {
-                let fechaApertura = days(document.getElementById('spnFechaHoraApertura').textContent, 'DD/MM/YYYY HH:mm:ss').format("YYYY/MM/DD");
+                let fechaApertura = dayjs(document.getElementById('spnFechaHoraApertura').textContent, 'DD/MM/YYYY HH:mm:ss').format("YYYY/MM/DD");
                 if (dayjs(value, "DD/MM/YYYY").isBefore(dayjs(fechaApertura)))
                     return false;
             }
@@ -482,7 +502,7 @@ var oModalCajaApertura = {
             return true;
         }, "No debe ser menor a la fecha de apertura.");
 
-        //Validar fecha de cierre
+        //Fecha de cierre que no sea mayor a la fecha actual
         $.validator.addMethod("notOlderDateCurrent", function (value, element) {
             if (document.getElementById('chkCieDif_ca').checked) {
                 let fechaActual = dayjs().format("YYYY/MM/DD");
@@ -505,11 +525,11 @@ var oModalCajaApertura = {
             return true;
         }, "Ingrese la hora de cierre.");
 
-        //Validar fecha de cierre
+        //Fecha y hora de cierre no debe ser mayor a la fecha actual.
         $.validator.addMethod("notOlderDateHourCurrent", function (value, element) {
             if (document.getElementById('chkCieDif_ca').checked) {
                 let fechaHoraCierre = `${document.getElementById('txtFecCie_ca').value} ${document.getElementById('txtHorCie_ca').value}`;
-                fechaHoraCierre = days(fechaHoraCierre, 'DD/MM/YYYY HH:mm');
+                fechaHoraCierre = dayjs(fechaHoraCierre, 'DD/MM/YYYY HH:mm');
 
                 let fechaActual = new Date();
 
@@ -519,13 +539,13 @@ var oModalCajaApertura = {
             return true;
         }, "No debe ser mayor a la fecha y hora actual.");
 
-        //Validar fecha de cierre
+        //Fecha y hora de cierre no debe ser menor a la fecha de apertura.
         $.validator.addMethod("notLessDateHourOpening", function (value, element) {
             if (document.getElementById('chkCieDif_ca').checked) {
                 let fechaHoraCierre = `${document.getElementById('txtFecCie_ca').value} ${document.getElementById('txtHorCie_ca').value}`;
-                fechaHoraCierre = days(fechaHoraCierre, 'DD/MM/YYYY HH:mm');
+                fechaHoraCierre = dayjs(fechaHoraCierre, 'DD/MM/YYYY HH:mm');
 
-                let fechaHoraApertura = days(document.getElementById('spnFechaHoraApertura').textContent, 'DD/MM/YYYY HH:mm:ss')
+                let fechaHoraApertura = dayjs(document.getElementById('spnFechaHoraApertura').textContent, 'DD/MM/YYYY HH:mm:ss')
 
                 if (fechaHoraCierre.isBefore(fechaHoraApertura))
                     return false;
@@ -537,13 +557,13 @@ var oModalCajaApertura = {
             rules: {
                 txtFecCie_ca: {
                     requiredDateOpening: true,
-                    notLessDateOpening:true,
-                    notOlderDateCurrent:true
+                    notLessDateOpening: true,
+                    notOlderDateCurrent: true
                 },
                 txtHorCie_ca: {
                     requiredHourOpening: true,
                     notOlderDateHourCurrent: true,
-                    notLessDateHourOpening:true
+                    notLessDateHourOpening: true
                 },
                 cboCaja_ca: {
                     requiredBox: true

@@ -313,17 +313,17 @@ var oCompra = {
         oCompra.limpiarAbono();
 
         document.getElementById('btnConPro').addEventListener('click', (e) => {
+            //Abrir modal de consulta de proveedores.
             oModalConsultarProveedor.show().then(response => {
                 oCompra.bindingProveedor(response);
-            }).catch(error => {
-            });
+            }).catch(error => { });
         });
 
         document.getElementById('btnNuePro').addEventListener('click', (e) => {
+            //Abrir modal de registro de proveedores.
             oModalRegistrarProveedor.show().then(response => {
                 oCompra.bindingProveedor(response);
-            }).catch(error => {
-            });
+            }).catch(error => { });
         });
 
         document.getElementById('btnConProConsulta').addEventListener('click', (e) => {
@@ -389,7 +389,7 @@ var oCompra = {
         });
 
         let options = {
-     
+
         };
         let modal = document.getElementById('modalConsultarCompra')
         oCompra.instance = new bootstrap.Modal(modal, options)
@@ -454,6 +454,8 @@ var oCompra = {
         }
     },
     obtenerCompraPorCodigo: function (comprobante) {
+        oHelper.showLoading();
+
         let table = document.getElementById('tblDetalle');
 
         oHelper.limpiarTabla(table);
@@ -957,7 +959,7 @@ var oCompra = {
                 });
                 document.getElementById('cboForPag').value = "";
                 return;
-            }; 
+            };
 
             let txtFecVen = document.getElementById('txtFecVen');
             if (txtFecVen.value == "") {
@@ -1247,7 +1249,7 @@ var oCompra = {
                 JsonArticulos: jsonArticulo,
                 Abono: oCompra.modeloAbono != null ? oCompra.modeloAbono.abono : 0,
                 Saldo: oCompra.modeloAbono != null ? oCompra.modeloAbono.saldo : 0,
-                FechaCancelacion: oCompra.modeloAbono != null ? oCompra.modeloAbono.fechaCancelacion: '',
+                FechaCancelacion: oCompra.modeloAbono != null ? oCompra.modeloAbono.fechaCancelacion : '',
                 Observacion: document.getElementById('txtObservacion').value
             };
 

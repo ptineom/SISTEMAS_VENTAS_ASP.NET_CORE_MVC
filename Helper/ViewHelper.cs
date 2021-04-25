@@ -488,32 +488,32 @@ namespace Helper
             }
         }
 
-        public static string formatoIgv(decimal igv)
+        public static string FormatoIgv(decimal igv)
         {
             int parteEntera = (int)igv; // sin redondeo;
             decimal decimales = (igv - parteEntera);
             return (decimales > 0 ? string.Format("{0:0,0.00}", igv) : parteEntera.ToString());
         }
 
-        public static string redondearSiNoHayDecimales(decimal numero)
+        public static string RedondearSiNoHayDecimales(decimal numero)
         {
             int parteEntera = (int)numero; // sin redondeo;
             decimal decimales = (numero - parteEntera);
             return (decimales > 0 ? string.Format("{0:#,#0.00}", numero) : parteEntera.ToString());
         }
-        public static string redondearSiNoHayDecimales(string numero)
+        public static string RedondearSiNoHayDecimales(string numero)
         {
             decimal dNumero = Convert.ToDecimal(numero);
             int parteEntera = (int)dNumero; // sin redondeo;
             decimal decimales = (dNumero - parteEntera);
             return (decimales > 0 ? string.Format("{0:#,#0.00}", dNumero) : parteEntera.ToString());
         }
-        private static string repetirCaracter(char caracater, int nroVeces)
+        private static string RepetirCaracter(char caracater, int nroVeces)
         {
             return string.Concat(Enumerable.Repeat(caracater.ToString(), nroVeces));
         }
 
-        public static string formatoComprobante(string tipoComprobante, int serie, int documento, bool abreviado = false)
+        public static string FormatoComprobante(string tipoComprobante, int serie, int documento, bool abreviado = false)
         {
             //FACTURA: 003-000015
             int maxLSerie = 3, maxLDocumento = 6;
@@ -528,16 +528,16 @@ namespace Helper
                 resultado = "La longitud del nro del comprobante no debe de sobrepasar de los " + maxLDocumento + " caracteres.";
                 return resultado;
             }
-            string nroSerie = (repetirCaracter('0', maxLSerie) + serie);
+            string nroSerie = (RepetirCaracter('0', maxLSerie) + serie);
             nroSerie = nroSerie.Substring((nroSerie.Length - maxLSerie), maxLSerie);// sustituye a la funcion right de vb
-            string nroComprobante = (repetirCaracter('0', maxLDocumento) + documento);
+            string nroComprobante = (RepetirCaracter('0', maxLDocumento) + documento);
             nroComprobante = nroComprobante.Substring((nroComprobante.Length - maxLDocumento), maxLDocumento);
 
             resultado = (abreviado ? tipoComprobante.Substring(0, 3) : tipoComprobante) + ": " + nroSerie + "-" + nroComprobante;
             return resultado;
         }
 
-        public static bool validarEmail(string email)
+        public static bool ValidarEmail(string email)
         {
             String sFormato;
             sFormato = "\\w+([-+.']\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";
@@ -556,6 +556,23 @@ namespace Helper
             {
                 return false;
             }
+        }
+
+        public static string ValidateRangeDate(string fechaInicial, string fechaFinal)
+        {
+            DateTime fechaMinima = DateTime.Parse("01/01/1753 12:00:00");
+            DateTime fechaMaxima = DateTime.Parse("31/12/9999 11:59:59");
+            if (DateTime.Parse(fechaInicial) < fechaMinima)
+                return $"La fecha inicial no debe ser menor a la fecha mínima permitida: {fechaMinima.ToShortDateString()}";
+
+            if (DateTime.Parse(fechaFinal) > fechaMaxima)
+                return $"La fecha final no debe ser mayor a la fecha máxima permitida: {fechaMaxima.ToShortDateString()}";
+
+
+            if (DateTime.Parse(fechaInicial) > DateTime.Parse(fechaFinal))
+                return "La fecha inicial no debe ser mayor a la fecha final";
+
+            return "";
         }
     }
 

@@ -67,7 +67,7 @@ var oAlerta = {
         content.insertAdjacentHTML('afterbegin', alerta);
 
         document.getElementById('alerta').addEventListener('closed.bs.alert', function () {
-            clearInterval(oCompra.intervalId);
+            clearInterval(oAlerta.intervalId);
         })
 
         if (closeAutomatic) {
@@ -78,11 +78,11 @@ var oAlerta = {
             setTimeout(() => {
                 let myAlert = document.getElementById('alerta');
                 //Disminuirá la opacidad del componente hasta desaparecer.
-                oCompra.intervalId = setInterval(function () {
+                oAlerta.intervalId = setInterval(function () {
                     if (myAlert.style.opacity > 0) {
                         myAlert.style.opacity -= 0.1;
                     } else {
-                        clearInterval(oCompra.intervalId);
+                        clearInterval(oAlerta.intervalId);
                         myAlert.parentElement.removeChild(myAlert);
                     }
                 }, milisegundos);
