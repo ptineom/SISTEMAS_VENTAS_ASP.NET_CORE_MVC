@@ -2,6 +2,7 @@
 var oCompra = {
     modeloAbono: null,
     instance: null,
+    titulo: "Registro de compra",
     init: function () {
         oCompra.botonera(true);
         oConfigControls.inicializarDatePicker("#txtFecVen, .input-daterange");
@@ -30,6 +31,7 @@ var oCompra = {
 
         let txtSerie = document.getElementById('txtSerie');
         txtSerie.addEventListener('keyup', (e) => oHelper.teclaEnter(e, "txtNumero"));
+        txtSerie.addEventListener('input', (e) => oHelper.mayus(e.target));
 
         let txtNumero = document.getElementById('txtNumero');
         txtNumero.addEventListener('keyup', (e) => oHelper.teclaEnter(e, "txtFecEmi"));
@@ -278,7 +280,6 @@ var oCompra = {
             oCompra.calcularTotales();
         });
 
-
         let txtTasDes = document.getElementById('txtTasDes');
         txtTasDes.addEventListener('keypress', (e) => oHelper.soloNumerosEnteros(e));
         txtTasDes.addEventListener('input', (e) => {
@@ -339,10 +340,9 @@ var oCompra = {
                 oCompra.agregarArticulo(modelo).then(() => {
 
                 }).catch(error => {
-                    oAlerta.alerta({
-                        title: error,
-                        type: "warning",
-                        closeAutomatic: true
+                    oAlerta.show({
+                        message: error,
+                        type: "warning"
                     });
                 });
             }, document.getElementById('tblDetalle'));
@@ -350,20 +350,68 @@ var oCompra = {
 
         document.getElementById('btnNuevo').addEventListener('click', oCompra.nuevo);
         document.getElementById('btnGrabar').addEventListener('click', () => {
-            oCompra.validarForm().then((response) => {
-                oCompra.grabar(response);
+            //Validamos los datos
+            oCompra.validarForm().then((result) => {
+                //Si tiene caja abierta y monto total en caja > 0, entonces mostrará el modal 
+                //preguntando si desea retirar dinero de caja.
+                if (oModalCajaApertura.bCajaAbierta) {
+
+                    //Traemos el monto total de caja en tiempo real(no signalr).
+                    oHelper.showLoading();
+                    let uri = `/CajaApertura/GetTotalsByUserId/${oModalCajaApertura.modelo.idCaja}/${oModalCajaApertura.modelo.correlativo}`;
+                    axios.get(uri).then((response) => {
+                        let data = response.data.Data;
+                        if (data.MontoTotal > 0) {
+
+                            //Mostramos el modal de pregunta "¿deseamos retirar dinero de caja?", en caso si, entonces ingresamos la cantidad a retirar.
+                            oModalPagarCompra.show({
+                                sgnMoneda: oCompra.getSgnMoneda(),
+                                montoTotalCaja: data.MontoTotal,
+                                esAcredito: oCompra.esAcredito(),
+                                montoCompra: oCompra.esAcredito() ? (oCompra.modeloAbono != null ? oCompra.modeloAbono.abono : 0) : oHelper.numeroSinMoneda(document.getElementById('lblTotPag').textContent)
+                            }).then((modelo) => {
+                                //Obtenemos el monto ingresado en el modal.
+                                result = Object.assign(result, {
+                                    flgRetirarCaja: modelo.bRetirarDinero,
+                                    montoRetiraCaja: modelo.montoRetiro,
+                                    idCaja: oModalCajaApertura.modelo.idCaja,
+                                    correlativoCa: oModalCajaApertura.modelo.correlativo
+                                })
+
+                                //Realizamos el guardado de la compra.
+                                oCompra.grabar(result);
+                            }).catch(() => { });
+                        }
+                    }).catch((error) => {
+                        oAlerta.show({
+                            message: error.response.data.Message,
+                            type: "warning"
+                        });
+                    }).finally(() => oHelper.hideLoading());
+
+                } else {
+                    //Si no existe caja abierta, realizamos el guardado de la compra.
+                    oCompra.grabar(result);
+                }
             }).catch(error => {
-                oAlerta.alerta({
-                    title: error,
+                oAlerta.show({
+                    message: error,
                     type: "warning"
                 });
             })
         });
         document.getElementById('btnAnular').addEventListener('click', () => {
             oAlertaModal.showConfirmation({
-                title: "Artículo",
-                message: "¿Desea anular el registro seleccionado?"
-            }).then((ok) => {
+                title: oCompra.titulo,
+                message: "¿Desea anular el registro seleccionado?",
+                size: "",
+                showCheckOptional: true,
+                messageCheckOptional: "Utilizar de modelo este registro para registrar nueva compra."
+            }).then((okResponse) => {
+                let crearCopia = okResponse.checkOptional;
+
+                oHelper.showLoading();
+
                 let parameters = {
                     IdTipoComprobante: document.getElementById('cboTipCom').value,
                     NroSerie: document.getElementById('txtSerie').value,
@@ -371,21 +419,34 @@ var oCompra = {
                     IdProveedor: document.getElementById('hddIdPro').value
                 };
 
-                oHelper.showLoading();
-
                 axios.post("/Compra/Delete", parameters).then((response) => {
                     let data = response.data;
-                    alert("Anulado");
+
+                    //Si hemos marcado la opción de crear copia solo se desabilitará los elementos desabilitados.
+                    if (crearCopia) {
+                        oCompra.botonera(true);
+                        oCompra.desabilitar(false);
+                        document.getElementById('spnEstado').textContent = "";
+                    } else {
+                        oCompra.nuevo();
+                    }
+
+                    //Incializamos la pestaña consulta
+                    oCompra.inicializarPestaniaConsulta();
+
+                    oAlerta.show({
+                        message: data.Mensaje,
+                        type: "success"
+                    });
                 }).catch((error) => {
-                    oAlerta.alerta({
-                        title: error.response.data.Message,
+                    oAlerta.show({
+                        message: error.response.data.Message,
                         type: "warning"
                     });
                 }).finally(() => oHelper.hideLoading());
             }).catch((cancelar) => {
 
             })
-            return;
         });
 
         let options = {
@@ -398,7 +459,7 @@ var oCompra = {
 
         });
         modal.addEventListener('hidden.bs.modal', function () {
-
+          
         });
 
         document.getElementById('btnBuscar').addEventListener('click', () => {
@@ -411,24 +472,7 @@ var oCompra = {
         document.getElementById('filtroFechas').style.display = "flex";
 
         Array.from(modal.querySelectorAll('input[type=radio][name="flexRadioDefault"]')).forEach(rb => {
-            rb.addEventListener('change', (e) => {
-                if (e.target.id == "rbPorProveedor") {
-                    document.getElementById('filtroProveedor').style.display = "flex";
-                    document.getElementById('filtroComprobante').style.display = "none";
-                    oCompra.inicializarDatosComprobanteConsulta(true);
-
-                } else if (e.target.id == "rbPorComprobante") {
-                    document.getElementById('filtroProveedor').style.display = "none";
-                    document.getElementById('filtroComprobante').style.display = "flex";
-                    oCompra.inicializarDatosProveedorConsulta(true);
-                } else if (e.target.id == "rbPorFechas") {
-                    document.getElementById('filtroFechas').display = "flex";
-                    document.getElementById('filtroProveedor').style.display = "none";
-                    document.getElementById('filtroComprobante').style.display = "none";
-                    oCompra.inicializarDatosProveedorConsulta(true);
-                    oCompra.inicializarDatosComprobanteConsulta(true);
-                }
-            })
+            rb.addEventListener('change', (e) => oCompra.seleccionarPorTipoDeFiltroEnConsulta(e.target.id));
         });
 
         document.getElementById('btnBuscarComprobantes').addEventListener('click', oCompra.consultar);
@@ -445,6 +489,48 @@ var oCompra = {
             })
 
         });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key == "+") {
+                oModalConsultarArticulo.show((modelo) => {
+                    //Agregamos el artículo encontrado al detalle.
+                    oCompra.agregarArticulo(modelo).then(() => {}).catch(error => {
+                        oAlerta.show({
+                            message: error,
+                            type: "warning"
+                        });
+                    });
+                }, document.getElementById('tblDetalle'));
+            }
+        })
+    },
+    inicializarPestaniaConsulta() {
+        //Incializamos los elementos y tabla de la pestaña consulta.
+        let rb = document.getElementById('rbPorFechas');
+        rb.checked = true;
+        oCompra.seleccionarPorTipoDeFiltroEnConsulta(rb.id);
+        oCompra.cleartblConsultarCompra();
+    },
+    seleccionarPorTipoDeFiltroEnConsulta(idTipoFiltro) {
+        switch (idTipoFiltro) {
+            case "rbPorProveedor":
+                document.getElementById('filtroProveedor').style.display = "flex";
+                document.getElementById('filtroComprobante').style.display = "none";
+                oCompra.inicializarDatosComprobanteConsulta(true);
+                break;
+            case "rbPorComprobante":
+                document.getElementById('filtroProveedor').style.display = "none";
+                document.getElementById('filtroComprobante').style.display = "flex";
+                oCompra.inicializarDatosProveedorConsulta(true);
+                break;
+            case "rbPorFechas":
+                document.getElementById('filtroFechas').display = "flex";
+                document.getElementById('filtroProveedor').style.display = "none";
+                document.getElementById('filtroComprobante').style.display = "none";
+                oCompra.inicializarDatosProveedorConsulta(true);
+                oCompra.inicializarDatosComprobanteConsulta(true);
+                break;
+        }
     },
     cleartblConsultarCompra: function () {
         let tblConsultarCompra = $("#tblConsultarCompra").DataTable();
@@ -468,7 +554,6 @@ var oCompra = {
             let detalle = data.Detalle;
 
             //Binding
-
             //Cabecera
             document.getElementById('cboTipCom').value = cabecera.IdTipoComprobante;
             document.getElementById('txtSerie').value = cabecera.NroSerie;
@@ -488,10 +573,11 @@ var oCompra = {
             document.getElementById('cboForPag').value = cabecera.IdTipoCondicion;
             document.getElementById('txtObservacion').value = cabecera.Observacion;
 
-            document.getElementById('lblSubTot').textContent = cabecera.TotBruto;
-            document.getElementById('lblTotDes').textContent = cabecera.TotDescuento;
-            document.getElementById('lblTotIgv').textContent = cabecera.TotImpuesto;
-            document.getElementById('lblTotal').textContent = cabecera.TotCompra;
+            document.getElementById('lblSubTot').textContent = oHelper.formatoMiles(cabecera.TotBruto);
+            document.getElementById('lblTotDes').textContent = oHelper.formatoMiles(cabecera.TotDescuento);
+            document.getElementById('lblTotIgv').textContent = oHelper.formatoMiles(cabecera.TotImpuesto);
+            document.getElementById('lblTotal').textContent = oHelper.formatoMiles(cabecera.TotCompra);
+
             document.getElementById('lblTotRed').textContent = (parseFloat(cabecera.TotCompra) - parseFloat(cabecera.TotCompraRedondeo)).toFixed(2);
             document.getElementById('lblTotPag').textContent = oHelper.formatoMoneda(oCompra.getSgnMoneda(), cabecera.TotCompraRedondeo, 2);
             document.getElementById('txtTasDes').value = cabecera.TasDescuento;
@@ -500,11 +586,14 @@ var oCompra = {
             if (cabecera.EstDocumento == 1) {
                 spnEstado.classList.remove("bg-danger");
                 spnEstado.classList.add("bg-success");
+
             } else if (cabecera.EstDocumento == 3) {
                 spnEstado.classList.remove("bg-success");
                 spnEstado.classList.add("bg-danger");
+
             };
             spnEstado.textContent = cabecera.NomEstado;
+            spnEstado.setAttribute("data-idEstado", cabecera.EstDocumento);
 
             //Detalle
             let tbody = table.getElementsByTagName('tbody')[0];
@@ -513,8 +602,13 @@ var oCompra = {
             detalle.forEach(x => {
                 let tr = document.createElement('tr');
 
-                let option = `<option value="${x.IdUm}" data-nroFactor="${x.NroFactor}">${x.NomUm}</option>`;
+                let option = '<option value>---Seleccione---</option>';
+                x.JsonListaUm.forEach(y => {
+                    option += `<option value="${y.IdUm}" ${y.IdUm == x.IdUm ? 'selected' : ''} data-nroFactor="${y.NroFactor}">${y.NomUm.capitalizeAll()}</option>`
+                });
+
                 let cboUm = `<select class="form-select form-select-sm">${option}</select>`;
+
                 let txtPrecio = `<input class="form-control form-control-sm text-end" type="text" style="width:80px" value="${parseFloat(x.PrecioArticulo).toFixed(2)}"/>`;
                 let txtCantidad = `<input class="form-control form-control-sm text-end" type="text" value="${x.Cantidad}" style="width:80px"/>`;
                 let txtDescuento = `<input class="form-control form-control-sm text-end" type="number" min="0" max="100" step="5" value="${x.TasDescuento}" style="width:80px"/>`;
@@ -543,10 +637,10 @@ var oCompra = {
             oCompra.instance.hide();
 
         }).catch(error => {
-            oAlerta.alerta({
-                title: error.response.data.Message,
+            oAlerta.show({
+                message: error.response.data.Message,
                 type: "warning",
-                contenedor: "#modalConsultarCompra .modal-dialog"
+                container: "#modalConsultarCompra .modal-dialog"
             });
         }).finally(() => {
             oHelper.hideLoading();
@@ -595,10 +689,10 @@ var oCompra = {
             });
             tbody.appendChild(frag);
         }).catch(error => {
-            oAlerta.alerta({
-                title: error.response.data.Message,
+            oAlerta.show({
+                message: error.response.data.Message,
                 type: "warning",
-                contenedor: "#modalConsultarCompra .modal-dialog"
+                container: "#modalConsultarCompra .modal-dialog"
             });
         }).finally(() => {
             oHelper.hideLoading();
@@ -718,7 +812,7 @@ var oCompra = {
         if (subTotal == 0)
             document.getElementById('txtTasDes').value = "";
 
-        if (oCompra.esAcredito) {
+        if (oCompra.esAcredito()) {
             oCompra.limpiarAbono();
             document.getElementById('cboForPag').value = "";
         }
@@ -728,15 +822,15 @@ var oCompra = {
         let txtNumDoc = document.getElementById('txtNumDoc');
 
         if (cboTipDoc.value == '') {
-            oAlerta.alerta({
-                title: "Debe de seleccionar el tipo de documento",
+            oAlerta.show({
+                message: "Debe de seleccionar el tipo de documento",
                 type: "warning"
             });
             return;
         }
         if (txtNumDoc.value == '') {
-            oAlerta.alerta({
-                title: "Debe de ingresar el N° de documento",
+            oAlerta.show({
+                message: "Debe de ingresar el N° de documento",
                 type: "warning"
             });
             return;
@@ -754,8 +848,8 @@ var oCompra = {
             document.getElementById('txtNumDoc').value = modelo.NroDocumento;
             document.getElementById('txtRazSoc').value = modelo.NomProveedor;
         }).catch((error) => {
-            oAlerta.alerta({
-                title: error.response.data.Message,
+            oAlerta.show({
+                message: error.response.data.Message,
                 type: "warning"
             });
         }).finally(() => oHelper.hideLoading());
@@ -766,15 +860,15 @@ var oCompra = {
         let txtNumDoc = document.getElementById('txtNumDocConsulta');
 
         if (cboTipDoc.value == '') {
-            oAlerta.alerta({
-                title: "Debe de seleccionar el tipo de documento",
+            oAlerta.show({
+                message: "Debe de seleccionar el tipo de documento",
                 type: "warning"
             });
             return;
         }
         if (txtNumDoc.value == '') {
-            oAlerta.alerta({
-                title: "Debe de ingresar el N° de documento",
+            oAlerta.show({
+                message: "Debe de ingresar el N° de documento",
                 type: "warning"
             });
             return;
@@ -792,8 +886,8 @@ var oCompra = {
             document.getElementById('txtNumDocConsulta').value = modelo.NroDocumento;
             document.getElementById('txtRazSocConsulta').value = modelo.NomProveedor;
         }).catch((error) => {
-            oAlerta.alerta({
-                title: error.response.data.Message,
+            oAlerta.show({
+                message: error.response.data.Message,
                 type: "warning"
             });
         }).finally(() => oHelper.hideLoading());
@@ -802,8 +896,8 @@ var oCompra = {
     obtenerArticuloPorCodigoBarra: function () {
         let txtCodBar = document.getElementById('txtCodBar');
         if (txtCodBar.value == "")
-            oAlerta.alerta({
-                title: "Debe de ingresar el código de barra",
+            oAlerta.show({
+                message: "Debe de ingresar el código de barra",
                 type: "warning"
             })
 
@@ -825,16 +919,15 @@ var oCompra = {
             oCompra.agregarArticulo(modelo).then(() => {
                 document.getElementById('btnLimCodBar').click();
             }).catch(error => {
-                oAlerta.alerta({
-                    title: error,
-                    type: "warning",
-                    closeAutomatic: true
+                oAlerta.show({
+                    message: error,
+                    type: "warning"
                 });
                 document.getElementById('btnLimCodBar').click();
             });
         }).catch((error) => {
-            oAlerta.alerta({
-                title: error.response.data.Message,
+            oAlerta.show({
+                message: error.response.data.Message,
                 type: "warning"
             });
         }).finally(() => oHelper.hideLoading());
@@ -941,6 +1034,7 @@ var oCompra = {
         document.getElementById('txtNumeroConsulta').value = "";
     },
     inicializarDatosComprobanteConsulta: function (bInicializarTodo) {
+        //Limpiamos los elementos relacionados al comprobante en las pestaña de consulta.
         oCompra.limpiarComprobanteConsulta(bInicializarTodo);
 
         document.getElementById('txtSerieConsulta').disabled = bInicializarTodo;
@@ -952,10 +1046,9 @@ var oCompra = {
         //Evaluamos si es a crédito
         if (flgEvaluaCredito) {
             if (document.getElementById('lblTotal').textContent == 0) {
-                oAlerta.alerta({
-                    title: "Debe de existir un monto total de la compra para realizar el abono",
-                    type: "warning",
-                    closeAutomatic: true
+                oAlerta.show({
+                    message: "Debe de existir un monto total de la compra para realizar el abono",
+                    type: "warning"
                 });
                 document.getElementById('cboForPag').value = "";
                 return;
@@ -963,8 +1056,8 @@ var oCompra = {
 
             let txtFecVen = document.getElementById('txtFecVen');
             if (txtFecVen.value == "") {
-                oAlerta.alerta({
-                    title: "Debe de seleccionar la fecha de vencimiento si la forma de pago es a crédito",
+                oAlerta.show({
+                    message: "Debe de seleccionar la fecha de vencimiento si la forma de pago es a crédito",
                     type: "warning"
                 });
                 document.getElementById('cboForPag').value = "";
@@ -978,8 +1071,8 @@ var oCompra = {
 
                 //Si la fecha es menor a la fecha actual retorna false
                 if (fechaVencimiento.isBefore(fechaActual)) {
-                    oAlerta.alerta({
-                        title: "La fecha de vencimiento no puede ser menor a la fecha actual.",
+                    oAlerta.show({
+                        message: "La fecha de vencimiento no puede ser menor a la fecha actual.",
                         type: "warning"
                     });
                     document.getElementById('cboForPag').value = "";
@@ -1084,8 +1177,15 @@ var oCompra = {
         document.getElementById('btnConPro').disabled = sw;
 
         if (!sw) {
-            document.getElementById('txtNumDoc').disabled = true;
-            document.getElementById('btnBusPorNum').disabled = true;
+            //Utilizado para el boton nuevo
+            if (document.getElementById('cboTipDoc').value == "") {
+                document.getElementById('txtNumDoc').disabled = true;
+                document.getElementById('btnBusPorNum').disabled = true;
+            } else {
+                //Habilitado desde la opcion crear copia al anular.
+                document.getElementById('txtNumDoc').disabled = sw;
+                document.getElementById('btnBusPorNum').disabled = sw;
+            }
         } else {
             document.getElementById('txtNumDoc').disabled = sw;
             document.getElementById('btnBusPorNum').disabled = sw;
@@ -1128,9 +1228,13 @@ var oCompra = {
         } else {
             document.getElementById('btnNuevo').disabled = bNuevo;
             document.getElementById('btnGrabar').disabled = !bNuevo;
-            document.getElementById('btnAnular').disabled = bNuevo;
             document.getElementById('btnBuscar').disabled = bNuevo;
             document.getElementById('btnImprimir').disabled = bNuevo;
+
+            if (document.getElementById('spnEstado').getAttribute('data-idEstado') == "3")
+                document.getElementById('btnAnular').disabled = true;
+            else
+                document.getElementById('btnAnular').disabled = bNuevo;
         }
     },
     validarForm: function () {
@@ -1138,8 +1242,31 @@ var oCompra = {
             if (document.getElementById('cboTipCom').value == "")
                 return reject("Seleccione el tipo de comprobante.");
 
-            if (document.getElementById('txtSerie').value == "")
+            let txtSerie = document.getElementById('txtSerie');
+            if (txtSerie.value == 0) {
                 return reject("Ingrese la serie del comprobante.");
+            } else {
+                let lengthMax = 4;
+                if (isNaN(txtSerie.value)) {
+                    if (txtSerie.value.length < lengthMax) {
+                        return reject(`Debe de tener al menos ${lengthMax} caracteres la serie.`);
+                    }
+                    //No debe de haber mas de una letra
+                    let arr = txtSerie.value.split('');
+                    if (arr.filter(x => isNaN(x)).length > 1) {
+                        return reject("Formato no válido en la serie");
+                    }
+
+                    let cboTipCom = document.getElementById('cboTipCom');
+                    let nomTipCom = cboTipCom.options[cboTipCom.selectedIndex].text;
+                    if (nomTipCom.toUpperCase().substring(0, 1) != txtSerie.value.toUpperCase().substring(0, 1))
+                        return reject("La letra inicial de la serie no coincide con el tipo de comprobante.");
+                } else {
+                    let serie = `${("0").repeat(lengthMax)}${txtSerie.value}`;
+                    serie = serie.revertir().substring(0, lengthMax).revertir();
+                    txtSerie.value = serie;
+                }
+            }
 
             if (document.getElementById('txtSerie').value.length > 4)
                 return reject("La serie del comprobante debe ser máximo 4 caracteres.");
@@ -1171,13 +1298,16 @@ var oCompra = {
             if (document.getElementById('hddIdPro').value == "")
                 return reject("Ingrese el proveedor.");
 
-            if (document.getElementById('cboTipPag').value == "")
-                return reject("Seleccione el tipo de pago.");
+            if (document.getElementById('cboTipDoc').value == "")
+                return reject("Seleccione el tipo de documento del proveedor.");
+
+            if (document.getElementById('txtNumDoc').value == "")
+                return reject("Ingrese el R.U.C del proveedor.");
 
             if (document.getElementById('cboTipPag').value == "")
                 return reject("Seleccione el tipo de pago.");
 
-            if (document.getElementById('cboTipPag').value == "")
+            if (document.getElementById('cboForPag').value == "")
                 return reject("Seleccione la forma de pago.");
 
             let table = document.getElementById('tblDetalle');
@@ -1224,11 +1354,11 @@ var oCompra = {
     },
     grabar: function (params) {
         oAlertaModal.showConfirmation({
-            title: "Registro de compra",
+            title: oCompra.titulo,
             message: "¿Desea guardar los datos ingresados?"
         }).then((ok) => {
-
             let jsonArticulo = params.jsonArticulo
+            let flgRetirarCaja = params.flgRetirarCaja == undefined ? false : params.flgRetirarCaja;
 
             let parameters = {
                 IdTipoComprobante: document.getElementById('cboTipCom').value,
@@ -1240,17 +1370,21 @@ var oCompra = {
                 FecVencimiento: document.getElementById('txtFecVen').value,
                 IdTipoPago: document.getElementById('cboTipPag').value,
                 IdTipoCondicionPago: document.getElementById('cboForPag').value,
-                TotBruto: document.getElementById('lblSubTot').textContent,
-                TotDescuento: document.getElementById('lblTotDes').textContent,
+                TotBruto: oHelper.numeroSinMiles(document.getElementById('lblSubTot').textContent),
+                TotDescuento: oHelper.numeroSinMiles(document.getElementById('lblTotDes').textContent),
                 TasDescuento: document.getElementById('txtTasDes').value == "" ? 0 : document.getElementById('txtTasDes').value,
                 TasIgv: document.getElementById('txtIgv').value,
-                TotImpuesto: document.getElementById('lblTotIgv').textContent,
-                TotCompra: document.getElementById('lblTotal').textContent,
+                TotImpuesto: oHelper.numeroSinMiles(document.getElementById('lblTotIgv').textContent),
+                TotCompra: oHelper.numeroSinMiles(document.getElementById('lblTotal').textContent),
                 JsonArticulos: jsonArticulo,
                 Abono: oCompra.modeloAbono != null ? oCompra.modeloAbono.abono : 0,
                 Saldo: oCompra.modeloAbono != null ? oCompra.modeloAbono.saldo : 0,
                 FechaCancelacion: oCompra.modeloAbono != null ? oCompra.modeloAbono.fechaCancelacion : '',
-                Observacion: document.getElementById('txtObservacion').value
+                Observacion: document.getElementById('txtObservacion').value,
+                FlgRetirarCaja: params.flgRetirarCaja,
+                MontoRetiraCaja: flgRetirarCaja ? params.montoRetiraCaja : 0,
+                IdCaja: params.flgRetirarCaja ? params.idCaja : '',
+                CorrelativoCa: params.flgRetirarCaja ? params.correlativoCa : 0
             };
 
             oHelper.showLoading();
@@ -1258,17 +1392,18 @@ var oCompra = {
             axios.post("/Compra/Register", parameters).then((response) => {
                 let data = response.data;
                 if (data.Resultado) {
-                    oAlerta.alerta({
-                        title: data.Mensaje,
-                        type: "success",
-                        closeAutomatic: true
+                    oAlerta.show({
+                        message: data.Mensaje,
+                        type: "success"
                     });
+
                     oCompra.nuevo();
+                    oCompra.inicializarPestaniaConsulta();
                 }
 
             }).catch((error) => {
-                oAlerta.alerta({
-                    title: error.response.data,
+                oAlerta.show({
+                    message: error.response.data,
                     type: "warning"
                 });
             }).finally(() => oHelper.hideLoading());

@@ -3,7 +3,7 @@ var oAlertaModal = {
     resolve: null,
     reject: null,
     aceptar: false,
-    instance:null,
+    instance: null,
     showConfirmation: function (config) {
         if (typeof config != 'object')
             throw new Error("El parámetro del modal de confirmación debe ser un objeto");
@@ -15,6 +15,8 @@ var oAlertaModal = {
         let iconButton1 = '<i class="bi bi-x-circle-fill"></i>';
         let iconButton2 = '<i class="bi bi-check-circle-fill"></i>';
         let size = "modal-sm";
+        let showCheckOptional = false;
+        let messageCheckOptional = "";
 
         if (config.title != undefined)
             title = config.title;
@@ -37,6 +39,12 @@ var oAlertaModal = {
         if (config.size != undefined)
             size = config.size;
 
+        if (config.showCheckOptional != undefined)
+            showCheckOptional = config.showCheckOptional;
+
+        if (config.messageCheckOptional != undefined)
+            messageCheckOptional = config.messageCheckOptional;
+
         let html = `<div class="modal fade" tabindex="-1" aria-hidden="true" id="alerta-modal" aria-labelledby="staticBackdropLabel" style="z-index:99999">
                       <div class="modal-dialog ${size} modal-dialog-centered">
                         <div class="modal-content" >
@@ -46,7 +54,15 @@ var oAlertaModal = {
                           </div>
                           <div class="modal-body">
                             <div class="row">
-                                <div class="col-9"><p class="mb-0">${message}</p></div>
+                                <div class="col-9">
+                                    <p class="mb-0">${message}</p>
+                                    <div class="form-check" style="display:${showCheckOptional ? 'block' : 'none'}">
+                                      <input class="form-check-input" type="checkbox" value="" id="chkOptional">
+                                      <label class="form-check-label" for="chkOptional">
+                                          <small class="text-muted">${messageCheckOptional}</small> 
+                                      </label>
+                                    </div>
+                                </div>
                                 <div class="col-3 "><i class="bi bi-question-circle-fill text-primary h2"></i></div>
                             </div>
                           </div>
@@ -79,7 +95,9 @@ var oAlertaModal = {
 
         alertaModal.querySelector('#btnAceptarAlerta').addEventListener('click', () => {
             oAlertaModal.aceptar = true;
-            oAlertaModal.resolve();
+            oAlertaModal.resolve({
+                checkOptional: document.getElementById('chkOptional').checked
+            });
             oAlertaModal.instance.hide();
         });
 

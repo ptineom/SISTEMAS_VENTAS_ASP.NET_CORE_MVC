@@ -70,6 +70,11 @@ table.dataTable{
     margin-top:0px !important;
 }
 
+.rowSelected {
+    background: #1e88e5 !important;
+    color: white !important;
+}
+
 .modal-footer {
     background-color: #FAFAFA
 }
@@ -77,6 +82,36 @@ table.dataTable{
 /**datepicker*/
 .datepicker table th{
     font-weight:bold;
+}
+
+/* Animaciones */
+
+.animated {
+    -webkit-animation-duration: 1s;
+    animation-duration: 1s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+}
+
+.fast {
+    -webkit-animation-duration: 0.5s;
+    animation-duration: 0.5s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.fadeIn {
+    animation-name: fadeIn;
 }
 
 body {
@@ -194,19 +229,26 @@ ul ul a {
     padding-left: 0px !important;
     padding-right: 0px !important;
 }
+.navbarCustom {
+    position: fixed;
+    top: 0;
+    width: calc(100% - 250px);
+    z-index: 1030
+}
 
 #content > nav {
     background-color: #3C8DBC;
-    /* position: fixed;
-left:250px;
-right: 0px;
-z-index: 5000; */
 }
 
 #content.active {
     /*   width: 100%;*/
     width: calc(100% - 56px);
 }
+
+    #content.active .navbar {
+        /*   width: 100%;*/
+        width: calc(100% - 56px);
+    }
 
 /* ---------------------------------------------------
     LOGGOUT
@@ -245,20 +287,20 @@ z-index: 5000; */
 }
 
 @media (max-width: 768px) {
-    #sidebar {
-        width: 250px;
-    }
-
     #sidebar.active {
         width:0;
     }
 
-    #content {
-        width: calc(100%);
+    /*El contenedor y el navbar siempre deberá tener el width: 100% en tamaño movil*/
+    #content, #content.active {
+        width: 100%;
     }
 
+    #content .navbar, #content.active .navbar {
+        width: 100%;
+    }
 
-    #content.active {
-           width: 100%;
+    .navbarCustom {
+        z-index: 10
     }
 }

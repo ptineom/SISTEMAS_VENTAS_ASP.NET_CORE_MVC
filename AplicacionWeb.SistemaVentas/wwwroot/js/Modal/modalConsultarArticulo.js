@@ -3,6 +3,7 @@ var oModalConsultarArticulo = {
     callback: null,
     tblDetalle: null,
     instance: null,
+    container: "#modalConsultarArticulo .modal-content",
     init: function () {
         let modal = document.getElementById('modalConsultarArticulo');
         modal.addEventListener('shown.bs.modal', function () {
@@ -16,6 +17,12 @@ var oModalConsultarArticulo = {
             oModalConsultarArticulo.clearTblConsultarArticulo();
             document.getElementById('txtFiltroArticulo').value = "";
             document.getElementById('rbPorDescripcion').cheked = true;
+
+            //Si detecta que la alerta esta abierta, la cerramos.
+            if (oAlerta.alertInstance != null)
+                oAlerta.alertInstance.close();
+
+            oModalConsultarArticulo.instance = null;
 
         });
 
@@ -37,41 +44,57 @@ var oModalConsultarArticulo = {
             let button = e.currentTarget;
             let row = button.parentElement.parentElement;
 
-            let modelo = {
-                idArticulo: row.cells[6].textContent,
-                codigo: row.cells[1].textContent,
-                descripcion: row.cells[2].textContent,
-                jsonListaUm: JSON.parse(row.cells[7].textContent),
-            };
-            let tbody = oModalConsultarArticulo.tblDetalle.getElementsByTagName('tbody')[0];
-            let rows = tbody.rows;
-
-            if (rows.length > 0) {
-                if (Array.from(tbody.rows).some(x => x.cells[9].textContent == row.cells[6].textContent)) {
-                    oAlerta.alerta({
-                        title: `${row.cells[2].textContent} ya fue seleccionado.`,
-                        type: "warning",
-                        contenedor: "#modalConsultarArticulo .modal-content",
-                        notTitle: true,
-                        notIcon: true,
-                        closeAutomatic: true
-                    });
-                    return;
-                }
-            };
-
-            oAlerta.alerta({
-                title: `${row.cells[2].textContent} seleccionado.`,
-                type: "success",
-                contenedor: "#modalConsultarArticulo .modal-content",
-                notTitle: true,
-                notIcon: true,
-                closeAutomatic: true
-            });
-
-            //Enviamos el modelo al callback como parametro
-            oModalConsultarArticulo.callback(modelo);
+            oModalConsultarArticulo.seleccionarArticulo(row);
         });
+
+        window.addEventListener("keydown", (e) => {
+            //Indicamos la instancia del modal, porque cuando cerramos cualquier modal la instancia se convierte en null.
+            if ((e.key == "Enter" || e.key == "Escape" || e.key == "ArrowDown" || e.key == "ArrowUp") && oModalConsultarArticulo.instance != null) {
+                let tblConsultarArticulo = $("#tblConsultarArticulo").DataTable();
+                if (tblConsultarArticulo.rows().count() == 0)
+                    return;
+
+                oConfigControls.direccionarFilasGrilla(e, {
+                    table: document.getElementById('tblConsultarArticulo'),
+                    txtFiltro: document.getElementById('txtFiltroArticulo'),
+                    callback: oModalConsultarArticulo.seleccionarArticulo,
+                    callbackEsc: () => oModalConsultarArticulo.instance.hide()
+                });
+            } 
+        });
+    },
+    seleccionarArticulo(row) {
+        let modelo = {
+            idArticulo: row.cells[6].textContent,
+            codigo: row.cells[1].textContent,
+            descripcion: row.cells[2].textContent,
+            jsonListaUm: JSON.parse(row.cells[7].textContent),
+        };
+        let tbody = oModalConsultarArticulo.tblDetalle.getElementsByTagName('tbody')[0];
+        let rows = tbody.rows;
+
+        if (rows.length > 0) {
+            if (Array.from(tbody.rows).some(x => x.cells[9].textContent == row.cells[6].textContent)) {
+                oAlerta.show({
+                    message: `${row.cells[2].textContent} ya fue seleccionado.`,
+                    type: "warning",
+                    container: `${oModalConsultarArticulo.container} #tblConsultarArticulo`,
+                    simpleAlert: true
+                });
+                return;
+            }
+        };
+
+        oAlerta.show({
+            boldText: "Registro seleccionado",
+            message: `${row.cells[2].textContent}.`,
+            type: "success",
+            container: `${oModalConsultarArticulo.container} #tblConsultarArticulo`,
+            simpleAlert: true
+        });
+
+        //Enviamos el modelo al callback como parametro
+        oModalConsultarArticulo.callback(modelo);
     },
     show: function (callback, tblDetalle) {
         let options = {};
@@ -111,13 +134,10 @@ var oModalConsultarArticulo = {
     consultar: function () {
         let txtFiltro = document.getElementById('txtFiltroArticulo');
         if (txtFiltro.value == "") {
-            oAlerta.alerta({
-                title: "Debe de ingresar al menos 1 caracter.",
+            oAlerta.show({
+                message: "Debe de ingresar al menos 1 caracter.",
                 type: "warning",
-                contenedor: "#modalConsultarArticulo .modal-dialog",
-                closeAutomatic: true,
-                notTitle: true,
-                notIcon: true
+                container: oModalConsultarArticulo.container
             });
             return;
         }
@@ -152,13 +172,10 @@ var oModalConsultarArticulo = {
             });
             tbody.appendChild(frag);
         }).catch(error => {
-            oAlerta.alerta({
-                title: error.response.data.Message,
+            oAlerta.show({
+                message: error.response.data.Message,
                 type: "warning",
-                contenedor: "#modalConsultarArticulo .modal-dialog",
-                closeAutomatic: true,
-                notTitle: true,
-                notIcon: true
+                container: oModalConsultarArticulo.container,
             });
         }).finally(() => {
             oHelper.hideLoading();

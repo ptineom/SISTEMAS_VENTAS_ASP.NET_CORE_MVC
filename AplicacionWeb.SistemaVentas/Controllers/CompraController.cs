@@ -192,7 +192,12 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                     SALDO = request.Saldo,
                     FEC_CANCELACION = request.FechaCancelacion,
                     JSON_ARTICULOS = request.JsonArticulos,
-                    TAS_IGV = request.TasIgv
+                    TAS_IGV = request.TasIgv,
+                    ID_CAJA_CA = request.IdCaja,
+                    ID_USUARIO_CA = _idUsuario,
+                    CORRELATIVO_CA = request.CorrelativoCa,
+                    FLG_RETIRAR_CAJA = request.FlgRetirarCaja,
+                    MONTO_RETIRA_CAJA = request.MontoRetiraCaja
                 };
 
                 return _brCompra.Register(docCompra);
@@ -287,13 +292,13 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                     IdArticulo = x.ID_ARTICULO,
                     NomArticulo = ViewHelper.CapitalizeAll(x.NOM_ARTICULO),
                     IdUm = x.ID_UM,
-                    NomUm = ViewHelper.CapitalizeAll(x.NOM_UM),
                     Cantidad = x.CANTIDAD,
                     TasDescuento = x.TAS_DESCUENTO,
                     NroFactor = x.NRO_FACTOR,
                     PrecioArticulo = x.PRECIO_ARTICULO,
                     Importe = x.IMPORTE,
-                    Codigo = string.IsNullOrEmpty(x.CODIGO_BARRA) ? x.ID_ARTICULO : x.CODIGO_BARRA
+                    Codigo = string.IsNullOrEmpty(x.CODIGO_BARRA) ? x.ID_ARTICULO : x.CODIGO_BARRA,
+                    JsonListaUm = JsonSerializer.Deserialize<List<UnidadMedidaModel>>(x.JSON_UM.Replace("ID_UM","IdUm").Replace("NOM_UM","NomUm").Replace("NRO_FACTOR","NroFactor"))
                 }).ToList<object>()
             };
 

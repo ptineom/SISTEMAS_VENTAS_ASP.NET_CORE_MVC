@@ -39,7 +39,7 @@ else
             }
             <span class="menu-label">@menuItem.label</span>
         </a>
-        <ul class="collapse list-unstyled treeview-menu" id="@id">
+        <ul class="collapse list-unstyled treeview-menu animated fadeIn" id="@id">
             @foreach (var hijo in menuItem.children)
             {
                 <partial name="~/Views/Shared/_Menu.cshtml" model="hijo" />

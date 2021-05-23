@@ -6,8 +6,8 @@ namespace Helper
 {
     public class Constantes
     {
-        public const string sMensajeGrabadoOk = "Se grabaron corréctamente los datos";
-        public const string sMensajeEliminadoOk = "Se eliminaron corréctamente los datos";
+        public const string sMensajeGrabadoOk = "Se grabaron correctamente los datos";
+        public const string sMensajeEliminadoOk = "Se eliminaron correctamente los datos";
         public const string sMensajeErrorForm = "Ocurrió un error en la validación del formulario";
         public const string RequiredMensaje = "Debe de ingresar el/la {0}";
         public const string StringLengthMensaje = "El campo {0} debe tener una longitud mínima de {2} y una longitud máxima de {1}";

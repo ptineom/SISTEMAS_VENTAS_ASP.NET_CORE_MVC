@@ -284,16 +284,18 @@ var oHelper = {
         return { serie: serie, documento: nroComprobante }
     },
     formatoLeftSerie: function (prefijo, valor) {
+        debugger;
         if (prefijo == undefined) {
             throw new Error("Prefijo de serie indefinido");
         }
         if (valor == undefined) {
             throw new Error("Número de serie indefinido");
         }
-        let lengthMax = 4, res1 = 0, res2 = 0, resultado = '';
-        res1 = (lengthMax - prefijo.length);
-        if (valor.length <= res1) {
-            res2 = (res1 - valor.length);
+        let lengthMax = 4, res2 = 0;
+        let countCharacters = (lengthMax - prefijo.length);
+
+        if (valor.toString().length <= countRepeat) {
+            res2 = (countRepeat - valor.toString().length);
         } else {
             res2 = 0;
         }

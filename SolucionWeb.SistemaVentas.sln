@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AplicacionWeb.SistemaVentas", "AplicacionWeb.SistemaVentas\AplicacionWeb.SistemaVentas.csproj", "{F49928BB-3A55-4E77-A0F3-21DEC368EF9A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AplicacionWeb.SistemaVentas", "AplicacionWeb.SistemaVentas\AplicacionWeb.SistemaVentas.csproj", "{F49928BB-3A55-4E77-A0F3-21DEC368EF9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entidades", "Entidades\Entidades.csproj", "{5D229A7D-2DE9-4F36-95A0-D95357F7B314}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Entidades", "Entidades\Entidades.csproj", "{5D229A7D-2DE9-4F36-95A0-D95357F7B314}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CapaDao", "CapaDao\CapaDao.csproj", "{0DFA7888-8B43-4973-BAFC-145C11ABC453}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CapaDao", "CapaDao\CapaDao.csproj", "{0DFA7888-8B43-4973-BAFC-145C11ABC453}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CapaNegocio", "CapaNegocio\CapaNegocio.csproj", "{16DC28AB-F0E7-41C9-85F9-204F7A0F5AC4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CapaNegocio", "CapaNegocio\CapaNegocio.csproj", "{16DC28AB-F0E7-41C9-85F9-204F7A0F5AC4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Helper", "Helper\Helper.csproj", "{DF26D2AF-A848-4A34-9F3D-1CC6D8CB393A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helper", "Helper\Helper.csproj", "{DF26D2AF-A848-4A34-9F3D-1CC6D8CB393A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

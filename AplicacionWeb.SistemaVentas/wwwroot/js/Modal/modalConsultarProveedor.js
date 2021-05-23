@@ -10,17 +10,20 @@ var oModalConsultarProveedor = {
 
             document.getElementById('txtFiltroProveedor').focus();
         });
+
         modal.addEventListener('hidden.bs.modal', function () {
             //Limpiamos los controles
             oModalConsultarProveedor.clearTblConsultarProveedor();
             document.getElementById('txtFiltroProveedor').value = "";
             document.getElementById('rbProveedorPorDescripcion').cheked = true;
 
-            //Será reject cada vez que cierre el modal sin haber seleccionado algún registro.
+            //Será reject cada vez que se cierre el modal sin haber seleccionado algún registro.
             if (!oModalConsultarProveedor.seleccionado)
                 oModalConsultarProveedor.reject();
             else
                 oModalConsultarProveedor.seleccionado = false;
+
+            oModalConsultarProveedor.instance = null;
         });
 
         document.getElementById('txtFiltroProveedor').addEventListener('keyup', (e) => {
@@ -41,17 +44,36 @@ var oModalConsultarProveedor = {
             let button = e.currentTarget;
             let row = button.parentElement.parentElement;
 
-            let modelo = {
-                idProveedor: row.cells[1].textContent,
-                nomProveedor: row.cells[2].textContent,
-                idTipoDocumento: row.cells[6].textContent,
-                numDocumento: row.cells[4].textContent
-            }
-
-            oModalConsultarProveedor.seleccionado = true;
-            oModalConsultarProveedor.resolve(modelo);
-            oModalConsultarProveedor.instance.hide();
+            oModalConsultarProveedor.seleccionarProveedor(row);
         });
+
+        window.addEventListener("keydown", (e) => {
+            //Indicamos la instancia del modal, porque cuando cerramos cualquier modal la instancia se convierte en null.
+            if ((e.key == "Enter" || e.key == "Escape" || e.key == "ArrowDown" || e.key == "ArrowUp") && oModalConsultarProveedor.instance != null) {
+                let tblConsultarProveedor = $("#tblConsultarProveedor").DataTable();
+                if (tblConsultarProveedor.rows().count() == 0)
+                    return;
+
+                oConfigControls.direccionarFilasGrilla(e, {
+                    table: document.getElementById('tblConsultarProveedor'),
+                    txtFiltro: document.getElementById('txtFiltroProveedor'),
+                    callback: oModalConsultarProveedor.seleccionarProveedor,
+                    callbackEsc: () => oModalConsultarProveedor.instance.hide()
+                });
+            }
+        });
+    },
+    seleccionarProveedor(row) {
+        let modelo = {
+            idProveedor: row.cells[1].textContent,
+            nomProveedor: row.cells[2].textContent,
+            idTipoDocumento: row.cells[6].textContent,
+            numDocumento: row.cells[4].textContent
+        }
+
+        oModalConsultarProveedor.seleccionado = true;
+        oModalConsultarProveedor.resolve(modelo);
+        oModalConsultarProveedor.instance.hide();
     },
     initTblConsultarProveedor: function () {
         let aoColumns = [

@@ -113,19 +113,26 @@ ul ul a {
     padding-left: 0px !important;
     padding-right: 0px !important;
 }
+.navbarCustom {
+    position: fixed;
+    top: 0;
+    width: calc(100% - 250px);
+    z-index: 1030
+}
 
 #content > nav {
     background-color: #3C8DBC;
-    /* position: fixed;
-left:250px;
-right: 0px;
-z-index: 5000; */
 }
 
 #content.active {
     /*   width: 100%;*/
     width: calc(100% - 56px);
 }
+
+    #content.active .navbar {
+        /*   width: 100%;*/
+        width: calc(100% - 56px);
+    }
 
 /* ---------------------------------------------------
     LOGGOUT
@@ -164,20 +171,20 @@ z-index: 5000; */
 }
 
 @media (max-width: 768px) {
-    #sidebar {
-        width: 250px;
-    }
-
     #sidebar.active {
         width:0;
     }
 
-    #content {
-        width: calc(100%);
+    /*El contenedor y el navbar siempre deberá tener el width: 100% en tamaño movil*/
+    #content, #content.active {
+        width: 100%;
     }
 
+    #content .navbar, #content.active .navbar {
+        width: 100%;
+    }
 
-    #content.active {
-           width: 100%;
+    .navbarCustom {
+        z-index: 10
     }
 }

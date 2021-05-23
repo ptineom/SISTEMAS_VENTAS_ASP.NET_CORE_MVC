@@ -344,12 +344,12 @@ namespace CapaDao
                                     docCompraDetalle.NOM_ARTICULO = reader.GetString(reader.GetOrdinal("NOM_ARTICULO"));
                                     docCompraDetalle.PRECIO_ARTICULO = reader.GetDecimal(reader.GetOrdinal("PRECIO_ARTICULO"));
                                     docCompraDetalle.ID_UM = reader.GetString(reader.GetOrdinal("ID_UM"));
-                                    docCompraDetalle.NOM_UM = reader.GetString(reader.GetOrdinal("NOM_UM"));
                                     docCompraDetalle.CANTIDAD = reader.GetDecimal(reader.GetOrdinal("CANTIDAD"));
                                     docCompraDetalle.TAS_DESCUENTO = reader.GetDecimal(reader.GetOrdinal("TAS_DESCUENTO"));
                                     docCompraDetalle.IMPORTE = reader.GetDecimal(reader.GetOrdinal("IMPORTE"));
                                     docCompraDetalle.NRO_FACTOR = reader.GetDecimal(reader.GetOrdinal("NRO_FACTOR"));
                                     docCompraDetalle.CODIGO_BARRA = reader.IsDBNull(reader.GetOrdinal("CODIGO_BARRA")) ? string.Empty : reader.GetString(reader.GetOrdinal("CODIGO_BARRA"));
+                                    docCompraDetalle.JSON_UM = reader.GetString(reader.GetOrdinal("JSON_UM"));
                                     listaDocCompraDetalle.Add(docCompraDetalle);
                                 }
                                 docCompra.detalle = listaDocCompraDetalle;

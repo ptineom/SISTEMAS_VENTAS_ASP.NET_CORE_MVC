@@ -91,5 +91,6 @@ namespace Entidades
         public string JSON_UM { get; set; }
         public decimal PRECIO_COMPRA { get; set; }
         public string CODIGO_BARRA { get; set; }
+
     }
 }

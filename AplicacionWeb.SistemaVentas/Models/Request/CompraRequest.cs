@@ -7,6 +7,7 @@ namespace AplicacionWeb.SistemaVentas.Models.Request
 {
     public class CompraRequest
     {
+  
         public string IdTipoComprobante { get; set; }
         public string NroSerie { get; set; }
         public int NroDocumento { get; set; }
@@ -28,6 +29,9 @@ namespace AplicacionWeb.SistemaVentas.Models.Request
         public string FechaCancelacion { get; set; }
         public string Observacion { get; set; }
 
-
+        public bool FlgRetirarCaja { get; set; }
+        public decimal MontoRetiraCaja { get; set; }
+        public string IdCaja { get; set; }
+        public int CorrelativoCa { get; set; }
     }
 }

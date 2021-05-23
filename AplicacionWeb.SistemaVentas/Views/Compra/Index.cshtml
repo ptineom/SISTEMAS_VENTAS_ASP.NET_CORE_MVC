@@ -18,9 +18,14 @@
 <div class="row">
     <div class="col-12 col-md-6 pe-1">
         <div class="card rounded-0 ">
-            <div class="card-header bg-transparent py-1 fs-5 clearfix">
-                <i class="bi bi-file-ruled align-text-bottom"></i> <span class="">Datos del comprobante</span>
-                <span class="badge float-end mt-1" id="spnEstado">Anulado</span>
+            <div class="card-header bg-transparent py-1 fs-5 d-flex justify-content-between">
+                <div>
+                    <i class="bi bi-file-ruled align-text-bottom"></i>
+                    <span class="">Datos del comprobante</span>
+                </div>
+                <div class="">
+                    <span class="badge mt-1" id="spnEstado"></span>
+                </div>
             </div>
             <div class="card-body py-1 px-2">
                 <div class="row">
@@ -38,15 +43,15 @@
                     </div>
                     <div class="col-12 col-sm-4 col-md-3">
                         <label class="form-label mb-1">Serie</label>
-                        <input class="form-control form-control-sm" id="txtSerie" type="text" autocomplete="off" maxlength="4">
+                        <input class="form-control form-control-sm text-end" id="txtSerie" type="text" autocomplete="off" maxlength="4">
                     </div>
                     <div class="col-12 col-sm-4 col-md-4">
                         <label class="form-label mb-1">Número</label>
-                        <input class="form-control form-control-sm" id="txtNumero" type="text" autocomplete="off" maxlength="6">
+                        <input class="form-control form-control-sm text-end" id="txtNumero" type="text" autocomplete="off" maxlength="6">
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-12 col-md-6 ">
+                    <div class="col-12 col-sm-6 ">
                         <label class="form-label mb-1">Fecha emisión</label>
                         <div class="input-group input-group-sm date">
                             <span class="input-group-text">
@@ -55,7 +60,7 @@
                             <input type="text" class="form-control date-picker" id="txtFecEmi" data-date-format="dd/mm/yyyy">
                         </div>
                     </div>
-                    <div class="col-12 col-md-6">
+                    <div class="col-12 col-sm-6">
                         <label class="form-label mb-1">Fecha vencimiento</label>
                         <div class="input-group input-group-sm date">
                             <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
@@ -66,14 +71,14 @@
             </div>
         </div>
     </div>
-    <div class="col-12 col-md-6 ps-0">
+    <div class="col-12 col-md-6 pe-1 mt-1 mt-md-0 ps-md-1">
         <div class="card rounded-0 " id="cardProveedor">
             <div class="card-header bg-transparent py-1 fs-5">
                 <i class="bi bi-truck align-text-bottom"></i>  <span class="">Datos del proveedor</span>
             </div>
             <div class="card-body py-1 px-2">
                 <div class="row">
-                    <div class="col-12 col-sm-5 pe-1">
+                    <div class="col-12 col-sm-5">
                         <label class="form-label mb-1">Tipo documento</label>
                         <select class="form-select form-select-sm" id="cboTipDoc">
                             @if (listaTipoDocumento != null)
@@ -85,7 +90,7 @@
                             }
                         </select>
                     </div>
-                    <div class="col-12 col-sm-7 ps-1">
+                    <div class="col-12 col-sm-7">
                         <input type="hidden" id="hddIdPro" />
                         <label class="form-label mb-1">N° documento</label>
                         <div class="input-group input-group-sm ">
@@ -105,11 +110,11 @@
     </div>
 </div>
 <div class="row mt-1">
-    <div class="col-12">
+    <div class="col-12 pe-1">
         <div class="card rounded-0 shadow">
             <div class="card-body py-1 px-2">
                 <div class="row">
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-sm-7 col-md-4">
                         <label class="form-label mb-1">Código de barra</label>
                         <div class="input-group input-group-sm">
                             <span class="input-group-text"><i class="bi bi-upc"></i></span>
@@ -118,10 +123,10 @@
                             <button class="btn btn-outline-secondary" id="btnBusPorCodBar" type="button"><i class="bi bi-arrow-return-left"></i></button>
                         </div>
                     </div>
-                    <div class="col-12 col-md-4 d-flex align-items-end">
+                    <div class="col-12 col-sm-5 col-md-4 d-flex align-items-end mt-1 mt-sm-0">
                         <button type="button" class="btn btn-primary" id="btnAgrArt"><i class="bi bi-cart-plus-fill"></i> Agregar artículos [+]</button>
                     </div>
-                    <div class="col-12 col-md-3">
+                    <div class="col-6 col-md-3">
                         <label class="form-label mb-1">Moneda</label>
                         <select class="form-select form-select-sm" disabled id="cboMoneda">
                             @if (listaMoneda != null)
@@ -133,7 +138,7 @@
                             }
                         </select>
                     </div>
-                    <div class="col-12 col-md-1 ">
+                    <div class="col-6 col-md-1 ">
                         <label class="form-label mb-1">I.G.V.</label>
                         <input type="text" class="form-control form-control-sm text-end" autocomplete="off" id="txtIgv" value="@tasIgv">
                     </div>
@@ -144,7 +149,7 @@
 </div>
 
 <div class="row mt-1">
-    <div class="col-12">
+    <div class="col-12 pe-1">
         <div class="card rounded-0 ">
             <div class="card-header bg-transparent py-1 fs-6">
                 <i class="bi bi-cart-plus-fill align-text-bottom"></i> <span class="">Detalle de la compra</span>
@@ -183,59 +188,63 @@
 </div>
 
 <div class="row mt-1">
-    <div class="col-12">
+    <div class="col-12 pe-1">
         <div class="card rounded-0 ">
             <div class="card-body py-1 px-2">
                 <div class="row">
-                    <div class="col-4">
+                    <div class="col-12 col-lg-6">
                         <div class="row">
-                            <div class="col-6">
-                                <label class="form-label mb-1">Tipo de pago</label>
-                                <select class="form-select form-select-sm" id="cboTipPag">
-                                    @if (listaTipPag != null)
-                                    {
-                                        foreach (var item in listaTipPag)
-                                        {
-                                            <option value="@item.IdTipoPago">@item.NomTipoPago</option>
-                                        }
-                                    }
-                                </select>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label mb-1">Forma de pago</label>
-                                <select class="form-select form-select-sm" id="cboForPag">
-                                    @if (listaTipConPag != null)
-                                    {
-                                        foreach (var item in listaTipConPag)
-                                        {
-                                            <option value="@item.IdTipoCondicionPago" data-flgEvaluaCredito="@item.FlgEvaluaCredito">@item.NomTipoCondicionPago</option>
-                                        }
-                                    }
-                                </select>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label mb-1">Observación</label>
-                                <textarea class="form-control" id="txtObservacion" rows="3"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="row" id="panelAbono">
-                            <div class="col-12">
-                                <label class="form-label mb-1">Abono</label>
-                                <div class="input-group input-group-sm ">
-                                    <input class="form-control form-control-sm" disabled id="txtAbono" type="text">
-                                    <button class="btn btn-outline-secondary" type="button" id="btnEditarAbono"><i class="bi bi-pencil-fill"></i></button>
+                            <div class="col-12 col-sm-7 col-md-6 col-lg-7">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label class="form-label mb-1">Tipo de pago</label>
+                                        <select class="form-select form-select-sm" id="cboTipPag">
+                                            @if (listaTipPag != null)
+                                            {
+                                                foreach (var item in listaTipPag)
+                                                {
+                                                    <option value="@item.IdTipoPago">@item.NomTipoPago</option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-6 ">
+                                        <label class="form-label mb-1">Forma de pago</label>
+                                        <select class="form-select form-select-sm" id="cboForPag">
+                                            @if (listaTipConPag != null)
+                                            {
+                                                foreach (var item in listaTipConPag)
+                                                {
+                                                    <option value="@item.IdTipoCondicionPago" data-flgEvaluaCredito="@item.FlgEvaluaCredito">@item.NomTipoCondicionPago</option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label mb-1">Observación</label>
+                                        <textarea class="form-control" id="txtObservacion" rows="3"></textarea>
+                                    </div>
                                 </div>
-
                             </div>
-                            <div class="col-12">
-                                <label class="form-label mb-1">Saldo</label>
-                                <input class="form-control form-control-sm" id="txtSaldo" type="text" disabled>
+                            <div class="col-12 col-sm-5 col-md-6 col-lg-5">
+                                <div class="row" id="panelAbono">
+                                    <div class="col-12">
+                                        <label class="form-label mb-1">Abono</label>
+                                        <div class="input-group input-group-sm ">
+                                            <input class="form-control form-control-sm text-end" disabled id="txtAbono" type="text">
+                                            <button class="btn btn-outline-secondary" type="button" id="btnEditarAbono"><i class="bi bi-pencil-fill"></i></button>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label mb-1">Saldo</label>
+                                        <input class="form-control form-control-sm text-end" id="txtSaldo" type="text" disabled>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-5">
+                    <div class="col-12 col-lg-6 mt-2 mt-md-0">
                         <div class="row">
                             <div class="col-3">
                                 <label class="form-label mb-1 fw-bold title-totales">Sub total</label>
@@ -310,14 +319,14 @@
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
             <div class="modal-header py-2">
-                <h5 class="modal-title fs-6"><i class="bi bi-binoculars-fill"></i> Consultar compra</h5>
+                <h5 class="modal-title fs-6"><i class="bi bi-binoculars-fill"></i> Consultar compra <span class="d-none d-lg-inline-block">[Esc = Regresar]</span> </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body pt-1 px-1" style="background: #fafafa;">
                 <div class="card rounded-0 shadow mb-1">
                     <div class="card-body py-2 px-2">
                         <div class="row">
-                            <div class="col-lg-2 border-end ps-3">
+                            <div class="col-12 col-md-3 col-xl-2 border-end ps-3">
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="flexRadioDefault" id="rbPorProveedor">
                                     <label class="form-check-label" for="rbPorProveedor">
@@ -337,10 +346,10 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="col-lg-10">
+                            <div class="col-12 col-md-9 col-xl-10">
                                 <div class="row" id="filtroProveedor">
-                                    <div class="col-12 col-lg-3">
-                                        <label class="form-label mb-1">Tipo documento</label>
+                                    <div class="col-12 col-sm-4 col-lg-2">
+                                        <label class="form-label mb-1">Tipo doc.</label>
                                         <select class="form-select form-select-sm" id="cboTipDocConsulta">
                                             @if (listaTipoDocumento != null)
                                             {
@@ -351,22 +360,22 @@
                                             }
                                         </select>
                                     </div>
-                                    <div class="col-12 col-lg-3">
+                                    <div class="col-12 col-sm-8 col-lg-4">
                                         <input type="hidden" id="hddIdProConsulta" />
-                                        <label class="form-label mb-1">N° documento</label>
+                                        <label class="form-label mb-1">N° doc.</label>
                                         <div class="input-group input-group-sm ">
                                             <input type="text" class="form-control " placeholder="" id="txtNumDocConsulta" autocomplete="off" disabled>
                                             <button class="btn btn-outline-success" type="button" id="btnBusPorNumConsulta"><i class="bi bi-arrow-return-left"></i></button>
                                             <button class="btn btn-outline-secondary" type="button" id="btnConProConsulta"><i class="bi bi-binoculars-fill "></i></button>
                                         </div>
                                     </div>
-                                    <div class="col-6 col-lg-6">
+                                    <div class="col-12 col-lg-6">
                                         <label class="form-label mb-1">Razón social</label>
                                         <input type="text" class="form-control form-control-sm " id="txtRazSocConsulta" disabled>
                                     </div>
                                 </div>
                                 <div class="row" id="filtroComprobante">
-                                    <div class="col-12 col-sm-4 col-md-3 ">
+                                    <div class="col-12 col-sm-4 col-lg-3 ">
                                         <label class="form-label mb-1">Tipo comprobante</label>
                                         <select class="form-select form-select-sm" id="cboTipComConsulta" aria-label=".form-select-lg example">
                                             @if (listaComprobante != null)
@@ -378,17 +387,17 @@
                                             }
                                         </select>
                                     </div>
-                                    <div class="col-12 col-sm-4 col-md-3">
+                                    <div class="col-12 col-sm-4 col-lg-3">
                                         <label class="form-label mb-1">Serie</label>
                                         <input class="form-control form-control-sm" id="txtSerieConsulta" type="text" autocomplete="off" maxlength="4" disabled>
                                     </div>
-                                    <div class="col-12 col-sm-4 col-md-3">
+                                    <div class="col-12 col-sm-4 col-lg-3">
                                         <label class="form-label mb-1">Número</label>
                                         <input class="form-control form-control-sm" id="txtNumeroConsulta" type="text" autocomplete="off" maxlength="6" disabled>
                                     </div>
                                 </div>
                                 <div class="row" id="filtroFechas">
-                                    <div class="col-lg-6">
+                                    <div class="col-12 col-lg-6">
                                         <label class="form-label mb-1">Rango de fechas</label>
                                         <div class="input-group input-group-sm date input-daterange">
                                             <input type="text" class="form-control date-picker" id="txtRanFecIni" name="start">
@@ -396,7 +405,7 @@
                                             <input type="text" class="form-control date-picker" id="txtRanFecFin" name="end">
                                         </div>
                                     </div>
-                                    <div class="col-12 col-lg-3">
+                                    <div class="col-6 col-lg-3">
                                         <label class="form-label mb-1">Estado</label>
                                         <select class="form-select form-select-sm" id="cboEstadoConsulta">
                                             @if (listaEstado != null)
@@ -408,7 +417,7 @@
                                             }
                                         </select>
                                     </div>
-                                    <div class="col-xs-12 col-lg-2 d-flex align-items-end">
+                                    <div class="col-6 col-lg-3 d-flex align-items-end mt-1 mt-lg-0">
                                         <button type="button" class="btn btn-primary" id="btnBuscarComprobantes"><i class="bi bi-search"></i> Consultar</button>
                                     </div>
                                 </div>
@@ -453,8 +462,61 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer py-1">
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="bi bi-box-arrow-left"></i> Salir</button>
+            @*<div class="modal-footer py-1">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="bi bi-box-arrow-left"></i> Salir</button>
+                </div>*@
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" tabindex="-1" aria-hidden="true" id="modalPagarCompra" aria-labelledby="staticBackdropLabel">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header py-3">
+                <h5 class="modal-title"><i class="bi bi-cash-stack"></i> Monto a retirar de caja</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-2 px-2 px-sm-3">
+                <div id="modalVista1">
+                    <div class="row">
+                        <div class="col-8 col-sm-9">
+                            <p class="fs-5 mb-1 mb-sm-2">¿Desea retirar dinero de caja?</p>
+                            <p class="mb-0"><span class="text-muted">Si selecciona </span> <span class="fw-bold">No, </span> <span class="text-muted">proseguirá con el guardado del registro.</span></p>
+                        </div>
+                        <div class="col-4 col-sm-3 px-1">
+                            <img src="~/icons/icon7.png" class="img-fluid"/>
+                        </div>
+                    </div>
+                </div>
+                <div id="modalVista2">
+                    <form id="form-pagarCompra">
+                        <div class="row">
+                            <div class="col-6 ">
+                                <label class="form-label mb-1">Monto total de la compra</label>
+                                <input class="form-control form-control-sm text-end" id="txtMonTotCom_modPagCom" disabled type="text" autocomplete="off">
+                            </div>
+                            <div class="col-6 ">
+                                <label class="form-label mb-1">Monto en caja</label>
+                                <input class="form-control form-control-sm text-end" id="txtMonCaj_modPagCom" disabled type="text" autocomplete="off">
+                            </div>
+                            <div class="col-6 ">
+                                <label class="form-label mb-1">Saldo restante</label>
+                                <input class="form-control form-control-sm text-end" id="txtSalPag_modPagCom" disabled type="text" autocomplete="off">
+                            </div>
+
+                            <div class="col-6 ">
+                                <label class="form-label mb-1">Monto a retirar de caja</label>
+                                <input class="form-control form-control-sm text-end" id="txtMonRet_modPagCom" type="text" autocomplete="off" name="txtMonRet_modPagCom">
+                            </div>
+
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-success" id="btnLeft_modPagCom"><i class="bi bi-save"></i> No</button>
+                <button type="button" class="btn btn-primary" id="btnRight_modPagCom"><i class="bi bi-arrow-right"></i> Si</button>
             </div>
         </div>
     </div>
@@ -470,5 +532,7 @@
     <script src="~/js/Modal/modalConsultarProveedor.js"></script>
     <script src="~/js/Modal/modalRegistrarProveedor.js"></script>
     <script src="~/js/Modal/modalConsultarArticulo.js"></script>
+    <script src="~/js/Modal/modalPagarCompra.js"></script>
+
 }
 
