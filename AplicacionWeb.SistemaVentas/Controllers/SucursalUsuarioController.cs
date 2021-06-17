@@ -1,6 +1,7 @@
 ﻿using AplicacionWeb.SistemaVentas.Models;
+using AplicacionWeb.SistemaVentas.Models.Response;
 using AplicacionWeb.SistemaVentas.Models.ViewModel;
-using AplicacionWeb.SistemaVentas.Servicios.Seguridad;
+using AplicacionWeb.SistemaVentas.Services.Security.Contracts;
 using CapaNegocio;
 using Entidades;
 using Microsoft.AspNetCore.Authorization;
@@ -22,13 +23,17 @@ namespace AplicacionWeb.SistemaVentas.Controllers
         BrSucursalUsuario _brSucursalUsuario = null;
         IHttpContextAccessor _accessor = null;
         string _idUsuario = string.Empty;
+        private readonly ISessionIdentity _sessionIdentity;
 
-        public SucursalUsuarioController(IResultadoOperacion resultado, IHttpContextAccessor accessor)
+        public SucursalUsuarioController(IResultadoOperacion resultado, IHttpContextAccessor accessor, ISessionIdentity sessionIdentity)
         {
             _resultado = resultado;
             _brSucursalUsuario = new BrSucursalUsuario();
             _accessor = accessor;
-            _idUsuario = new Session(_accessor).GetUserLogged().IdUsuario;
+
+            _sessionIdentity = sessionIdentity;
+            UsuarioIdentityViewModel usuario = _sessionIdentity.GetUserLogged();
+            _idUsuario = usuario.IdUsuario;
         }
 
         [Route("[action]")]
@@ -40,12 +45,12 @@ namespace AplicacionWeb.SistemaVentas.Controllers
             if (!_resultado.Resultado)
                 return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
 
-            List<SucursalModel> sucursales = ((List<SUCURSAL>)_resultado.Data).Select(x => new SucursalModel() { 
+            List<SucursalViewModel> sucursales = ((List<SUCURSAL>)_resultado.Data).Select(x => new SucursalViewModel() { 
                 IdSucursal = x.ID_SUCURSAL,
                 NomSucursal = x.NOM_SUCURSAL
-            }).ToList<SucursalModel>();
+            }).ToList<SucursalViewModel>();
 
-            sucursales.Insert(0, new SucursalModel()
+            sucursales.Insert(0, new SucursalViewModel()
             {
                 IdSucursal="-1",
                 NomSucursal = "---SELECCIONE---"

@@ -153,18 +153,18 @@ var oModalConsultarArticulo = {
 
         oHelper.showLoading("#modalConsultarArticulo .modal-content");
         axios.get(`/Articulo/GetAllByFiltersHelper/${tipoFiltro}/${txtFiltro.value}/false`).then(response => {
-            let listaArticulo = response.data.Data;
-
+            const result = response.data;
+            const listArticulo = result.data;
             let frag = document.createDocumentFragment();
-            listaArticulo.forEach(x => {
+            listArticulo.forEach(x => {
                 let td = `<td class="py-1"><button type="button" class="btn btn-sm warning-intenso"><i class="bi bi-hand-index-fill" style='color:#fff'></i></button></td>
-                                <td>${x.Codigo}</td>
-                                <td>${x.NomArticulo}</td>
-                                <td>${x.NomMarca}</td>
-                                <td>${x.NomUm}</td>
-                                <td class='text-end'>${x.StockActual}</td>
-                                <td class='d-none'>${x.IdArticulo}</td>
-                                <td class='d-none'>${JSON.stringify(x.ListaUm)}</td>`;
+                                <td>${x.codigo}</td>
+                                <td>${x.nomArticulo}</td>
+                                <td>${x.nomMarca}</td>
+                                <td>${x.nomUm}</td>
+                                <td class='text-end'>${x.stockActual}</td>
+                                <td class='d-none'>${x.idArticulo}</td>
+                                <td class='d-none'>${JSON.stringify(x.listaUm)}</td>`;
 
                 let tr = document.createElement('tr');
                 tr.innerHTML = td

@@ -1,17 +1,22 @@
 ﻿using AplicacionWeb.SistemaVentas.Hubs;
 using AplicacionWeb.SistemaVentas.Models.Request;
-using AplicacionWeb.SistemaVentas.Models.ViewModel;
-using AplicacionWeb.SistemaVentas.Servicios.Seguridad;
+using AplicacionWeb.SistemaVentas.Models.Response;
+using AplicacionWeb.SistemaVentas.Services.Security.Contracts;
 using CapaNegocio;
+using CapaNegocio.Contracts;
 using Entidades;
 using Helper;
+using Helper.DTOGeneric;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace AplicacionWeb.SistemaVentas.Controllers
@@ -19,29 +24,32 @@ namespace AplicacionWeb.SistemaVentas.Controllers
     [Route("[controller]")]
     public class CajaAperturaController : Controller
     {
-        private IConfiguration _configuration = null;
-        private IHttpContextAccessor _accessor;
-        private IResultadoOperacion _resultado = null;
-        private BrCajaApertura _brCajaApertura = null;
+        private IHubContext<CambiarEstadoCajaHub> _hubContext;
+        private readonly ICajaAperturaService _cajaAperturaService;
+        private readonly ISessionIdentity _sessionIdentity;
+        private readonly IMonedaService _monedaService;
+        private readonly ISucursalCajaUsuarioService _sucursalCajaUsuarioService;
         private string _idSucursal;
         private string _idUsuario;
-        private IHubContext<CambiarEstadoCajaHub> _hubContext;
 
-        public CajaAperturaController(IResultadoOperacion resultado, IConfiguration configuration,
-    IHttpContextAccessor accessor, IHubContext<CambiarEstadoCajaHub> hubContext)
+        public CajaAperturaController(ICajaAperturaService cajaAperturaService, ISessionIdentity sessionIdentity,
+            IMonedaService monedaService, ISucursalCajaUsuarioService sucursalCajaUsuarioService,
+            IHubContext<CambiarEstadoCajaHub> hubContext)
         {
-            _configuration = configuration;
-            _resultado = resultado;
-            _brCajaApertura = new BrCajaApertura(_configuration);
-            _accessor = accessor;
+            _cajaAperturaService = cajaAperturaService;
+            _monedaService = monedaService;
+            _sucursalCajaUsuarioService = sucursalCajaUsuarioService;
 
-            UsuarioLogueadoModel usuario = new Session(_accessor).GetUserLogged();
+            _sessionIdentity = sessionIdentity;
+
+            UsuarioIdentityViewModel usuario = _sessionIdentity.GetUserLogged();
             _idUsuario = usuario.IdUsuario;
             _idSucursal = usuario.IdSucursal;
 
             //Hub para signalr
             _hubContext = hubContext;
         }
+
         public IActionResult Index()
         {
             return View();
@@ -50,92 +58,126 @@ namespace AplicacionWeb.SistemaVentas.Controllers
         [HttpGet("GetData")]
         public async Task<IActionResult> GetDataAsync()
         {
-            List<MONEDA> listaMoneda = null;
-            List<CAJA> listaCaja = null;
-            _resultado = await Task.Run(() => _brCajaApertura.GetData(_idSucursal, _idUsuario, ref listaMoneda, ref listaCaja));
+            //Lista de monedas.
+            List<MONEDA> listMonedas = await _monedaService.GetAllAsync();
+            //Moneda local.
+            listMonedas = listMonedas.Where(x => x.FLG_LOCAL).ToList<MONEDA>();
 
-            if (!_resultado.Resultado)
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
-
-            if (listaMoneda == null)
-                return StatusCode(StatusCodes.Status404NotFound, new { Message = "Debe de configurar la moneda en el sistema.", Status = "Error" });
-
-            if (listaCaja == null)
-                return StatusCode(StatusCodes.Status404NotFound, new { Message = "Debe de configurar las cajas en el sistema.", Status = "Error" });
-
-
-            //Moneda local
-            var monedaLocal = listaMoneda.Where(x => x.FLG_LOCAL == true).Select(y => new
+            //Lista de cajas.
+            List<CAJA> listCajas = await _sucursalCajaUsuarioService.GetAllBoxes(new SUCURSAL_CAJA_USUARIO()
             {
-                IdMoneda = y.ID_MONEDA,
-                NomMoneda = y.NOM_MONEDA,
-                SgnMoneda = y.SGN_MONEDA
-            }).FirstOrDefault();
-
-
-            //Resultado final 
-            _resultado = new ResultadoOperacion();
-            _resultado.SetResultado(true, new
-            {
-                ListaCaja = listaCaja.Select(x => new
-                {
-                    IdCaja = x.ID_CAJA,
-                    NomCaja = ViewHelper.CapitalizeFirstLetter(x.NOM_CAJA)
-                }).ToList<object>(),
-                MonedaLocal = monedaLocal
+                ID_SUCURSAL = _idSucursal,
+                ID_USUARIO = _idUsuario
             });
 
-            return Ok(_resultado);
+            if (listMonedas == null || listMonedas.Count == 0)
+                return NotFound(new ResponseObject()
+                {
+                    Success = false,
+                    Message = Constantes.NOT_FOUND,
+                    ErrorDetails = new ErrorDetails()
+                    {
+                        StatusCode = StatusCodes.Status404NotFound,
+                        Message = "Debe de configurar la moneda local."
+                    }
+                });
+
+            if (listCajas == null || listCajas.Count == 0)
+                return NotFound(new ResponseObject()
+                {
+                    Success = false,
+                    Message = Constantes.NOT_FOUND,
+                    ErrorDetails = new ErrorDetails()
+                    {
+                        StatusCode = StatusCodes.Status404NotFound,
+                        Message = "Debe de configurar al menos una caja."
+                    }
+                });
+
+            var response = new ResponseObject()
+            {
+                Data = new
+                {
+                    moneda = listMonedas.Select(y => new
+                    {
+                        IdMoneda = y.ID_MONEDA,
+                        NomMoneda = ViewHelper.CapitalizeFirstLetter(y.NOM_MONEDA),
+                        SgnMoneda = y.SGN_MONEDA
+                    }).FirstOrDefault(),
+                    listCajas = listCajas.Select(x => new
+                    {
+                        IdCaja = x.ID_CAJA,
+                        NomCaja = ViewHelper.CapitalizeFirstLetter(x.NOM_CAJA)
+                    }).ToList(),
+                }
+            };
+            return Ok(response);
         }
 
         [HttpGet("GetStateBox")]
         public async Task<IActionResult> GetStateBoxAsync()
         {
-            _resultado = await Task.Run(() => _brCajaApertura.GetStateBox(_idSucursal, _idUsuario));
-
-            if (!_resultado.Resultado)
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
-
-            if (_resultado.Data != null)
+            //Obtenemos el estado de la caja
+            var result = await _cajaAperturaService.GetBoxStateAsync(new CAJA_APERTURA()
             {
-                CAJA_APERTURA cajaApertura = (CAJA_APERTURA)_resultado.Data;
+                ID_SUCURSAL = _idSucursal,
+                ID_USUARIO = _idUsuario
+            });
 
-                _resultado.Data = new
+            ResponseObject response = new ResponseObject();
+
+            //En caso la caja este cerrado devolverá el objeto cajaApertura null.
+            if (result != null)
+            {
+                //var qq2 = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+                //var qq3 = DateTime.Now.ToString("dd/MM/yyyy hh:mm tt");
+                response.Data = new
                 {
-                    IdCaja = cajaApertura.ID_CAJA,
-                    Correlativo = cajaApertura.CORRELATIVO,
-                    FechaApertura = cajaApertura.FECHA_APERTURA,
-                    MontoApertura = cajaApertura.MONTO_APERTURA,
-                    IdMoneda = cajaApertura.ID_MONEDA,
-                    SgnMoneda = cajaApertura.SGN_MONEDA,
-                    FlgReaperturado = cajaApertura.FLG_REAPERTURADO,
-                    Item = cajaApertura.ITEM,
-                    FlgCierreDiferido = cajaApertura.FLG_CIERRE_DIFERIDO,
-                    FechaCierre = cajaApertura.FECHA_CIERRE,
-                    HoraCierre = cajaApertura.HORA_CIERRE,
-                    NomCaja = cajaApertura.NOM_CAJA
+                    IdCaja = result.ID_CAJA,
+                    Correlativo = result.CORRELATIVO,
+                    FechaApertura = result.FECHA_APERTURA.ToString("dd/MM/yyyy HH:mm:ss"),
+                    MontoApertura = result.MONTO_APERTURA,
+                    IdMoneda = result.ID_MONEDA,
+                    SgnMoneda = result.SGN_MONEDA,
+                    FlgReaperturado = result.FLG_REAPERTURADO,
+                    Item = result.ITEM,
+                    FlgCierreDiferido = result.FLG_CIERRE_DIFERIDO,
+                    FechaCierre = result.FECHA_CIERRE,
+                    HoraCierre = result.HORA_CIERRE,
+                    NomCaja = result.NOM_CAJA
                 };
             }
 
-            return Ok(_resultado);
+            return Ok(response);
         }
 
         [HttpGet("GetTotalsByUserId/{idCaja}/{correlativo}")]
         public async Task<IActionResult> GetTotalsByUserIdAsync(string idCaja, int correlativo)
         {
-            _resultado = await Task.Run(() => _brCajaApertura.GetTotalsByUserId(_idSucursal, idCaja, _idUsuario, correlativo));
-
-            if (!_resultado.Resultado)
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
-
-            if (_resultado.Data == null)
-                return NotFound(new { Message = "No se encontraron datos.", Status = "Error" });
-
-            if (_resultado.Data != null)
+            var result = await _cajaAperturaService.GetTotalsByUserIdAsync(new CAJA_APERTURA()
             {
-                DINERO_EN_CAJA dineroEnCaja = (DINERO_EN_CAJA)_resultado.Data;
+                ID_SUCURSAL = _idSucursal,
+                ID_CAJA = idCaja,
+                ID_USUARIO = _idUsuario,
+                CORRELATIVO = correlativo
+            });
 
-                _resultado.Data = new
+            if (result == null)
+                return NotFound(new ResponseObject()
+                {
+                    Success = false,
+                    ErrorDetails = new ErrorDetails()
+                    {
+                        StatusCode = StatusCodes.Status404NotFound,
+                        Message = Constantes.NOT_FOUND
+                    }
+                });
+
+            DINERO_EN_CAJA dineroEnCaja = (DINERO_EN_CAJA)result;
+
+            var response = new ResponseObject()
+            {
+                Data = new
                 {
                     MontoAperturaCaja = dineroEnCaja.MONTO_APERTURA_CAJA,
                     MontoCobradoContado = dineroEnCaja.MONTO_COBRADO_CONTADO,
@@ -143,17 +185,29 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                     MontoCajaOtrosIngreso = dineroEnCaja.MONTO_CAJA_OTROS_INGRESO,
                     MontoCajaSalida = dineroEnCaja.MONTO_CAJA_SALIDA,
                     MontoTotal = dineroEnCaja.MONTO_TOTAL
-                };
-            }
+                }
+            };
 
-            return Ok(_resultado);
+            return Ok(response);
         }
 
         [HttpPost("Register")]
         public async Task<IActionResult> RegisterAsync([FromBody] CajaAbiertaRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new ResponseObject()
+                {
+                    Success = false,
+                    ErrorDetails = new ErrorDetails()
+                    {
+                        StatusCode = StatusCodes.Status400BadRequest,
+                        Message = JsonSerializer.Serialize(ModelState)
+                    }
+                });
+            }
 
-            _resultado = await Task.Run(() => _brCajaApertura.Register(new CAJA_APERTURA()
+            var result = await _cajaAperturaService.RegisterAsync(new CAJA_APERTURA()
             {
                 ACCION = request.Accion,
                 ID_SUCURSAL = _idSucursal,
@@ -168,16 +222,26 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                 FLG_REAPERTURADO = request.flgReaperturado,
                 ITEM = request.Item,
                 FLG_CIERRE_DIFERIDO = request.flgCierreDiferido
-            }));
+            });
 
-            if (!_resultado.Resultado)
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
-
-            if (_resultado.Data != null)
+            if (!result.Success)
             {
-                CAJA_APERTURA cajaApertura = (CAJA_APERTURA)_resultado.Data;
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseObject()
+                {
+                    Success = false,
+                    ErrorDetails = new ErrorDetails()
+                    {
+                        StatusCode = StatusCodes.Status500InternalServerError,
+                        Message = result.ErrorDetails.Message
+                    }
+                });
+            }
 
-                _resultado.Data = new
+            if (result.Data != null)
+            {
+                CAJA_APERTURA cajaApertura = (CAJA_APERTURA)result.Data;
+
+                result.Data = new
                 {
                     IdCaja = cajaApertura.ID_CAJA,
                     Correlativo = cajaApertura.CORRELATIVO,
@@ -190,31 +254,41 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                 };
             }
 
-            return Ok(_resultado);
+            return Ok(result);
         }
 
-        [HttpGet("GetAllByFilters")]
-        public async Task<IActionResult> GetAllByFiltersAsync([FromQuery] string idCaja, [FromQuery] string idUsuario,
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAllAsync([FromQuery] string idCaja, [FromQuery] string idUsuario,
             [FromQuery] string fechaInicial, [FromQuery] string fechaFinal)
         {
-            _resultado = await Task.Run(() => _brCajaApertura.GetAllByFilters(_idSucursal, idCaja, idUsuario, fechaInicial, fechaFinal));
-
-            if (!_resultado.Resultado)
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
-
-            if (_resultado.Data == null)
-                return NotFound(new { Message = "No se encontraron datos.", Status = "Error" });
-
-            if (_resultado.Data != null)
+            var result = await _cajaAperturaService.GetAllAsync(new CAJA_APERTURA()
             {
-                List<CAJA_APERTURA> listaCajaApertura = (List<CAJA_APERTURA>)_resultado.Data;
+                ID_SUCURSAL = _idSucursal,
+                ID_CAJA = idCaja,
+                ID_USUARIO = idUsuario,
+                FECHA_INICIAL = string.IsNullOrEmpty(fechaInicial) ? null : Convert.ToDateTime(fechaInicial),
+                FECHA_FINAL = string.IsNullOrEmpty(fechaFinal) ? null : Convert.ToDateTime(fechaFinal)
+            });
 
-                _resultado.Data = listaCajaApertura.Select(x => new
+            if (result == null || result.Count == 0)
+                return NotFound(new ResponseObject()
+                {
+                    Success = false,
+                    ErrorDetails = new ErrorDetails()
+                    {
+                        StatusCode = StatusCodes.Status404NotFound,
+                        Message = Constantes.NOT_FOUND
+                    }
+                });
+
+            var response = new ResponseObject()
+            {
+                Data = result.Select(x => new
                 {
                     NomUsuario = ViewHelper.CapitalizeAll(x.NOM_USUARIO),
                     NomCaja = ViewHelper.CapitalizeAll(x.NOM_CAJA),
-                    FechaApertura = x.FECHA_APERTURA,
-                    FechaCierre = x.FECHA_CIERRE,
+                    FechaApertura = x.FECHA_APERTURA.ToString("dd/MM/yyyy HH:mm"),
+                    FechaCierre = x.FECHA_CIERRE.HasValue? Convert.ToDateTime(x.FECHA_APERTURA).ToString("dd/MM/yyyy HH:mm") : "",
                     SgnMoneda = x.SGN_MONEDA,
                     MontoApertura = x.MONTO_APERTURA,
                     MontoTotal = x.MONTO_COBRADO,
@@ -223,67 +297,93 @@ namespace AplicacionWeb.SistemaVentas.Controllers
                     IdCaja = x.ID_CAJA,
                     Correlativo = x.CORRELATIVO,
                     FlgReaperturado = x.FLG_REAPERTURADO
-                });
-            }
+                })
+            };
 
-            return Ok(_resultado);
+            return Ok(response);
         }
 
         [Route("[action]")]
         public async Task<IActionResult> ReaperturaCajaIndex()
         {
-            List<USUARIO> listaUsuario = null;
-            List<CAJA> listaCaja = null;
-            _resultado = await Task.Run(() => _brCajaApertura.GetDataQuerys(_idSucursal, ref listaUsuario, ref listaCaja));
-
-            if (!_resultado.Resultado)
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
-
-            if (listaUsuario == null)
-                return StatusCode(StatusCodes.Status404NotFound, new { Message = "Debe de configurar los usuarios en el sistema.", Status = "Error" });
-
-            if (listaCaja == null)
-                return StatusCode(StatusCodes.Status404NotFound, new { Message = "Debe de configurar las cajas en el sistema.", Status = "Error" });
-
-            List<UsuarioModel> ListaUsuario = listaUsuario.Select(x => new UsuarioModel()
+            //Lista de cajas por sucursal.
+            List<CAJA> cajas = await _sucursalCajaUsuarioService.GetAllBoxes(new SUCURSAL_CAJA_USUARIO()
             {
-                IdUsuario = x.ID_USUARIO,
-                NomUsuario = ViewHelper.CapitalizeAll(x.NOM_USUARIO)
-            }).ToList<UsuarioModel>();
+                ID_SUCURSAL = _idSucursal
+            });
 
-            List<CajaModel> ListaCaja = listaCaja.Select(x => new CajaModel()
+            //Lista de usuarios por sucursal.
+            List<USUARIO> usuarios = await _sucursalCajaUsuarioService.GetAllUsersByCampusId(_idSucursal);
+
+            List<CajaSelectViewModel> listCajas = null; ;
+            List<UsuarioSelectViewModel> listUsuarios = null;
+
+            if (cajas != null)
             {
-                IdCaja = x.ID_CAJA,
-                NomCaja = ViewHelper.CapitalizeFirstLetter(x.NOM_CAJA)
-            }).ToList<CajaModel>();
+                listCajas = cajas.Select(x => new CajaSelectViewModel()
+                {
+                    IdCaja = x.ID_CAJA,
+                    NomCaja = x.NOM_CAJA
+                }).ToList();
+            };
 
-            ViewBag.ListaUsuario = ListaUsuario;
-            ViewBag.ListaCaja = ListaCaja;
+            if (usuarios != null)
+            {
+                listUsuarios = usuarios.Select(x => new UsuarioSelectViewModel()
+                {
+                    IdUsuario = x.ID_USUARIO,
+                    NomUsuario = x.NOM_USUARIO
+                }).ToList();
+            };
+
+            ViewBag.listCajas = listCajas;
+            ViewBag.listUsuarios = listUsuarios;
 
             return View();
         }
 
-        [HttpPost("ReopenBox")]
+        [HttpPost("ReopenBox")] 
         public async Task<IActionResult> ReopenBoxAsync([FromBody] ReaperturarCajaRequest request)
         {
-
-            _resultado = await Task.Run(() => _brCajaApertura.ReopenBox(new CAJA_APERTURA()
+            if (!ModelState.IsValid)
             {
-                ACCION = "REA",
+                return BadRequest(new ResponseObject()
+                {
+                    Success = false,
+                    ErrorDetails = new ErrorDetails()
+                    {
+                        StatusCode = StatusCodes.Status400BadRequest,
+                        Message = JsonSerializer.Serialize(ModelState)
+                    }
+                });
+            }
+
+            var result = await _cajaAperturaService.ReopenBoxAsync(new CAJA_APERTURA()
+            {
                 ID_SUCURSAL = _idSucursal,
                 ID_CAJA = request.IdCaja,
                 ID_USUARIO = request.IdUsuario,
                 CORRELATIVO = request.Correlativo,
-                ID_USUARIO_REGISTRO = _idUsuario
-            }));
+                ID_USUARIO_REGISTRO = _idUsuario,
+            });
 
-            if (!_resultado.Resultado)
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
+            if (!result.Success)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseObject()
+                {
+                    Success = false,
+                    ErrorDetails = new ErrorDetails()
+                    {
+                        StatusCode = StatusCodes.Status500InternalServerError,
+                        Message = result.ErrorDetails.Message
+                    }
+                });
+            }
 
             //Enviamos el mensaje signalr al usuario indicado
             await _hubContext.Clients.User(request.IdUsuario).SendAsync("actualizarEstadoCaja");
 
-            return Ok(_resultado);
+            return Ok(result);
         }
     }
 }

@@ -14,8 +14,8 @@ namespace Entidades
         public int NRO_DOCUMENTO { get; set; }
         public string ID_PROVEEDOR { get; set; }
         public string ID_MONEDA { get; set; }
-        public string FEC_DOCUMENTO { get; set; }
-        public string FEC_VENCIMIENTO { get; set; }
+        public DateTime FEC_DOCUMENTO { get; set; }
+        public DateTime FEC_VENCIMIENTO { get; set; }
         public int EST_DOCUMENTO { get; set; }
         public string OBS_COMPRA { get; set; }
         public decimal TOT_BRUTO { get; set; }
@@ -39,14 +39,6 @@ namespace Entidades
 
         public string NOM_ESTADO { get; set; }
 
-        public List<TIPO_DOCUMENTO> listaDocumentos { get; set; }
-        public List<TIPO_COMPROBANTE> listaComprobantes { get; set; }
-        public List<MONEDA> listaMonedas { get; set; }
-        public List<TIPO_PAGO> listaTipPag { get; set; }
-        public List<TIPO_CONDICION_PAGO> listaTipCon { get; set; }
-        public List<ESTADO> listaEstados { get; set; }
-
-        public List<UBIGEO> listaDepartamentos { get; set; }
         public List<DOC_COMPRA_DETALLE> detalle { get; set; }
         //
         public string NOM_PROVEEDOR { get; set; }
@@ -61,6 +53,8 @@ namespace Entidades
         public int CORRELATIVO_CA { get; set; }
         public string SGN_MONEDA { get; set; }
 
+        public DateTime FECHA_INICIAL { get; set; }
+        public DateTime FECHA_FINAL { get; set; }
 
     }
     public class DOC_COMPRA_LISTADO : DOC_COMPRA

@@ -13,7 +13,7 @@ namespace AplicacionWeb.SistemaVentas.Models.Request
         public decimal MontoApertura { get; set; }
         public string FechaApertura { get; set; }
         public decimal MontoTotal { get; set; }
-        public string FechaCierre { get; set; }
+        public DateTime? FechaCierre { get; set; }
         public string IdMoneda { get; set; }
         public bool flgReaperturado { get; set; }
         public int Item { get; set; }

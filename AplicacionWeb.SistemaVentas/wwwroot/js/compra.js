@@ -383,8 +383,9 @@ var oCompra = {
                             }).catch(() => { });
                         }
                     }).catch((error) => {
+                        const data = error.response.data;
                         oAlerta.show({
-                            message: error.response.data.Message,
+                            message: data.errorDetails.message,
                             type: "warning"
                         });
                     }).finally(() => oHelper.hideLoading());
@@ -439,8 +440,9 @@ var oCompra = {
                         type: "success"
                     });
                 }).catch((error) => {
+                    const data = error.response.data;
                     oAlerta.show({
-                        message: error.response.data.Message,
+                        message: data.errorDetails.message,
                         type: "warning"
                     });
                 }).finally(() => oHelper.hideLoading());
@@ -549,51 +551,52 @@ var oCompra = {
         let parameters = `${comprobante.idTipoComprobante}/${comprobante.nroSerie}/${comprobante.nroDocumento}/${comprobante.idProveedor}`;
 
         axios.get(`/Compra/GetById/${parameters}`).then(response => {
-            let data = response.data.Data;
-            let cabecera = data.Cabecera;
-            let detalle = data.Detalle;
+            const result = response.data;
+            let data = result.data;
+            let cabecera = data.cabecera;
+            let detalle = data.detalle;
 
             //Binding
             //Cabecera
-            document.getElementById('cboTipCom').value = cabecera.IdTipoComprobante;
-            document.getElementById('txtSerie').value = cabecera.NroSerie;
-            document.getElementById('txtNumero').value = cabecera.NroDocumento;
+            document.getElementById('cboTipCom').value = cabecera.idTipoComprobante;
+            document.getElementById('txtSerie').value = cabecera.nroSerie;
+            document.getElementById('txtNumero').value = cabecera.nroDocumento;
 
-            $("#txtFecEmi").datepicker('update', cabecera.FecDocumento);
-            $('#txtFecVen').datepicker('update', cabecera.FecVencimiento);
+            $("#txtFecEmi").datepicker('update', cabecera.fecDocumento);
+            $('#txtFecVen').datepicker('update', cabecera.fecVencimiento);
 
-            document.getElementById('cboTipDoc').value = cabecera.IdTipoDocumento;
-            document.getElementById('hddIdPro').value = cabecera.IdProveedor;
-            document.getElementById('txtNumDoc').value = cabecera.NroDocumentoProveedor;
-            document.getElementById('txtRazSoc').value = cabecera.NomProveedor;
+            document.getElementById('cboTipDoc').value = cabecera.idTipoDocumento;
+            document.getElementById('hddIdPro').value = cabecera.idProveedor;
+            document.getElementById('txtNumDoc').value = cabecera.nroDocumentoProveedor;
+            document.getElementById('txtRazSoc').value = cabecera.nomProveedor;
 
-            document.getElementById('txtIgv').value = cabecera.TasIgv;
+            document.getElementById('txtIgv').value = cabecera.tasIgv;
 
-            document.getElementById('cboTipPag').value = cabecera.IdTipoPago;
-            document.getElementById('cboForPag').value = cabecera.IdTipoCondicion;
-            document.getElementById('txtObservacion').value = cabecera.Observacion;
+            document.getElementById('cboTipPag').value = cabecera.idTipoPago;
+            document.getElementById('cboForPag').value = cabecera.idTipoCondicion;
+            document.getElementById('txtObservacion').value = cabecera.observacion;
 
-            document.getElementById('lblSubTot').textContent = oHelper.formatoMiles(cabecera.TotBruto);
-            document.getElementById('lblTotDes').textContent = oHelper.formatoMiles(cabecera.TotDescuento);
-            document.getElementById('lblTotIgv').textContent = oHelper.formatoMiles(cabecera.TotImpuesto);
-            document.getElementById('lblTotal').textContent = oHelper.formatoMiles(cabecera.TotCompra);
+            document.getElementById('lblSubTot').textContent = oHelper.formatoMiles(cabecera.totBruto);
+            document.getElementById('lblTotDes').textContent = oHelper.formatoMiles(cabecera.totDescuento);
+            document.getElementById('lblTotIgv').textContent = oHelper.formatoMiles(cabecera.totImpuesto);
+            document.getElementById('lblTotal').textContent = oHelper.formatoMiles(cabecera.totCompra);
 
-            document.getElementById('lblTotRed').textContent = (parseFloat(cabecera.TotCompra) - parseFloat(cabecera.TotCompraRedondeo)).toFixed(2);
-            document.getElementById('lblTotPag').textContent = oHelper.formatoMoneda(oCompra.getSgnMoneda(), cabecera.TotCompraRedondeo, 2);
-            document.getElementById('txtTasDes').value = cabecera.TasDescuento;
+            document.getElementById('lblTotRed').textContent = (parseFloat(cabecera.totCompra) - parseFloat(cabecera.totCompraRedondeo)).toFixed(2);
+            document.getElementById('lblTotPag').textContent = oHelper.formatoMoneda(oCompra.getSgnMoneda(), cabecera.totCompraRedondeo, 2);
+            document.getElementById('txtTasDes').value = cabecera.tasDescuento;
 
             let spnEstado = document.getElementById('spnEstado');
-            if (cabecera.EstDocumento == 1) {
+            if (cabecera.estDocumento == 1) {
                 spnEstado.classList.remove("bg-danger");
                 spnEstado.classList.add("bg-success");
 
-            } else if (cabecera.EstDocumento == 3) {
+            } else if (cabecera.estDocumento == 3) {
                 spnEstado.classList.remove("bg-success");
                 spnEstado.classList.add("bg-danger");
 
             };
-            spnEstado.textContent = cabecera.NomEstado;
-            spnEstado.setAttribute("data-idEstado", cabecera.EstDocumento);
+            spnEstado.textContent = cabecera.nomEstado;
+            spnEstado.setAttribute("data-idEstado", cabecera.estDocumento);
 
             //Detalle
             let tbody = table.getElementsByTagName('tbody')[0];
@@ -603,27 +606,27 @@ var oCompra = {
                 let tr = document.createElement('tr');
 
                 let option = '<option value>---Seleccione---</option>';
-                x.JsonListaUm.forEach(y => {
-                    option += `<option value="${y.IdUm}" ${y.IdUm == x.IdUm ? 'selected' : ''} data-nroFactor="${y.NroFactor}">${y.NomUm.capitalizeAll()}</option>`
+                x.jsonListaUm.forEach(y => {
+                    option += `<option value="${y.idUm}" ${y.idUm == x.idUm ? 'selected' : ''} data-nroFactor="${y.NroFactor}">${y.nomUm.capitalizeAll()}</option>`
                 });
 
                 let cboUm = `<select class="form-select form-select-sm">${option}</select>`;
 
-                let txtPrecio = `<input class="form-control form-control-sm text-end" type="text" style="width:80px" value="${parseFloat(x.PrecioArticulo).toFixed(2)}"/>`;
-                let txtCantidad = `<input class="form-control form-control-sm text-end" type="text" value="${x.Cantidad}" style="width:80px"/>`;
-                let txtDescuento = `<input class="form-control form-control-sm text-end" type="number" min="0" max="100" step="5" value="${x.TasDescuento}" style="width:80px"/>`;
-                let txtImporte = `<input class="form-control form-control-sm text-end" type="text" style="width:100px" value="${parseFloat(x.Importe).toFixed(2)}"/>`;
+                let txtPrecio = `<input class="form-control form-control-sm text-end" type="text" style="width:80px" value="${parseFloat(x.precioArticulo).toFixed(2)}"/>`;
+                let txtCantidad = `<input class="form-control form-control-sm text-end" type="text" value="${x.cantidad}" style="width:80px"/>`;
+                let txtDescuento = `<input class="form-control form-control-sm text-end" type="number" min="0" max="100" step="5" value="${x.tasDescuento}" style="width:80px"/>`;
+                let txtImporte = `<input class="form-control form-control-sm text-end" type="text" style="width:100px" value="${parseFloat(x.importe).toFixed(2)}"/>`;
 
-                let td = `<td>${x.Codigo}</td>
-                    <td>${x.NomArticulo}</td>
+                let td = `<td>${x.codigo}</td>
+                    <td>${x.nomArticulo}</td>
                     <td>${cboUm}</td>
-                    <td class='text-end'>${x.NroFactor}</td>
+                    <td class='text-end'>${x.nroFactor}</td>
                     <td class='text-end'>${txtPrecio}</td>
                     <td>${txtCantidad}</td>
                     <td>${txtDescuento}</td>
                     <td>${txtImporte}</td>
                     <td><button type="button" class="btn btn-danger btn-sm" ><i class="bi bi-trash-fill"></i></button></td>
-                    <td class='d-none'>${x.IdArticulo}</td>`;
+                    <td class='d-none'>${x.idArticulo}</td>`;
 
                 tr.innerHTML = td;
                 frag.appendChild(tr);
@@ -637,10 +640,10 @@ var oCompra = {
             oCompra.instance.hide();
 
         }).catch(error => {
+            const data = error.response.data;
             oAlerta.show({
-                message: error.response.data.Message,
-                type: "warning",
-                container: "#modalConsultarCompra .modal-dialog"
+                message: data.errorDetails.message,
+                type: "warning"
             });
         }).finally(() => {
             oHelper.hideLoading();
@@ -665,23 +668,24 @@ var oCompra = {
                 idEstado: document.getElementById('cboEstadoConsulta').value,
             }
         }
-        axios.get("/Compra/GetAllByFilters", parameters).then(response => {
-            let listaArticulo = response.data.Data;
+        axios.get("/Compra/GetAll", parameters).then(response => {
+            const result = response.data;
+            const listArticulo = result;
 
             let frag = document.createDocumentFragment();
-            listaArticulo.forEach(x => {
+            listArticulo.forEach(x => {
                 let td = `<td class="py-1"><button type="button" class="btn btn-sm warning-intenso"><i class="bi bi-hand-index-fill" style='color:#fff'></i></button></td>
-                        <td>${x.Comprobante}</td>
-                        <td>${x.DocProveedor}</td>
-                        <td>${x.NomProveedor}</td>
-                        <td class='text-end'>${oHelper.formatoMoneda(x.SgnMoneda, x.TotCompra, 2)}</td>
-                        <td class='text-end'>${x.FecDocumento}</td>
-                        <td><span class="badge rounded-pill bg-${(x.FlgEvaluaCredito ? 'warning' : 'primary')} ">${x.NomTipoCondicionPago}</span></td>
-                        <td><span class="badge rounded-pill bg-${(x.EstDocumento == 1 ? 'success' : 'danger')} ">${x.NomEstado}</span></td>
-                        <td class='d-none' >${x.IdTipoComprobante}</td>
-                        <td class='d-none' >${x.NroSerie}</td>
-                        <td class='d-none'>${x.NroDocumento}</td>
-                        <td class='d-none' >${x.IdProveedor}</td>`;
+                        <td>${x.comprobante}</td>
+                        <td>${x.docProveedor}</td>
+                        <td>${x.nomProveedor}</td>
+                        <td class='text-end'>${oHelper.formatoMoneda(x.sgnMoneda, x.totCompra, 2)}</td>
+                        <td class='text-end'>${x.fecDocumento}</td>
+                        <td><span class="badge rounded-pill bg-${(x.flgEvaluaCredito ? 'warning' : 'primary')} ">${x.nomTipoCondicionPago}</span></td>
+                        <td><span class="badge rounded-pill bg-${(x.estDocumento == 1 ? 'success' : 'danger')} ">${x.nomEstado}</span></td>
+                        <td class='d-none' >${x.idTipoComprobante}</td>
+                        <td class='d-none' >${x.nroSerie}</td>
+                        <td class='d-none'>${x.nroDocumento}</td>
+                        <td class='d-none' >${x.idProveedor}</td>`;
 
                 let tr = document.createElement('tr');
                 tr.innerHTML = td
@@ -689,8 +693,9 @@ var oCompra = {
             });
             tbody.appendChild(frag);
         }).catch(error => {
+            const data = error.response.data;
             oAlerta.show({
-                message: error.response.data.Message,
+                message: data.errorDetails.message,
                 type: "warning",
                 container: "#modalConsultarCompra .modal-dialog"
             });
@@ -841,15 +846,17 @@ var oCompra = {
         const parameters = `${cboTipDoc.value}/${txtNumDoc.value}`;
 
         axios.get(`/Proveedor/GetByDocument/${parameters}`).then(response => {
-            const modelo = response.data.Data;
+            const result = response.data;
+            const modelo = result.data;
 
-            document.getElementById('hddIdPro').value = modelo.IdProveedor;
-            document.getElementById('cboTipDoc').value = modelo.IdTipoDocumento;
-            document.getElementById('txtNumDoc').value = modelo.NroDocumento;
-            document.getElementById('txtRazSoc').value = modelo.NomProveedor;
+            document.getElementById('hddIdPro').value = modelo.idProveedor;
+            document.getElementById('cboTipDoc').value = modelo.idTipoDocumento;
+            document.getElementById('txtNumDoc').value = modelo.nroDocumento;
+            document.getElementById('txtRazSoc').value = modelo.nomProveedor;
         }).catch((error) => {
+            const data = error.response.data;
             oAlerta.show({
-                message: error.response.data.Message,
+                message: data.errorDetails.message,
                 type: "warning"
             });
         }).finally(() => oHelper.hideLoading());
@@ -886,8 +893,9 @@ var oCompra = {
             document.getElementById('txtNumDocConsulta').value = modelo.NroDocumento;
             document.getElementById('txtRazSocConsulta').value = modelo.NomProveedor;
         }).catch((error) => {
+            const data = error.response.data;
             oAlerta.show({
-                message: error.response.data.Message,
+                message: data.errorDetails.message,
                 type: "warning"
             });
         }).finally(() => oHelper.hideLoading());
@@ -904,15 +912,15 @@ var oCompra = {
         oHelper.showLoading();
         axios.get(`/Articulo/GetByBarcode/${txtCodBar.value}/${true}`).then((response) => {
             let result = response.data;
-            if (!result.Resultado)
+            if (!result.resultado)
                 return;
 
-            let articulo = result.Data;
+            let articulo = result.data;
             let modelo = {
-                idArticulo: articulo.IdArticulo,
-                codigo: articulo.Codigo,
-                descripcion: articulo.NomArticulo,
-                jsonListaUm: articulo.ListaUm
+                idArticulo: articulo.idArticulo,
+                codigo: articulo.codigo,
+                descripcion: articulo.nomArticulo,
+                jsonListaUm: articulo.listaUm
             };
 
             //Agregamos el artículo encontrado al detalle.
@@ -926,8 +934,9 @@ var oCompra = {
                 document.getElementById('btnLimCodBar').click();
             });
         }).catch((error) => {
+            const data = error.response.data;
             oAlerta.show({
-                message: error.response.data.Message,
+                message: data.errorDetails.message,
                 type: "warning"
             });
         }).finally(() => oHelper.hideLoading());
@@ -957,12 +966,12 @@ var oCompra = {
             let selected = '', nroFactor = '';
             if (modelo.jsonListaUm.length == 1) {
                 selected = 'selected';
-                nroFactor = modelo.jsonListaUm[0].NroFactor;
+                nroFactor = modelo.jsonListaUm[0].nroFactor;
             }
 
             let option = '<option value>---Seleccione---</option>';
             modelo.jsonListaUm.forEach(x => {
-                option += `<option value="${x.IdUm}" ${selected} data-nroFactor="${x.NroFactor}">${x.NomUm}</option>`
+                option += `<option value="${x.idUm}" ${selected} data-nroFactor="${x.nroFactor}">${x.nomUm}</option>`
             });
 
             let cboUm = `<select class="form-select form-select-sm">${option}</select>`;
@@ -1390,10 +1399,11 @@ var oCompra = {
             oHelper.showLoading();
 
             axios.post("/Compra/Register", parameters).then((response) => {
-                let data = response.data;
-                if (data.Resultado) {
+                const result = response.data;
+
+                if (result.success) {
                     oAlerta.show({
-                        message: data.Mensaje,
+                        message: result.message,
                         type: "success"
                     });
 
@@ -1402,8 +1412,9 @@ var oCompra = {
                 }
 
             }).catch((error) => {
+                const data = error.response.data;
                 oAlerta.show({
-                    message: error.response.data,
+                    message: data.errorDetails.message,
                     type: "warning"
                 });
             }).finally(() => oHelper.hideLoading());

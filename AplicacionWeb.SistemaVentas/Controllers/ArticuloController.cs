@@ -1,5 +1,6 @@
-﻿using AplicacionWeb.SistemaVentas.Models.ViewModel;
-using AplicacionWeb.SistemaVentas.Servicios.Seguridad;
+﻿using AplicacionWeb.SistemaVentas.Models.Response;
+using AplicacionWeb.SistemaVentas.Models.ViewModel;
+using AplicacionWeb.SistemaVentas.Services.Security.Contracts;
 using CapaNegocio;
 using Entidades;
 using Helper;
@@ -24,9 +25,10 @@ namespace AplicacionWeb.SistemaVentas.Controllers
         private IConfiguration _configuration;
         private IWebHostEnvironment _environment;
         private IHttpContextAccessor _accessor;
+        private readonly ISessionIdentity _sessionIdentity;
 
         public ArticuloController(IResultadoOperacion resultado, IConfiguration configuration,
-            IWebHostEnvironment environment, IHttpContextAccessor accessor)
+            IWebHostEnvironment environment, IHttpContextAccessor accessor, ISessionIdentity sessionIdentity)
         {
             _configuration = configuration;
             _accessor = accessor;
@@ -34,8 +36,8 @@ namespace AplicacionWeb.SistemaVentas.Controllers
             _resultado = resultado;
             _brArticulo = new BrArticulo(_configuration, _environment);
 
-
-            UsuarioLogueadoModel usuario = new Session(_accessor).GetUserLogged();
+            _sessionIdentity = sessionIdentity;
+            UsuarioIdentityViewModel usuario = _sessionIdentity.GetUserLogged();
             _idUsuario = usuario.IdUsuario;
             _idSucursal = usuario.IdSucursal;
         }

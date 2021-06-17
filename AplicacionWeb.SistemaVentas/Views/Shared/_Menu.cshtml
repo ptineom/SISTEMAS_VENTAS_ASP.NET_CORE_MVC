@@ -1,46 +1,46 @@
-﻿@using AplicacionWeb.SistemaVentas.Models.ViewModel
+﻿@using AplicacionWeb.SistemaVentas.Models.Response
 
-@model MenuItemModel
+@model MenuItemViewModel
 
 @{
-    MenuItemModel menuItem = (MenuItemModel)Model;
+    MenuItemViewModel menuItem = (MenuItemViewModel)Model;
 }
 
-@if (menuItem.children == null)
+@if (menuItem.Children == null)
 {
     <li >
         <a href="#"
-           data-breadcrumb="@menuItem.breadcrumbs"
-           data-flgFormulario="@menuItem.flgFormulario"
-           data-id="@menuItem.id"
-           data-route="@menuItem.route"
+           data-breadcrumb="@menuItem.Breadcrumbs"
+           data-flgFormulario="@menuItem.FlgFormulario"
+           data-id="@menuItem.Id"
+           data-route="@menuItem.Route"
            class="ps-3">
 
-            @if (menuItem.flgRaiz)
+            @if (menuItem.FlgRaiz)
             {
-                <i class="@(string.IsNullOrEmpty(menuItem.icon)?"": string.Format("{0} {1}",menuItem.icon,"me-1 align-text-bottom"))"></i>
+                <i class="@(string.IsNullOrEmpty(menuItem.Icon)?"": string.Format("{0} {1}",menuItem.Icon,"me-1 align-text-bottom"))"></i>
             }
-            <span class="menu-label">@menuItem.label</span>
+            <span class="menu-label">@menuItem.Label</span>
         </a>
     </li>
 }
 else
 {
-    var id = string.Format("menu-{0}", menuItem.id);
+    var id = string.Format("menu-{0}", menuItem.Id);
     <li class="treeview">
         <a data-bs-toggle="collapse" href="#@id" aria-expanded="false" aria-controls="@id"
            class="dropdown-toggle ps-3"
-           data-breadcrumb="@menuItem.breadcrumbs"
-           data-flgFormulario="@menuItem.flgFormulario"
-           data-id="@menuItem.id">
-            @if (menuItem.flgRaiz)
+           data-breadcrumb="@menuItem.Breadcrumbs"
+           data-flgFormulario="@menuItem.FlgFormulario"
+           data-id="@menuItem.Id">
+            @if (menuItem.FlgRaiz)
             {
-                <i class="me-1 align-text-bottom @(string.IsNullOrEmpty(menuItem.icon)?"": menuItem.icon)"></i>
+                <i class="me-1 align-text-bottom @(string.IsNullOrEmpty(menuItem.Icon)?"": menuItem.Icon)"></i>
             }
-            <span class="menu-label">@menuItem.label</span>
+            <span class="menu-label">@menuItem.Label</span>
         </a>
         <ul class="collapse list-unstyled treeview-menu animated fadeIn" id="@id">
-            @foreach (var hijo in menuItem.children)
+            @foreach (var hijo in menuItem.Children)
             {
                 <partial name="~/Views/Shared/_Menu.cshtml" model="hijo" />
             }

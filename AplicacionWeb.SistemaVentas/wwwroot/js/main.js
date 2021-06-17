@@ -142,6 +142,7 @@ var oMain = {
                 }
 
             }).catch((error) => {
+                debugger;
                 oAlerta.alerta({
                     title: error,
                     type: "warning"

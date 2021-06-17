@@ -16,9 +16,9 @@
                 <label class="form-label mb-1">Caja</label>
                 <select class="form-select form-select-sm" id="cboCaja" aria-label=".form-select-lg example">
                     <option value="">---Seleccione---</option>
-                    @if (ViewBag.ListaCaja != null)
+                    @if (ViewBag.listCajas != null)
                     {
-                        foreach (var item in ViewBag.ListaCaja)
+                        foreach (var item in ViewBag.listCajas)
                         {
                             <option value="@item.IdCaja">@item.NomCaja</option>
                         }
@@ -29,9 +29,9 @@
                 <label class="form-label mb-1">Usuario</label>
                 <select class="form-select form-select-sm" id="cboUsuario" aria-label=".form-select-lg example">
                     <option value="">---Seleccione---</option>
-                    @if (ViewBag.ListaUsuario != null)
+                    @if (ViewBag.listUsuarios != null)
                     {
-                        foreach (var item in ViewBag.ListaUsuario)
+                        foreach (var item in ViewBag.listUsuarios)
                         {
                             <option value="@item.IdUsuario">@item.NomUsuario</option>
                         }

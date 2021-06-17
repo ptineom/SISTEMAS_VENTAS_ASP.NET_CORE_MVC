@@ -28,7 +28,6 @@ namespace CapaNegocio
             _resultado = new ResultadoOperacion();
             _environment = environment;
             _configuration = configuration;
-            //Conexion BD.
             _conexion = new Conexion(_configuration);
         }
 

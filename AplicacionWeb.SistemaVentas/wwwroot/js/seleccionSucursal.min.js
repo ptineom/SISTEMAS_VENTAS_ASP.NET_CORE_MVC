@@ -31,8 +31,9 @@ var oSeleccionSucursal = {
                 nomSucursal
             };
             axios.post("/Login/ChangeSucursal", parameters).then((response) => {
-                if (response.data.Resultado) {
-                    let returnUrl = response.data.Data;
+                const result = response.data;
+                if (result.success) {
+                    let returnUrl = result.data;
                     window.location.href = returnUrl;
                 }
             }).catch((error) => {

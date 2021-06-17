@@ -1,11 +1,11 @@
 ﻿@using AplicacionWeb.SistemaVentas.Extensiones
 @using AplicacionWeb.SistemaVentas.Models.Request
-@using AplicacionWeb.SistemaVentas.Models.ViewModel
+@using AplicacionWeb.SistemaVentas.Models.Response
 
 @model ProveedorRequest
 @{
-    var listaDepartamento = (List<DepartamentoModel>)ViewData["listaDepartamento"];
-    var listaTipoDocumento = (List<TipoDocumentoModel>)ViewData["listaTipoDocumento"];
+    var listaDepartamento = (List<DepartamentoSelectViewModel>)ViewData["listaDepartamento"];
+    var listaTipoDocumento = (List<TipoDocumentoSelectViewModel>)ViewData["listaTipoDocumento"];
 }
 
 <div class="modal fade" id="modalRegistrarProveedor" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">

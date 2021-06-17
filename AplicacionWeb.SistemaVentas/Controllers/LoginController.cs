@@ -1,20 +1,17 @@
 ﻿using AplicacionWeb.SistemaVentas.Models.Request;
+using AplicacionWeb.SistemaVentas.Models.Response;
 using AplicacionWeb.SistemaVentas.Models.ViewModel;
-using AplicacionWeb.SistemaVentas.Servicios.Seguridad;
-using CapaNegocio;
+using AplicacionWeb.SistemaVentas.Services.Security.Contracts;
+using CapaNegocio.Contracts;
 using Entidades;
 using Helper;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Helper.DTOGeneric;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace AplicacionWeb.SistemaVentas.Controllers
@@ -22,20 +19,17 @@ namespace AplicacionWeb.SistemaVentas.Controllers
     [Route("[controller]")]
     public class LoginController : Controller
     {
-        private IResultadoOperacion _resultado = null;
-        private BrUsuario _brUsuario = null;
-        private IHttpContextAccessor _accessor = null;
-        private IWebHostEnvironment _environment= null;
-        private IConfiguration _configuration = null;
-
-        public LoginController(IResultadoOperacion resultado, IHttpContextAccessor accessor, 
-            IWebHostEnvironment environment, IConfiguration configuration)
+        private readonly ISecurityService _securityService;
+        private readonly ITokenProcess _tokenProcess;
+        private readonly ISucursalUsuarioService _sucursalUsuarioService;
+        private readonly ISessionIdentity _sessionIdentity;
+        public LoginController(ISecurityService securityService, ITokenProcess tokenProcess, 
+            ISucursalUsuarioService sucursalUsuarioService, ISessionIdentity sessionIdentity)
         {
-            _configuration = configuration;
-            _resultado = resultado;
-            _brUsuario = new BrUsuario(_configuration);
-            _accessor = accessor;
-            _environment = environment;
+            _securityService = securityService;
+            _tokenProcess = tokenProcess;
+            _sucursalUsuarioService = sucursalUsuarioService;
+            _sessionIdentity = sessionIdentity;
         }
 
         [Route("[action]")]
@@ -44,186 +38,227 @@ namespace AplicacionWeb.SistemaVentas.Controllers
             return View(new LoginRequest());
         }
 
-        [HttpPost("ValidateUser")]
+        [HttpPost("UserValidate")]
         [AllowAnonymous]
-        public async Task<IActionResult> ValidateUserAsync([FromBody] LoginRequest request)
+        public async Task<IActionResult> UserValidateAsync([FromBody] LoginRequest request)
         {
             if (!ModelState.IsValid)
-                return BadRequest(new { Mesagge = ModelState, Status = "Error" });
+                return BadRequest(new ResponseObject()
+                {
+                    Success = false,
+                    ErrorDetails = new ErrorDetails()
+                    {
+                        StatusCode = StatusCodes.Status400BadRequest,
+                        Message = JsonSerializer.Serialize(ModelState)
+                    }
+                });
 
             if (string.IsNullOrWhiteSpace(request.idUsuario) || string.IsNullOrWhiteSpace(request.password))
-                return BadRequest(new { Message = "Usuario y/o contraseña incorrectas", Status = "Error" });
+                return NotFound(new ResponseObject()
+                {
+                    Success = false,
+                    ErrorDetails = new ErrorDetails()
+                    {
+                        StatusCode = StatusCodes.Status400BadRequest,
+                        Message = "Usuario y/o contraseña incorrectas"
+                    }
+                });
 
             //Validamos la existencia del usuario en la BD.
             string passwordHash256 = HashHelper.GetHash256(request.password);
-            _resultado = await Task.Run(() => _brUsuario.ValidateUser(request.idUsuario, passwordHash256));
+            var result = await Task.Run(() => _securityService.UserValidateAsync(request.idUsuario, passwordHash256));
 
-            if (!_resultado.Resultado)
-                return StatusCode(StatusCodes.Status404NotFound, new { Message = _resultado.Mensaje, Status = "Error" });
-
-            try
-            {
-                //Datos del usuario
-                USUARIO modelo = (USUARIO)_resultado.Data;
-                int countSedes = modelo.COUNT_SEDES;
-
-                if (countSedes == 0)
-                    return NotFound(new { Message = "Este usuario no tiene configurado al menos una sede.", Status = "Error" });
-
-                ResultadoLoginModel resultadoLogin = null;
-
-                //**** Si tiene una sede asignada, generamos el token.
-                if (countSedes == 1)
+            if (!result.Success)
+                return NotFound(new ResponseObject()
                 {
-                    //Generamos la identidad y cookie.
-                    await IdentitySignInAsync(modelo);
+                    Success = false,
+                    ErrorDetails = new ErrorDetails()
+                    {
+                        StatusCode = StatusCodes.Status404NotFound,
+                        Message = result.ErrorDetails.Message
+                    }
+                });
 
-                    resultadoLogin = new ResultadoLoginModel()
+            //Obtenemos los datos del usuario validado satisfactoriamente.
+            var usuario = (USUARIO)result.Data;
+
+            var model = new UsuarioAuthViewModel()
+            {
+                IdUsuario = usuario.ID_USUARIO,
+                NomUsuario = usuario.NOM_USUARIO,
+                NomRol = usuario.NOM_ROL,
+                IdSucursal = usuario.ID_SUCURSAL,
+                NomSucursal = usuario.NOM_SUCURSAL,
+                FlgCtrlTotal = usuario.FLG_CTRL_TOTAL,
+                Foto = usuario.FOTO,
+                CountSucursales = usuario.COUNT_SEDES
+            };
+
+            if (model.CountSucursales == 0)
+                return NotFound(new ResponseObject()
+                {
+                    Success = false,
+                    ErrorDetails = new ErrorDetails()
+                    {
+                        StatusCode = StatusCodes.Status404NotFound,
+                        Message = "El usuario no tiene configurado al menos 1 sucursal."
+                    }
+                });
+
+            var response = new ResponseObject();
+
+
+            //**** Si tiene una sede asignada, generamos el token.
+            if (model.CountSucursales == 1)
+            {
+                //Generamos la identidad y cookie.
+                var claims = _tokenProcess.GenerateClaims(model);
+                await _tokenProcess.IdentitySignInAsync(claims);
+
+                response = new ResponseObject()
+                {
+                    Data = new
                     {
                         ReturnUrl = "/Home/Index",
                         MasDeUnaSucursal = false
-                    };
-                }
-                else if (countSedes > 1)
+                    }
+                };
+            }
+            else if (model.CountSucursales > 1)
+            {
+                //Recuperamos las sucursales del usuario
+                List<SUCURSAL> list = await Task.Run(() => _sucursalUsuarioService.GetAllByCampusId(model.IdUsuario));
+
+                response = new ResponseObject()
                 {
-                    BrSucursalUsuario brSucursalUsuario = new BrSucursalUsuario();
-                    _resultado = new ResultadoOperacion();
-
-                    //Lista de sucursales por usuario.
-                    _resultado = brSucursalUsuario.GetAllByUserId(request.idUsuario);
-
-                    if (!_resultado.Resultado)
-                        return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
-
-                    List<SucursalModel> sucursales = ((List<SUCURSAL>)_resultado.Data).Select(x => new SucursalModel()
+                    Data = new
                     {
-                        IdSucursal = x.ID_SUCURSAL,
-                        NomSucursal = x.NOM_SUCURSAL
-                    }).ToList<SucursalModel>();
-                    sucursales.Insert(0, new SucursalModel() { IdSucursal = "-1", NomSucursal = "---SELECCIONE---" });
-
-                    resultadoLogin = new ResultadoLoginModel()
-                    {
-                        MasDeUnaSucursal = true,
-                        Sucursales = sucursales
-                    };
-                }
-                _resultado = new ResultadoOperacion();
-                _resultado.SetResultado(true, "", resultadoLogin);
-            }
-            catch (InvalidOperationException ex)
-            {
-                object obj = new { ex.Message, Status = "Error" };
-                return StatusCode(StatusCodes.Status500InternalServerError, obj);
-            }
-            catch (Exception ex)
-            {
-                object obj = new { ex.Message, Status = "Error" };
-                return StatusCode(StatusCodes.Status500InternalServerError, obj);
+                        FlgVariasSucursales = true,
+                        ListSucursales = list.Select(x => new SucursalViewModel()
+                        {
+                            IdSucursal = x.ID_SUCURSAL,
+                            NomSucursal = x.NOM_SUCURSAL
+                        })
+                    }
+                };
             }
 
-            return Ok(_resultado);
-            // return new JsonResult(_resultado);
+            return Ok(response);
         }
 
         [AllowAnonymous]
         [HttpPost("CreateIdentitySignIn")]
-        public async Task<IActionResult> CreateIdentitySignInAsync([FromBody] SeleccionSucursalRequest request)
+        public async Task<IActionResult> CreateIdentitySignInAsync([FromBody] SeleccionUsuarioSucursalRequest request)
         {
             if (!ModelState.IsValid)
-                return BadRequest(new { Mesagge = ModelState, Status = "Error" });
+                return BadRequest(new ResponseObject()
+                {
+                    Success = false,
+                    ErrorDetails = new ErrorDetails()
+                    {
+                        StatusCode = StatusCodes.Status400BadRequest,
+                        Message = JsonSerializer.Serialize(ModelState)
+                    }
+                });
 
             //Validamos la existencia del usuario en la BD.
             string passwordHash256 = HashHelper.GetHash256(request.password);
-            _resultado = await Task.Run(() => _brUsuario.ValidateUser(request.idUsuario, passwordHash256));
+            var result = await Task.Run(() => _securityService.UserValidateAsync(request.idUsuario, passwordHash256));
 
-            if (!_resultado.Resultado)
-                return StatusCode(StatusCodes.Status404NotFound, new { Message = _resultado.Mensaje, Status = "Error" });
+            if (!result.Success)
+                return NotFound(new ResponseObject()
+                {
+                    Success = false,
+                    ErrorDetails = new ErrorDetails()
+                    {
+                        StatusCode = StatusCodes.Status404NotFound,
+                        Message = result.ErrorDetails.Message
+                    }
+                });
 
-            //Datos del usuario
-            USUARIO modelo = (USUARIO)_resultado.Data;
-            modelo.ID_SUCURSAL = request.idSucursal;
-            modelo.NOM_SUCURSAL = request.nomSucursal;
+            //Obtenemos los datos del usuario validado satisfactoriamente.
+            var usuario = (USUARIO)result.Data;
+
+            var model = new UsuarioAuthViewModel()
+            {
+                IdUsuario = usuario.ID_USUARIO,
+                NomUsuario = usuario.NOM_USUARIO,
+                NomRol = usuario.NOM_ROL,
+                IdSucursal = usuario.ID_SUCURSAL,
+                NomSucursal = usuario.NOM_SUCURSAL,
+                FlgCtrlTotal = usuario.FLG_CTRL_TOTAL,
+                Foto = usuario.FOTO
+            };
+
+            model.IdSucursal = request.idSucursal;
+            model.NomSucursal = request.nomSucursal;
 
             //Generamos la identidad y cookie.
-            await IdentitySignInAsync(modelo);
+            var claims = _tokenProcess.GenerateClaims(model);
+            await _tokenProcess.IdentitySignInAsync(claims);
 
-            _resultado = new ResultadoOperacion();
-            _resultado.SetResultado(true, "", "/Home/Index");
+            var response = new ResponseObject()
+            {
+                Data = new
+                {
+                    ReturnUrl = "/Home/Index"
+                }
+            };
 
-            return Ok(_resultado);
+            return Ok(response);
         }
 
         [HttpPost("ChangeSucursal")]
-        public async Task<IActionResult> ChangeSucursalAsync([FromBody] ReqCambiarSucursalViewModel request)
+        public async Task<IActionResult> ChangeSucursalAsync([FromBody] CambiarSucursalRequest request)
         {
             if (!ModelState.IsValid)
-                return BadRequest(new { Mesagge = ModelState, Status = "Error" });
+                return BadRequest(new ResponseObject()
+                {
+                    Success = false,
+                    ErrorDetails = new ErrorDetails()
+                    {
+                        StatusCode = StatusCodes.Status400BadRequest,
+                        Message = JsonSerializer.Serialize(ModelState)
+                    }
+                });
 
             //Obtenemos el usuario actual 
-            UsuarioLogueadoModel userCurrent = new Session(_accessor, _environment).GetUserLogged();
+            UsuarioIdentityViewModel userCurrent = _sessionIdentity.GetUserLogged();
 
-            //Datos del usuario
-            USUARIO modelo = new USUARIO()
+            var model = new UsuarioAuthViewModel()
             {
-                ID_SUCURSAL = request.IdSucursal,
-                NOM_SUCURSAL = request.NomSucursal,
-                ID_USUARIO = userCurrent.IdUsuario,
-                NOM_USUARIO = userCurrent.NomUsuario,
-                NOM_ROL = userCurrent.NomRol,
-                FLG_CTRL_TOTAL = userCurrent.FlgCtrlTotal,
-                FOTO = userCurrent.AvatarUri
+                IdUsuario = userCurrent.IdUsuario,
+                NomUsuario = userCurrent.NomUsuario,
+                NomRol = userCurrent.NomRol,
+                IdSucursal = request.IdSucursal,
+                NomSucursal = request.NomSucursal,
+                FlgCtrlTotal = userCurrent.FlgCtrlTotal,
+                Foto = userCurrent.AvatarUri
             };
 
             //Generamos la identidad y cookie.
-            await IdentitySignInAsync(modelo);
+            var claims = _tokenProcess.GenerateClaims(model);
+            await _tokenProcess.IdentitySignInAsync(claims);
 
-            _resultado = new ResultadoOperacion();
-            _resultado.SetResultado(true,"", "/Home/Index");
+            var response = new ResponseObject()
+            {
+                Data = "/Home/Index"
+            };
 
-            return Ok(_resultado);
+            return Ok(response);
         }
 
         [Route("IdentitySignOn")]
         [AllowAnonymous]
         public async Task<IActionResult> IdentitySignOnAsync()
         {
-            await HttpContext.SignOutAsync();
+            await _tokenProcess.IdentitySignOnAsync();
             return RedirectToAction("Index", "Home");
         }
-
-        #region Metodos privados
-        public async Task IdentitySignInAsync(USUARIO usuario)
-        {
-            IEnumerable<Claim> claims = new List<Claim>()
-            {
-                new Claim(ClaimTypes.Role, usuario.NOM_ROL),
-                new Claim(ClaimTypes.Name, usuario.ID_USUARIO),
-                new Claim(ClaimTypes.NameIdentifier, usuario.ID_USUARIO),
-                new Claim("fullName", usuario.NOM_USUARIO),
-                new Claim("idSucursal", usuario.ID_SUCURSAL),
-                new Claim("nomSucursal", usuario.NOM_SUCURSAL),
-                new Claim("flgCtrlTotal", usuario.FLG_CTRL_TOTAL.ToString()),
-                new Claim("avatarUri", usuario.FOTO)
-            };
-
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-            var authProperties = new AuthenticationProperties
-            {
-                AllowRefresh = true,
-                IsPersistent = true,
-                ExpiresUtc = DateTime.UtcNow.AddDays(7)
-            };
-
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
-        }
-
-        #endregion
     }
 
     #region "Records"
-    public record ReqCambiarSucursalViewModel(string IdSucursal, string NomSucursal);
+    public record CambiarSucursalRequest(string IdSucursal, string NomSucursal);
     #endregion
 
 }

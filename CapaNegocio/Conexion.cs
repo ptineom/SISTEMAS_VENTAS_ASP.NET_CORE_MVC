@@ -20,14 +20,23 @@ namespace CapaNegocio
         {
             get
             {
-                //La conexión la obtenemos del appsetting.json
-                var sqlConnectionStringBuilder = new SqlConnectionStringBuilder(_configuration.GetConnectionString("ConnectionSql"));
+                ////La conexión la obtenemos del appsetting.json
+                //var sqlConnectionStringBuilder = new SqlConnectionStringBuilder(_configuration.GetConnectionString("ConnectionSql"));
 
-                //Las credenciales las obtenemos del administrador de secretos.
-                sqlConnectionStringBuilder.UserID = _configuration["ConnectionStrings:Credentials:Sql:UserId"];
-                sqlConnectionStringBuilder.Password = _configuration["ConnectionStrings:Credentials:Sql:Password"];
+                ////Las credenciales las obtenemos del administrador de secretos.
+                //sqlConnectionStringBuilder.UserID = _configuration["ConnectionStrings:Sql:UserId"];
+                //sqlConnectionStringBuilder.Password = _configuration["ConnectionStrings:Sql:Password"];
 
-                return sqlConnectionStringBuilder.ConnectionString;
+                var sqlConnectionSb = new SqlConnectionStringBuilder()
+                {
+                    UserID = _configuration.GetSection("ConnectionStrings:UserId").Value,
+                    Password = _configuration.GetSection("ConnectionStrings:Password").Value,
+                    DataSource = _configuration.GetSection("ConnectionStrings:DataSource").Value,
+                    InitialCatalog = _configuration.GetSection("ConnectionStrings:InitialCatalog").Value,
+                    PersistSecurityInfo = true
+                };
+
+                return sqlConnectionSb.ConnectionString;
             }
         }
 

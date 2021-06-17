@@ -17,13 +17,4 @@ namespace AplicacionWeb.SistemaVentas.Models.Request
         public string password { get; set; }
     }
 
-    public class SeleccionSucursalRequest : LoginRequest
-    {
-        [Required(ErrorMessage = "Debe de ingresar el {0}")]
-        public string idSucursal { get; set; }
-
-        [Required(ErrorMessage = "Debe de ingresar el {0}")]
-        public string nomSucursal { get; set; }
-    }
-
 }

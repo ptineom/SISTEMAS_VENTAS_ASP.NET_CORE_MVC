@@ -1,13 +1,13 @@
 ﻿@using AplicacionWeb.SistemaVentas.Extensiones
-@using AplicacionWeb.SistemaVentas.Models.ViewModel
+@using AplicacionWeb.SistemaVentas.Models.Response
 
 @model object;
 
 @{
     object modelo = (object)Model;
 
-    UsuarioLogueadoModel usuarioActual = (UsuarioLogueadoModel)modelo.GetValueProperty("UsuarioActual");
-    MenuItemModel menu = (MenuItemModel)modelo.GetValueProperty("Menu");
+    UsuarioIdentityViewModel usuarioActual = (UsuarioIdentityViewModel)modelo.GetValueProperty("UsuarioActual");
+    MenuItemViewModel menu = (MenuItemViewModel)modelo.GetValueProperty("Menu");
 }
 
 <ul class="px-0" id="sidebar-menu">
@@ -35,7 +35,7 @@
     </li>
 
     @{ 
-        foreach (var hijo in menu.children)
+        foreach (var hijo in menu.Children)
         {
             <partial name="~/Views/Shared/_Menu.cshtml" model="hijo"/>
         }

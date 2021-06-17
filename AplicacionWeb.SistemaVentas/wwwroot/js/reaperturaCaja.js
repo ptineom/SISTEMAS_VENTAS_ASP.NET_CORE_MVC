@@ -13,6 +13,7 @@ var oReaperturaCaja = {
         document.getElementById('btnConsultar').addEventListener('click', oReaperturaCaja.consultar);
 
         $("#tblConsultarCajaApertura").find("tbody").on("click", "td button", (e) => {
+
             let button = e.currentTarget;
             let row = button.parentElement.parentElement;
 
@@ -25,18 +26,20 @@ var oReaperturaCaja = {
                     IdUsuario: row.cells[9].textContent,
                     Correlativo: row.cells[10].textContent,
                 };
+
                 oHelper.showLoading();
                 axios.post("/CajaApertura/ReopenBox", parameters).then((response) => {
-                    let data = response.data;
-                    if (data.Resultado) {
-                        oAlerta.alerta({
-                            title: "Se reaperturó la caja seleccionada exitosamente.",
+                    const result = response.data;
+                    if (result.success) {
+                        oAlerta.show({
+                            message: "Se reaperturó la caja seleccionada exitosamente.",
                             type: "success"
                         });
                     }
                 }).catch((error) => {
-                    oAlerta.alerta({
-                        title: error.response.data.Message,
+                    const data = error.response.data;
+                    oAlerta.show({
+                        message: data.errorDetails.message,
                         type: "warning"
                     });
                 }).finally(() => {
@@ -90,22 +93,24 @@ var oReaperturaCaja = {
                     fechaFinal: document.getElementById('txtRanFecFin').value
                 }
             }
-            axios.get("/CajaApertura/GetAllByFilters", parameters).then(response => {
-                let ListaCajaApertura = response.data.Data;
+
+            axios.get("/CajaApertura/GetAll", parameters).then(response => {
+                const result = response.data;
+                const listAperturaCaja = result.data;
 
                 let frag = document.createDocumentFragment();
-                ListaCajaApertura.forEach(x => {
-                    let td = `<td class="py-1"><button type="button" class="btn btn-sm warning-intenso" ${(x.FlgCierre ? '' : 'disabled')}><i class="bi bi-hand-index-fill" style='color:#fff'></i></button></td>
-                        <td>${x.NomCaja}</td>
-                        <td>${x.NomUsuario}</td>
-                        <td>${x.FechaApertura}</td>
-                        <td>${x.FechaCierre}</td>
-                        <td class='text-end'>${oHelper.formatoMoneda(x.SgnMoneda, x.MontoApertura, 2)}</td>
-                        <td class='text-end'>${oHelper.formatoMoneda(x.SgnMoneda, x.MontoTotal, 2)}</td>
-                        <td><span class="badge rounded-pill bg-${(x.FlgCierre ? 'danger' : 'success')} ">${(x.FlgCierre ? 'Cerrado' : 'Abierto')}</span></td>
-                        <td class='d-none' >${x.IdCaja}</td>
-                        <td class='d-none' >${x.IdUsuario}</td>
-                        <td class='d-none'>${x.Correlativo}</td>`;
+                listAperturaCaja.forEach(x => {
+                    let td = `<td class="py-1"><button type="button" class="btn btn-sm warning-intenso" ${(x.flgCierre ? '' : 'disabled')}><i class="bi bi-hand-index-fill" style='color:#fff'></i></button></td>
+                        <td>${x.nomCaja}</td>
+                        <td>${x.nomUsuario}</td>
+                        <td>${x.fechaApertura}</td>
+                        <td>${x.fechaCierre}</td>
+                        <td class='text-end'>${oHelper.formatoMoneda(x.sgnMoneda, x.montoApertura, 2)}</td>
+                        <td class='text-end'>${oHelper.formatoMoneda(x.sgnMoneda, x.montoTotal, 2)}</td>
+                        <td><span class="badge rounded-pill bg-${(x.flgCierre ? 'danger' : 'success')} ">${(x.flgCierre ? 'Cerrado' : 'Abierto')}</span></td>
+                        <td class='d-none' >${x.idCaja}</td>
+                        <td class='d-none' >${x.idUsuario}</td>
+                        <td class='d-none'>${x.correlativo}</td>`;
 
                     let tr = document.createElement('tr');
                     tr.innerHTML = td
@@ -113,8 +118,9 @@ var oReaperturaCaja = {
                 });
                 tbody.appendChild(frag);
             }).catch(error => {
-                oAlerta.alerta({
-                    title: error.response.data.Message,
+                const data = error.response.data;
+                oAlerta.show({
+                    message: data.errorDetails.message,
                     type: "warning"
                 });
             }).finally(() => {
@@ -123,8 +129,8 @@ var oReaperturaCaja = {
             });
 
         }).catch(error => {
-            oAlerta.alerta({
-                title: error,
+            oAlerta.show({
+                message: error,
                 type: "warning"
             });
         })

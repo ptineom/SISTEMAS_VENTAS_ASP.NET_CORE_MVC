@@ -1,19 +1,25 @@
-﻿@using AplicacionWeb.SistemaVentas.Servicios.Seguridad
-@using AplicacionWeb.SistemaVentas.Servicios
-@using Microsoft.AspNetCore.Hosting;
+﻿@using Microsoft.AspNetCore.Hosting;
 @using Microsoft.AspNetCore.Http;
 @using Helper;
-@using AplicacionWeb.SistemaVentas.Models.ViewModel;
 @using Microsoft.Extensions.Configuration;
-@using System.Text.Json;
+@using CapaNegocio.Contracts;
+@using AplicacionWeb.SistemaVentas.Services.Security.Contracts;
+@using AplicacionWeb.SistemaVentas.Models.Response
 
 @inject IWebHostEnvironment enviroment
 @inject IHttpContextAccessor  accessor
 @inject IConfiguration configuration
+@inject ISecurityService securityService
+@inject ISessionIdentity sessionIdentity
 
 @{
-    UsuarioLogueadoModel usuarioActual = new Session(accessor, enviroment).GetUserLoggedFull();
-    MenuItemModel menu = new Menu(configuration).GetMenuByUserId(usuarioActual.IdUsuario);
+    //SessionIdentity sessionIdentity = new SessionIdentity(securityService, accessor);
+
+    //Datos del usuario en sesión.
+    UsuarioIdentityViewModel usuarioActual = sessionIdentity.GetUserLoggedFull();
+
+    //Menú a mostrar del usuario en sesión.
+    MenuItemViewModel menu = await sessionIdentity.GetMenuByUserIdAsync(usuarioActual.IdUsuario);
 
     object modeloSidebarMenu = new
     {

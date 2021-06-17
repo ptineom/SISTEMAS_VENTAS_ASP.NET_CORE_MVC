@@ -105,8 +105,9 @@ var oModalRegistrarProveedor = {
                 cboPro.appendChild(frag);
             })
             .catch((error) => {
-                oAlerta.alerta({
-                    title: error.response.data.Message,
+                const data = error.response.data;
+                oAlerta.show({
+                    message: data.errorDetails.message,
                     type: "warning"
                 });
             }).finally(() => oHelper.hideLoading());
@@ -136,8 +137,9 @@ var oModalRegistrarProveedor = {
                 cboDis.appendChild(frag);
             })
             .catch((error) => {
-                oAlerta.alerta({
-                    title: error.response.data.Message,
+                const data = error.response.data;
+                oAlerta.show({
+                    message: data.errorDetails.message,
                     type: "warning"
                 });
             }).finally(() => oHelper.hideLoading());
@@ -154,22 +156,23 @@ var oModalRegistrarProveedor = {
                 let txtRazSoc = document.getElementById('txtRazSocRegProv');
 
                 let parameters = {
-                    IdTipoDocumento: cboTipDoc.value == "" ? undefined : cboTipDoc.value,
-                    NroDocumento: txtNumDoc.value,
-                    RazonSocial: txtRazSoc.value,
-                    Contacto: document.getElementById('txtConRegProv').value,
-                    Email: document.getElementById('txtEmaRegProv').value,
-                    Telefono: document.getElementById('txtTelRegProv').value,
-                    Direccion: document.getElementById('txtDirRegProv').value,
-                    IdDepartamento: document.getElementById('cboDepRegProv').value,
-                    IdProvincia: document.getElementById('cboProRegProv').value,
-                    IdDistrito: document.getElementById('cboDisRegProv').value,
-                    MaxDigitosDocumento: cboTipDoc.options[cboTipDoc.selectedIndex].getAttribute("data-max-digitos")
+                    idTipoDocumento: cboTipDoc.value == "" ? undefined : cboTipDoc.value,
+                    nroDocumento: txtNumDoc.value,
+                    razonSocial: txtRazSoc.value,
+                    contacto: document.getElementById('txtConRegProv').value,
+                    email: document.getElementById('txtEmaRegProv').value,
+                    telefono: document.getElementById('txtTelRegProv').value,
+                    direccion: document.getElementById('txtDirRegProv').value,
+                    idDepartamento: document.getElementById('cboDepRegProv').value,
+                    idProvincia: document.getElementById('cboProRegProv').value,
+                    idDistrito: document.getElementById('cboDisRegProv').value,
+                    maxDigitosDocumento: cboTipDoc.options[cboTipDoc.selectedIndex].getAttribute("data-max-digitos")
                 };
 
                 oHelper.showLoading("#modalRegistrarProveedor .modal-content");
 
                 axios.post("/Proveedor/Register", parameters).then((response) => {
+                    //Devolvera al formulario principal estos datos.
                     oModalRegistrarProveedor.resolve({
                         idTipoDocumento: cboTipDoc.value,
                         numDocumento: txtNumDoc.value,
@@ -179,8 +182,9 @@ var oModalRegistrarProveedor = {
                     oModalRegistrarProveedor.ok = true;
                     oModalRegistrarProveedor.instance.hide();
                 }).catch((error) => {
-                    oAlerta.alerta({
-                        title: error.response.data.Message,
+                    const data = error.response.data;
+                    oAlerta.show({
+                        message: data.errorDetails.message,
                         type: "warning"
                     });
                 }).finally(() => oHelper.hideLoading());

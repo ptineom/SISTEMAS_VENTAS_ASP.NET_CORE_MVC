@@ -76,12 +76,16 @@ var oLogin = {
                 nomSucursal
             };
             axios.post("/Login/CreateIdentitySignIn", parameters).then((response) => {
-                if (response.data.Resultado) {
-                    let returnUrl = response.data.Data;
-                    window.location.href = returnUrl;
-                }
+                let result = response.data;
+                let data = result.data;
+
+                window.location.href = data.returnUrl;
             }).catch((error) => {
-                alert(error.response.data.message);
+                const data = error.response.data;
+                oAlerta.show({
+                    message: data.errorDetails.message,
+                    type: "warning"
+                });
             }).finally(() => oHelper.hideLoading());
         }
     },
@@ -103,14 +107,16 @@ var oLogin = {
                 password: document.getElementById('txtPassword').value
             };
 
-            axios.post("/Login/ValidateUser", parameters).then((response) => {
-                if (response.data.Resultado) {
-                    let data = response.data.Data;
-                    let masDeUnaSucursal = data.MasDeUnaSucursal
+            axios.post("/Login/UserValidate", parameters).then((response) => {
+                let result = response.data;
+                if (result.success) {
+                    let result = response.data;
+                    let data = result.data;
+                    let flgVariasSucursales = data.flgVariasSucursales
 
                     //Si tiene mas de de una sucursal mostramos el formulario para que pueda seleccionar.
-                    if (masDeUnaSucursal) {
-                        let sucursales = data.Sucursales;
+                    if (flgVariasSucursales) {
+                        let sucursales = data.listSucursales;
                         let frag = document.createDocumentFragment();
                         let cboSucursales = document.getElementById('cboSucursales');
                         cboSucursales.innerHTML = "";
@@ -118,8 +124,8 @@ var oLogin = {
                         //Cargamos el combo de sucursales
                         sucursales.forEach(x => {
                             let option = document.createElement('option');
-                            option.value = x.IdSucursal;
-                            option.text = x.NomSucursal;
+                            option.value = x.idSucursal;
+                            option.text = x.nomSucursal;
                             frag.appendChild(option);
                         });
                         cboSucursales.appendChild(frag);
@@ -132,7 +138,11 @@ var oLogin = {
                     }
                 }
             }).catch((error) => {
-                alert(error.response.data.message);
+                const data = error.response.data;
+                oAlerta.show({
+                    message: data.errorDetails.message,
+                    type: "warning"
+                });
             }).finally(() => oHelper.hideLoading());
         }
     }

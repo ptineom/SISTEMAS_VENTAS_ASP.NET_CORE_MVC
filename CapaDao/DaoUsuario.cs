@@ -10,42 +10,7 @@ namespace CapaDao
 {
     public class DaoUsuario
     {
-        public USUARIO ValidateUser(SqlConnection con, string idUsuario, string clave, bool noValidar = false)
-        {
-            USUARIO oModelo = null;
-            using (SqlCommand cmd = new SqlCommand("PA_VALIDA_USUARIO", con))
-            {
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.Add("@ID_USUARIO", SqlDbType.VarChar, 50).Value = idUsuario;
-                cmd.Parameters.Add("@CLAVE", SqlDbType.VarChar, 64).Value = clave;
-                cmd.Parameters.Add("@NO_VALIDAR", SqlDbType.Bit).Value = noValidar;
-                SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.SingleResult);
-                if (reader != null)
-                {
-                    if (reader.HasRows)
-                    {
-                        while (reader.Read())
-                        {
-                            oModelo = new USUARIO();
-                            oModelo.ID_USUARIO = reader.GetString(reader.GetOrdinal("ID_USUARIO"));
-                            oModelo.NOM_USUARIO = reader.GetString(reader.GetOrdinal("NOM_USUARIO"));
-                            oModelo.NOM_ROL = reader.GetString(reader.GetOrdinal("NOM_PERFIL"));
-                            oModelo.FOTO = reader.IsDBNull(reader.GetOrdinal("FOTO")) ? default(string) : reader.GetString(reader.GetOrdinal("FOTO"));
-                            oModelo.ID_SUCURSAL = reader.IsDBNull(reader.GetOrdinal("ID_SUCURSAL")) ? default(string) : reader.GetString(reader.GetOrdinal("ID_SUCURSAL"));
-                            oModelo.COUNT_SEDES = reader.GetInt32(reader.GetOrdinal("COUNT_SEDES"));
-                            oModelo.NOM_SUCURSAL = reader.IsDBNull(reader.GetOrdinal("NOM_SUCURSAL")) ? default(string) : reader.GetString(reader.GetOrdinal("NOM_SUCURSAL"));
-                            oModelo.FLG_CTRL_TOTAL = reader.GetBoolean(reader.GetOrdinal("FLG_CTRL_TOTAL"));
-                            oModelo.ID_GRUPO_ACCESO = reader.GetInt32(reader.GetOrdinal("ID_GRUPO_ACCESO"));
-                            oModelo.ID_EMPLEADO = reader.GetString(reader.GetOrdinal("ID_EMPLEADO"));
-                        }
-                    }
-                    reader.Close();
-                    reader.Dispose();
-                }
-            }
-            return oModelo;
-        }
-
+       
         public List<USUARIO> GetAll(SqlConnection con)
         {
             List<USUARIO> lista = null;

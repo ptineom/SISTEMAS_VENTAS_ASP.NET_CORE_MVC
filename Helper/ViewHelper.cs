@@ -21,7 +21,7 @@ namespace Helper
         {
             var path = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json");
             var configBuilder = new ConfigurationBuilder();
-            configBuilder.AddJsonFile(path, false);
+            configBuilder.AddJsonFile(path, false);//Nugget : Microsoft.Extensions.Configuration.Json
             return configBuilder.Build().GetSection(section).Value;
         }
         public static string GetNroComprobante(string numero)

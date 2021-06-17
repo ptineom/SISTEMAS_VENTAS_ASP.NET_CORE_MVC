@@ -8,27 +8,29 @@ var oModalCajaApertura = {
     verificarEstadoCaja: function () {
         return new Promise((resolve, reject) => {
             axios.get("/CajaApertura/GetStateBox").then((response) => {
-                let data = response.data.Data;
+                const result = response.data;
+                const data = result.data;
                 if (data != null) {
                     oModalCajaApertura.modelo = {
-                        idCaja: data.IdCaja,
-                        correlativo: data.Correlativo,
-                        fechaApertura: data.FechaApertura,
-                        montoApertura: data.MontoApertura,
-                        idMoneda: data.IdMoneda,
-                        sgnMoneda: data.SgnMoneda,
-                        flgReaperturado: data.FlgReaperturado,
-                        item: data.Item,
-                        flgCierreDiferido: data.FlgCierreDiferido,
-                        fechaCierre: data.FechaCierre,
-                        horaCierre: data.HoraCierre,
-                        nomCaja: data.NomCaja
+                        idCaja: data.idCaja,
+                        correlativo: data.correlativo,
+                        fechaApertura: data.fechaApertura,
+                        montoApertura: data.montoApertura,
+                        idMoneda: data.idMoneda,
+                        sgnMoneda: data.sgnMoneda,
+                        flgReaperturado: data.flgReaperturado,
+                        item: data.item,
+                        flgCierreDiferido: data.flgCierreDiferido,
+                        fechaCierre: data.fechaCierre,
+                        horaCierre: data.horaCierre,
+                        nomCaja: data.nomCaja
                     };
                     oModalCajaApertura.bCajaAbierta = true;
                 };
                 resolve(oModalCajaApertura.bCajaAbierta);
             }).catch((error) => {
-                reject(error.response.data.Message);
+                const data = error.response.data;
+                reject(data.errorDetails.message);
             })
         })
     },
@@ -63,7 +65,7 @@ var oModalCajaApertura = {
                                     <label class="form-label mb-1">Fecha cierre</label>
                                     <div class="input-group input-group-sm date">
                                         <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
-                                        <input type="text" class="form-control date-picker" id="txtFecCie_ca" data-date-format="dd/mm/yyyy" name="txtFecCie_ca">
+                                        <input type="text" class="form-control date-picker" id="txtFecCie_ca" autocomplete="off" data-date-format="dd/mm/yyyy" name="txtFecCie_ca">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -72,7 +74,7 @@ var oModalCajaApertura = {
                                         <span class="input-group-text input-group-addon">
                                             <i class="glyphicon glyphicon-time"></i>
                                         </span>
-                                        <input id="txtHorCie_ca" type="text" class="form-control input-small" name="txtHorCie_ca">
+                                        <input id="txtHorCie_ca" type="text" class="form-control input-small" name="txtHorCie_ca" autocomplete="off">
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-6">
@@ -230,47 +232,49 @@ var oModalCajaApertura = {
             oHelper.showLoading("#modalCajaApertura .modal-content");
 
             axios.get(`/CajaApertura/GetTotalsByUserId/${oModalCajaApertura.modelo.idCaja}/${oModalCajaApertura.modelo.correlativo}`).then((response) => {
-                let data = response.data.Data;
+                const result = response.data;
+                const data = result.data;
 
                 oModalCajaApertura.modelo = Object.assign(oModalCajaApertura.modelo, {
-                    montoApertura: data.MontoAperturaCaja,
-                    montoTotal: data.MontoTotal,
+                    montoApertura: data.montoAperturaCaja,
+                    montoTotal: data.montoTotal,
                 });
 
-                if (data.MontoAperturaCaja > 0) {
-                    spnMonApe_ca.textContent = oHelper.formatoMoneda(sgnMoneda, data.MontoAperturaCaja, 2);
+                if (data.montoAperturaCaja > 0) {
+                    spnMonApe_ca.textContent = oHelper.formatoMoneda(sgnMoneda, data.montoAperturaCaja, 2);
                     spnMonApe_ca.classList.remove('bg-light', 'text-dark');
                     spnMonApe_ca.classList.add('bg-success');
                 }
 
                 if (data.MontoCobradoContado > 0) {
-                    spnMonCon_ca.textContent = oHelper.formatoMoneda(sgnMoneda, data.MontoCobradoContado, 2);
+                    spnMonCon_ca.textContent = oHelper.formatoMoneda(sgnMoneda, data.montoCobradoContado, 2);
                     spnMonCon_ca.classList.remove('bg-light', 'text-dark');
                     spnMonCon_ca.classList.add('bg-success');
                 }
 
                 if (data.MontoCobradoCredito > 0) {
-                    spnMonPen_ca.textContent = oHelper.formatoMoneda(sgnMoneda, data.MontoCobradoCredito, 2);
+                    spnMonPen_ca.textContent = oHelper.formatoMoneda(sgnMoneda, data.montoCobradoCredito, 2);
                     spnMonPen_ca.classList.remove('bg-light', 'text-dark');
                     spnMonPen_ca.classList.add('bg-success');
                 }
 
-                if (data.MontoCajaOtrosIngreso > 0) {
-                    spnMonOtr_ca.textContent = oHelper.formatoMoneda(sgnMoneda, data.MontoCajaOtrosIngreso, 2);
+                if (data.montoCajaOtrosIngreso > 0) {
+                    spnMonOtr_ca.textContent = oHelper.formatoMoneda(sgnMoneda, data.montoCajaOtrosIngreso, 2);
                     spnMonOtr_ca.classList.remove('bg-light', 'text-dark');
                     spnMonOtr_ca.classList.add('bg-success');
                 }
 
-                if (data.MontoCajaSalida > 0) {
-                    spnMonSal_ca.textContent = oHelper.formatoMoneda(sgnMoneda, data.MontoCajaSalida, 2);
+                if (data.montoCajaSalida > 0) {
+                    spnMonSal_ca.textContent = oHelper.formatoMoneda(sgnMoneda, data.montoCajaSalida, 2);
                     spnMonSal_ca.classList.remove('bg-light', 'text-dark');
                     spnMonSal_ca.classList.add('bg-success');
                 }
 
-                document.getElementById('spnTotal_ca').textContent = `Total en caja: ${oHelper.formatoMoneda(sgnMoneda, data.MontoTotal, 2)}`;
+                document.getElementById('spnTotal_ca').textContent = `Total en caja: ${oHelper.formatoMoneda(sgnMoneda, data.montoTotal, 2)}`;
             }).catch((error) => {
-                oAlerta.alerta({
-                    title: error.response.data.Message,
+                const data = error.response.data;
+                oAlerta.show({
+                    message: data.errorDetails.message,
                     type: "warning"
                 });
             }).finally(() => oHelper.hideLoading());
@@ -280,9 +284,10 @@ var oModalCajaApertura = {
         oHelper.showLoading("#modalCajaApertura .modal-content");
 
         axios.get("/CajaApertura/GetData").then((response) => {
-            let data = response.data.Data;
-            let listaCaja = data.ListaCaja;
-            let monedaLocal = data.MonedaLocal;
+            let result = response.data;
+            let data = result.data;
+            let listCajas = data.listCajas;
+            let monedaLocal = data.moneda;
 
             //Listado de cajas del usuario.
             let cboCaja_ca = document.getElementById('cboCaja_ca');
@@ -292,12 +297,12 @@ var oModalCajaApertura = {
             option.value = "";
             cboCaja_ca.appendChild(option);
 
-            listaCaja.forEach((elem) => {
+            listCajas.forEach((elem) => {
                 option = document.createElement('option');
-                option.text = elem.NomCaja;
-                option.value = elem.IdCaja;
+                option.text = elem.nomCaja;
+                option.value = elem.idCaja;
 
-                if (listaCaja.length == 1)
+                if (listCajas.length == 1)
                     option.selected = true;
 
                 cboCaja_ca.appendChild(option);
@@ -305,16 +310,17 @@ var oModalCajaApertura = {
 
             //Moneda local
             oModalCajaApertura.moneda = {
-                idMoneda: monedaLocal.IdMoneda,
-                nomMoneda: monedaLocal.NomMoneda,
-                sgnMoneda: monedaLocal.SgnMoneda,
+                idMoneda: monedaLocal.idMoneda,
+                nomMoneda: monedaLocal.nomMoneda,
+                sgnMoneda: monedaLocal.sgnMoneda,
             };
 
             if (callback != undefined)
                 callback();
         }).catch((error) => {
-            oAlerta.alerta({
-                title: error.response.data.Message,
+            const data = error.response.data;
+            oAlerta.show({
+                message: data.errorDetails.message,
                 type: "warning"
             });
         }).finally(() => oHelper.hideLoading());
@@ -418,7 +424,7 @@ var oModalCajaApertura = {
                     MontoApertura: bCajaAbierta ? oModalCajaApertura.modelo.montoApertura : txtMonApe_ca.value == "" ? 0 : txtMonApe_ca.value,
                     IdMoneda: bCajaAbierta ? oModalCajaApertura.modelo.idMoneda : oModalCajaApertura.moneda.idMoneda,
                     IdCaja: document.getElementById('cboCaja_ca').value,
-                    FechaCierre: fechaCierre,
+                    FechaCierre: fechaCierre == "" ? null : fechaCierre,
                     MontoTotal: bCajaAbierta ? modelo.montoTotal : 0,
                     Correlativo: bCajaAbierta ? modelo.correlativo : 0,
                     FlgReaperturado: bCajaAbierta ? modelo.flgReaperturado : false,
@@ -427,21 +433,23 @@ var oModalCajaApertura = {
                 };
 
                 axios.post("/CajaApertura/Register", parameters).then((response) => {
-                    let data = response.data.Data;
+                    const result = response.data;
+                    const data = result.data;
+
                     if (data != null) {
                         oModalCajaApertura.modelo = {
-                            idCaja: data.IdCaja,
-                            correlativo: data.Correlativo,
-                            fechaApertura: data.FechaApertura,
-                            montoApertura: data.MontoApertura,
-                            idMoneda: data.IdMoneda,
-                            sgnMoneda: data.SgnMoneda,
-                            flgReaperturado: data.FlgReaperturado,
-                            item: data.Item,
-                            flgCierreDiferido: data.FlgCierreDiferido,
-                            fechaCierre: data.FechaCierre,
-                            horaCierre: data.HoraCierre,
-                            nomCaja: data.NomCaja
+                            idCaja: data.idCaja,
+                            correlativo: data.correlativo,
+                            fechaApertura: data.fechaApertura,
+                            montoApertura: data.montoApertura,
+                            idMoneda: data.idMoneda,
+                            sgnMoneda: data.sgnMoneda,
+                            flgReaperturado: data.flgReaperturado,
+                            item: data.item,
+                            flgCierreDiferido: data.flgCierreDiferido,
+                            fechaCierre: data.fechaCierre,
+                            horaCierre: data.horaCierre,
+                            nomCaja: data.nomCaja
                         };
                         oModalCajaApertura.bCajaAbierta = true;
                     } else {
@@ -455,8 +463,9 @@ var oModalCajaApertura = {
                     oModalCajaApertura.instance.hide();
 
                 }).catch((error) => {
-                    oAlerta.alerta({
-                        title: error.response.data.Message,
+                    const data = error.response.data;
+                    oAlerta.show({
+                        message: data.errorDetails.message,
                         type: "warning"
                     });
                 }).finally(() => {

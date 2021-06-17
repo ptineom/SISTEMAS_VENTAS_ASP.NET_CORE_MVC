@@ -26,25 +26,7 @@ namespace CapaNegocio
             //Conexion BD.
             _conexion = new Conexion(_configuration);
         }
-        public ResultadoOperacion ValidateUser(string idUsuario, string clave, bool noValidar = false)
-        {
-            USUARIO modelo = null;
-            using (SqlConnection con = new SqlConnection(_conexion.getConexion))
-            {
-                try
-                {
-                    con.Open();
-                    modelo = _dao.ValidateUser(con, idUsuario, clave, noValidar);
-                    _resultado.SetResultado(true, "", modelo);
-                }
-                catch (Exception ex)
-                {
-                    _resultado.SetResultado(false, ex.Message);
-                    Elog.save(this, ex);
-                }
-            }
-            return _resultado;
-        }
+      
         
         public ResultadoOperacion GetAll()
         {

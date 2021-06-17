@@ -1,6 +1,8 @@
 ﻿using CapaNegocio;
+using CapaNegocio.Contracts;
 using Entidades;
 using Helper;
+using Helper.DTOGeneric;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -14,15 +16,10 @@ namespace AplicacionWeb.SistemaVentas.Controllers
     [Route("[controller]")]
     public class UbigeoController : Controller
     {
-        private IResultadoOperacion _resultado;
-        private IConfiguration _configuration;
-        private BrUbigeo _brUbigeo;
-
-        public UbigeoController(IResultadoOperacion resultado, IConfiguration configuration)
+        private readonly IUbigeoService _ubigeo;
+        public UbigeoController(IUbigeoService ubigeo)
         {
-            _configuration = configuration;
-            _resultado = resultado;
-            _brUbigeo = new BrUbigeo(_configuration);
+            _ubigeo = ubigeo;
         }
 
         public IActionResult Index()
@@ -33,46 +30,59 @@ namespace AplicacionWeb.SistemaVentas.Controllers
         [HttpGet("GetAllProvinces/{idDepartamento}")]
         public async Task<IActionResult> GetAllProvincesAsync(string idDepartamento)
         {
-            _resultado = await Task.Run(() => _brUbigeo.GetAllProvinces(idDepartamento));
+            var result = await _ubigeo.GetAllProvincesAsync(idDepartamento);
 
-            if (!_resultado.Resultado)
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
+            if (result == null || result.Count == 0)
+                return NotFound(new ResponseObject()
+                {
+                    Success = false,
+                    Message = "Debe de configurar al menos una provincia del ubigeo",
+                    ErrorDetails = new ErrorDetails()
+                    {
+                        StatusCode = StatusCodes.Status404NotFound,
+                        Message = Constantes.NOT_FOUND
+                    }
+                });
 
-            if (_resultado.Data == null)
-                return NotFound(new { Message = "No se encontraron datos", Status = "Eror" });
-
-            List<UBIGEO> lista = (List<UBIGEO>)_resultado.Data;
-
-            _resultado.Data = lista.Select(x => new
+            var response = new ResponseObject()
             {
-                IdProvincia = x.ID_UBIGEO,
-                NomProvincia = ViewHelper.CapitalizeAll(x.UBIGEO_PROVINCIA)
-            });
+                Data = result.Select(x => new
+                {
+                    IdProvincia = x.ID_UBIGEO,
+                    NomProvincia = ViewHelper.CapitalizeAll(x.UBIGEO_PROVINCIA)
+                })
+            };
 
-            return Ok(_resultado);
+            return Ok(response);
         }
 
         [HttpGet("GetAllDistricts/{idProvincia}")]
         public async Task<IActionResult> GetAllDistrictsAsync(string idProvincia)
         {
-            _resultado = await Task.Run(() => _brUbigeo.GetAllDistricts(idProvincia));
+            var result = await _ubigeo.GetAllDistrictsAsync(idProvincia);
 
-            if (!_resultado.Resultado)
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = _resultado.Mensaje, Status = "Error" });
+            if (result == null || result.Count == 0)
+                return NotFound(new ResponseObject()
+                {
+                    Success = false,
+                    Message = "Debe de configurar al menos un distrito del ubigeo",
+                    ErrorDetails = new ErrorDetails()
+                    {
+                        StatusCode = StatusCodes.Status404NotFound,
+                        Message = Constantes.NOT_FOUND
+                    }
+                });
 
-            if (_resultado.Data == null)
-                return NotFound(new { Message = "No se encontraron datos", Status = "Eror" });
-
-            List<UBIGEO> lista = (List<UBIGEO>)_resultado.Data;
-
-
-            _resultado.Data = lista.Select(x => new
+            var response = new ResponseObject()
             {
-                IdDistrito = x.ID_UBIGEO,
-                NomDistrito = ViewHelper.CapitalizeAll(x.UBIGEO_DISTRITO)
-            });
+                Data = result.Select(x => new
+                {
+                    IdDistrito = x.ID_UBIGEO,
+                    NomDistrito = ViewHelper.CapitalizeAll(x.UBIGEO_DISTRITO)
+                })
+            };
 
-            return Ok(_resultado);
+            return Ok(response);
         }
     }
 }

@@ -117,13 +117,10 @@ var oModalConsultarProveedor = {
     consultar: function () {
         let txtFiltro = document.getElementById('txtFiltroProveedor');
         if (txtFiltro.value == "") {
-            oAlerta.alerta({
-                title: "Debe de ingresar al menos 1 caracter.",
+            oAlerta.show({
+                message: "Debe de ingresar al menos 1 caracter.",
                 type: "warning",
-                contenedor: "#modalConsultarProveedor .modal-dialog",
-                closeAutomatic: true,
-                notTitle: true,
-                notIcon: true
+                container: "#modalConsultarProveedor .modal-dialog",
             });
             return;
         }
@@ -138,18 +135,19 @@ var oModalConsultarProveedor = {
         oModalConsultarProveedor.clearTblConsultarProveedor();
 
         oHelper.showLoading("#modalConsultarProveedor .modal-content");
-        axios.get(`/Proveedor/GetAllByFilters/${tipoFiltro}/${txtFiltro.value}/false`).then(response => {
-            let listaProveedor = response.data.Data;
+        axios.get(`/Proveedor/GetAll/${tipoFiltro}/${txtFiltro.value}/false`).then(response => {
+            const result = response.data;
+            let listProveedor = result.data;
 
             let frag = document.createDocumentFragment();
-            listaProveedor.forEach(x => {
+            listProveedor.forEach(x => {
                 let td = `<td class="py-1"><button type="button" class="btn btn-sm warning-intenso"><i class="bi bi-hand-index-fill" style='color:#fff'></i></button></td>
-                                <td class='d-none'>${x.IdCliente}</td>
-                                <td>${x.NomCliente}</td>
-                                <td>${x.NomTipoDocumento}</td>
-                                <td>${x.NroDocumento}</td>
-                                <td>${x.DirCliente}</td>
-                                <td class='d-none'>${x.IdTipoDocumento}</td>`;
+                                <td class='d-none'>${x.idCliente}</td>
+                                <td>${x.nomCliente}</td>
+                                <td>${x.nomTipoDocumento}</td>
+                                <td>${x.nroDocumento}</td>
+                                <td>${x.dirProveedor}</td>
+                                <td class='d-none'>${x.idTipoDocumento}</td>`;
 
                 let tr = document.createElement('tr');
                 tr.innerHTML = td
@@ -159,13 +157,11 @@ var oModalConsultarProveedor = {
 
             oModalConsultarProveedor.initTblConsultarProveedor();
         }).catch(error => {
-            oAlerta.alerta({
-                title: error.response.data.Message,
+            const data = error.response.data;
+            oAlerta.show({
+                message: data.errorDetails.message,
                 type: "warning",
-                contenedor: "#modalConsultarProveedor .modal-dialog",
-                closeAutomatic: true,
-                notTitle: true,
-                notIcon: true
+                container: "#modalConsultarProveedor .modal-dialog",
             });
         }).finally(() => oHelper.hideLoading());
     }

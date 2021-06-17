@@ -13,6 +13,6 @@ namespace Entidades
         public string ID_USUARIO_REGISTRO { get; set; }
         public DateTime FEC_CREACION_UTC { get; set; }
         public DateTime FEC_EXPIRACION_UTC { get; set; }
-        public string XML_CLAIMS { get; set; }
+        public string JSON_CLAIMS { get; set; }
     }
 }

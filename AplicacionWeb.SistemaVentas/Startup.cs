@@ -15,6 +15,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using AplicacionWeb.SistemaVentas.CustomValidation;
 using AplicacionWeb.SistemaVentas.Hubs;
+using AplicacionWeb.SistemaVentas.Register;
+using AplicacionWeb.SistemaVentas.Services.Security.Contracts;
+using AplicacionWeb.SistemaVentas.Services.Security.Implementations;
 
 namespace AplicacionWeb.SistemaVentas
 {
@@ -32,7 +35,7 @@ namespace AplicacionWeb.SistemaVentas
         public void ConfigureServices(IServiceCollection services)
         {
             ////Por defecto el api, retorna los atributos del json en LowercamelCase, pero configuremos para que respete los nombres de los atributos del json.
-            services.AddControllers().AddJsonOptions(opt => opt.JsonSerializerOptions.PropertyNamingPolicy = null);
+            //services.AddControllers().AddJsonOptions(opt => opt.JsonSerializerOptions.PropertyNamingPolicy = null);
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -44,21 +47,15 @@ namespace AplicacionWeb.SistemaVentas
                     options.SlidingExpiration = true;
                 });
 
-
             services.AddControllersWithViews();
 
-            //services.Configure<CookiePolicyOptions>(options =>
-            //{
-            //    options.MinimumSameSitePolicy = SameSiteMode.Strict;
-            //    options.HttpOnly = HttpOnlyPolicy.None;
-            //    options.Secure = _environment.IsDevelopment()? CookieSecurePolicy.None : CookieSecurePolicy.Always;
-            //});
+            //Agregando Ioc configurados.
+            services.AddRegistration();
 
-            //services.AddMvc(options => options.Filters.Add(new AuthorizeFilter()));
-
+            services.AddHttpContextAccessor();
 
             services.AddTransient<IResultadoOperacion, ResultadoOperacion>();
-            services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddScoped<ISessionIdentity, SessionIdentity>();
 
             services.AddRazorPages().AddMvcOptions(options => {
                 options.MaxModelValidationErrors = 50;
@@ -69,6 +66,8 @@ namespace AplicacionWeb.SistemaVentas
             services.AddSingleton<IValidationAttributeAdapterProvider, AdapterProvider>();
 
             services.AddSignalR();
+
+      
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

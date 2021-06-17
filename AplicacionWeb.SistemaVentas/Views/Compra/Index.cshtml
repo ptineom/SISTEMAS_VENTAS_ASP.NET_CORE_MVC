@@ -1,17 +1,17 @@
-﻿@using AplicacionWeb.SistemaVentas.Models.ViewModel
+﻿@using AplicacionWeb.SistemaVentas.Models.Response
 @using AplicacionWeb.SistemaVentas.Models.Request
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
-    var listaTipoDocumento = (List<TipoDocumentoModel>)ViewBag.listaTipoDocumento;
-    var listaComprobante = (List<TipoComprobanteModel>)ViewBag.listaComprobante;
-    var listaMoneda = (List<MonedaModel>)ViewBag.listaMoneda;
-    var listaTipPag = (List<TipoPagoModel>)ViewBag.listaTipPag;
-    var listaTipConPag = (List<TipoCondicionPagoModel>)ViewBag.listaTipConPag;
-    var listaEstado = (List<EstadoModel>)ViewBag.listaEstado;
+    var listaTipoDocumento = (List<TipoDocumentoSelectViewModel>)ViewBag.listaTipoDocumento;
+    var listaComprobante = (List<TipoComprobanteSelectViewModel>)ViewBag.listaComprobante;
+    var listaMoneda = (List<MonedaSelectViewModel>)ViewBag.listaMoneda;
+    var listaTipPag = (List<TipoPagoSelectViewModel>)ViewBag.listaTipPag;
+    var listaTipConPag = (List<TipoCondicionPagoSelectViewModel>)ViewBag.listaTipConPag;
+    var listaEstado = (List<EstadoSelectViewModel>)ViewBag.listaEstado;
     var tasIgv = Convert.ToInt32(ViewBag.TasIgv);
-    var listaDepartamento = (List<DepartamentoModel>)ViewBag.listaDepartamento;
+    var listaDepartamento = (List<DepartamentoSelectViewModel>)ViewBag.listaDepartamento;
 }
 
 <input type="hidden" id="hddIgv" value="@tasIgv" />
